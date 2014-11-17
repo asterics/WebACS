@@ -1,0 +1,253 @@
+body {
+	font-family: Arial, Verdana, Helvetica, sans-serif;
+	font-size: 100%;
+	background-color: #dfe9f5;
+}
+
+.menu_header {
+  text-align: left;
+  background-color: #dfe9f5;
+  color: black;
+  padding-left: 0.3em;
+  margin: 0;
+}
+
+.tabpanel {
+  padding: 0.5em;
+  background-color: #dfe9f5;
+  height: 1%; /* IE fix for float bug */
+}
+
+.tablist {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.tab {
+  border: 1px solid black;
+  float: left;
+  display: inline; /* IE float bug fix */
+}
+
+.menuTab {
+  background-color: #dfe9f5;
+  margin: .2em 1px -1px 0;
+  font-weight: bold;
+  padding: 5px 7px 5px 7px;
+  height: 1em;
+  line-height: 1em;
+  border-top-left-radius: 5px;
+  border-top-right-radius: 5px;
+}
+
+.canvasTab {
+  background-color: #dfe9f5;
+  margin: .2em 1px -1px 0;
+  padding: 4px;
+  height: 0.8em;
+  line-height: 0.8em;
+  font-size: 0.8em;
+  border-top-left-radius: 3px;
+  border-top-right-radius: 3px;
+}
+
+.modelTab {
+  margin: 0 1px -1px 0;
+  padding: 4px;
+  height: 0.8em;
+  line-height: 0.8em;
+  font-size: 0.8em;
+  border-top-left-radius: 3px;
+  border-top-right-radius: 3px;  
+}
+
+.propEdTab {
+  background-color: #dfe9f5;
+  margin: .2em 1px -1px 0;
+  padding: 4px;
+  height: 0.8em;
+  line-height: 0.8em;
+  font-size: 0.8em;
+  border-top-left-radius: 3px;
+  border-top-right-radius: 3px;
+}
+
+.panel {
+  clear: both;
+  display: block;
+  margin: 0;
+  border: 1px solid black;
+  background-color: white;
+}
+
+.menuPanel {
+  height: 6em;
+  width: 95em;
+  padding: 0.3em 0.5em; 
+}
+
+.canvasPanel {
+  height: 37em;
+  width: 70em;
+  padding: 3px 4px 1px 2px;
+  background-color: #d1e5fd;
+}
+
+.modelPanel {
+  height: 35em;
+  width: 69em;
+  padding: 0.3em 0.5em;  
+  overflow: scroll;
+}
+
+.propEdPanel {
+  height: 36.65em;
+  width: 24em;
+  padding: 0.3em 0.5em;
+}
+
+li[aria-selected='true'] {
+  color: black;
+  background-color: #fff;
+  border-bottom: 1px solid white;
+}
+
+.menuButton {
+	text-align: center;
+	vertical-align: top;
+	width: auto;
+	overflow: visible;
+	padding: 0 0.5em 0 0.5em;
+	height: 6em;
+}
+
+.menuButton img {
+	display: block;
+	vertical-align: top;
+	margin: auto;
+	height: 3em;
+	width: 3em;
+}
+
+.buttonContents {
+	height: 6em;
+	white-space: nowrap;
+}
+
+.buttonGroup {
+	display: block;
+	padding-left: 3px;
+	padding-right: 3px;
+	height: 6em;
+	border-right: 1px solid grey;
+	float: left;
+}
+
+.buttonList, .buttonGroup input {
+	position: relative;
+	top: -7em;
+	list-style-type: none;
+	margin: 0;
+	padding: 0;
+}
+
+.buttonList button {
+	margin: 0 1px 0 1px;
+}
+
+.buttonGroup input {
+	top: -5em;
+}
+
+.buttonGroup h2, label {
+	margin-top: 5em;
+	font-size: 1em;
+	color: grey;
+	width: inherit;
+	text-align: center;
+	font-weight: normal;
+}
+
+.buttonGroup li {
+	display: block;
+	float: left;
+}
+
+.buttonGroup label {
+	display: block;
+}
+
+.bg_right {
+	border-right: 0;
+}
+
+.compMenu {
+	position: absolute;
+	padding: 0;
+	width: 12em;
+	z-index: 1000;
+}
+
+.compMenu li {
+	margin: 0;
+	width: 12em;
+	background-color: #e2f3fc;
+}
+
+.compMenu div {
+	padding: 2px;
+	border-top: 1px solid white;
+	border-bottom: 1px solid white;
+}
+
+.compMenuL2 {
+	left: 12.5em;
+}
+
+.compMenuL2 li {
+	position: relative;
+	clear: left;
+	top: -1.6em;
+	padding: 2px 0 2px 0;
+	border-top: 1px solid white;
+	border-bottom: 1px solid white;
+}
+
+.compMenu li:hover, .compMenu li:focus {
+	background-color: #afdef8;
+}
+
+.hiddenMenu {
+	left: -3000em;
+}
+
+div[aria-hidden='true'] {
+   display: none;
+}
+
+#canvasMotherPanel {
+  padding: 0 0.5em 0.5em 0.5em;
+  padding-bottom: 1em;
+  background-color: #dfe9f5;
+  float: left;
+}
+
+#propertyEditorMotherPanel {
+	background-color: #dfe9f5;
+	position: absolute;
+	left: 72em;
+}
+
+#mainCanvas {
+	height: 30em;
+	width: 96em;
+	background-color: white;
+	border: 1px solid black;
+}
+
+.hidden {
+  position: absolute;
+  left: -300em;
+  top: -300em;
+}
