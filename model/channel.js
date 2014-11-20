@@ -8,6 +8,7 @@ ACS.channel = function(id) { // String; TODO: decide if ID is really needed
 	var returnObj = {};
 	
 	returnObj.description = "";
+	returnObj.events = ACS.eventManager();
 	
 	returnObj.getId = function() {
 		return id;

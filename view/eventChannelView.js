@@ -27,7 +27,7 @@ ACS.eventChannelView = function(ec, // ACS.eventChannel
 	
 	var getComponentHeight = function(component) {
 		// determine height of the component, depending on the amount of input- and/or output-ports
-		var elementHeight = 120;
+		var elementHeight = COMPONENTVIEW_ELEMENTHEIGHT;
 		if ((component.outputPortList.length > 3) || (component.inputPortList.length > 3)) {
 			if (component.outputPortList.length > component.inputPortList.length) {
 				elementHeight = elementHeight + (component.outputPortList.length-3) * ACS.vConst.COMPONENTVIEW_PORTHEIGHTPLUSGAP;

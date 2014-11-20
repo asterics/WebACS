@@ -1,4 +1,5 @@
 ACS.componentView = function(	component, // ACS.component
+								model, // ACS.model
 								modelLayer, // Kinetic.Layer
 								guiLayer) { // Kinetic.Layer
 	// private variables
@@ -76,7 +77,16 @@ ACS.componentView = function(	component, // ACS.component
 				fontSize: ACS.vConst.COMPONENTVIEW_FONTSIZE,
 				fill: 'black',
 				width: ACS.vConst.COMPONENTVIEW_PORTLABELWIDTH
-			});	
+			});
+			// listen for click event on port
+			inputPortViewList[i]['port'].on('click', function(inPort) {
+				return function(evt) {
+					evt.cancelBubble = true;
+					if ((model.dataChannelList.length > 0) && (!model.dataChannelList[model.dataChannelList.length - 1].inputPort)) {
+						model.dataChannelList[model.dataChannelList.length - 1].setInputPort(inPort);
+					}
+				}
+			}(component.inputPortList[i]));
 		}
 		// construct output ports and their Labels
 		for (var i = 0; i < component.outputPortList.length; i++) {
@@ -102,7 +112,16 @@ ACS.componentView = function(	component, // ACS.component
 				fill: 'black',
 				align: 'right',
 				width: ACS.vConst.COMPONENTVIEW_PORTLABELWIDTH
-			});		
+			});
+			// listen for click event on port
+			outputPortViewList[i]['port'].on('click', function(outPort) {
+				return function(evt) {
+					evt.cancelBubble = true;
+					var ch = ACS.dataChannel('tempId'); // TODO: generate a proper ID or drop ID for channels
+					ch.setOutputPort(outPort);
+					model.addDataChannel(ch);
+				}
+			}(component.outputPortList[i]));
 		}
 		// construct event-input and event-output ports, if necessary
 		if (component.listenEventList.length > 0) {
@@ -177,7 +196,7 @@ ACS.componentView = function(	component, // ACS.component
 			component.setNewPosition(mainRect.getAbsolutePosition().x, mainRect.getAbsolutePosition().y);
 		});
 		// add the group to the layer
-		modelLayer.add(view);	
+		modelLayer.add(view);
 	}
 	
 	// public stuff

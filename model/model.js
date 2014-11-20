@@ -164,12 +164,12 @@ ACS.model = function(filename) { // String
 				var sourceCompId = channels.item(i).getElementsByTagName('source').item(0).getElementsByTagName('component').item(0).attributes.getNamedItem('id').textContent;
 				var sourcePortId = channels.item(i).getElementsByTagName('source').item(0).getElementsByTagName('port').item(0).attributes.getNamedItem('id').textContent;
 				var sourceComponent = findComponentById(componentList, sourceCompId);
-				dataChannelList[i].outputPort = findPortById(sourceComponent, sourcePortId, false);
+				dataChannelList[i].setOutputPort(findPortById(sourceComponent, sourcePortId, false));
 				// get the target port:
 				var targetCompId = channels.item(i).getElementsByTagName('target').item(0).getElementsByTagName('component').item(0).attributes.getNamedItem('id').textContent;
 				var targetPortId = channels.item(i).getElementsByTagName('target').item(0).getElementsByTagName('port').item(0).attributes.getNamedItem('id').textContent;
 				var targetComponent = findComponentById(componentList, targetCompId);
-				dataChannelList[i].inputPort = findPortById(targetComponent, targetPortId, true);
+				dataChannelList[i].setInputPort(findPortById(targetComponent, targetPortId, true));
 			}
 		}
 		return dataChannelList;
@@ -406,25 +406,23 @@ ACS.model = function(filename) { // String
 	}
 	
 	returnObj.addDataChannel = function(ch) { // ACS.channel
-		
+		returnObj.dataChannelList.push(ch);
 		this.events.fireEvent('dataChannelAddedEvent');
 	}
 	
 	returnObj.removeDataChannel = function(ch) { // ACS.channel
-		
+		returnObj.dataChannelList.splice(returnObj.dataChannelList.indexOf(ch), 1);
 		this.events.fireEvent('dataChannelRemovedEvent');
-		return removedChannel;
 	}	
 
 	returnObj.addEventChannel = function(ch) { // ACS.channel
-		
+		returnObj.eventChannelList.push(ch);
 		this.events.fireEvent('eventChannelAddedEvent');
 	}
 	
 	returnObj.removeEventChannel = function(ch) { // ACS.channel
-		
+		returnObj.eventChannelList.splice(returnObj.dataChannelList.indexOf(ch), 1);
 		this.events.fireEvent('eventChannelRemovedEvent');
-		return removedChannel;
 	}		
 	
 	returnObj.getComponentCollection = function() {

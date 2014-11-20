@@ -21,7 +21,7 @@ ACS.channelView = function(modelLayer) { // Kinetic.Layer
 	
 	returnObj.setEndPoint = function(x, y) {
 		if (returnObj.line) {
-			returnObj.line.points([returnObj.line.points()[2], returnObj.line.points()[3], x, y]);
+			returnObj.line.points([returnObj.line.points()[0], returnObj.line.points()[1], x, y]);
 		}
 	}
 	
@@ -39,6 +39,10 @@ ACS.channelView = function(modelLayer) { // Kinetic.Layer
 	
 	returnObj.getVisible = function() {
 		return visible;
+	}
+	
+	returnObj.reDraw = function() {
+		returnObj.line.points([x, y, returnObj.line.points()[2], returnObj.line.points()[3]]);
 	}
 	
 	returnObj.destroy = function() {

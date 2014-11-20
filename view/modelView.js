@@ -26,7 +26,7 @@ ACS.modelView = function(	modelContainerId, // String
 		visualAreaMarkerViewList = [];
 		// instantiate new views:
 		for (i = 0; i < model.componentList.length; i++) {
-			componentViewList[i] = ACS.componentView(model.componentList[i], modelLayer, guiLayer);
+			componentViewList[i] = ACS.componentView(model.componentList[i], model, modelLayer, guiLayer);
 		}
 		for (i = 0; i < model.dataChannelList.length; i++) {
 			dataChannelViewList[i] = ACS.dataChannelView(model.dataChannelList[i], modelLayer);
@@ -108,15 +108,26 @@ ACS.modelView = function(	modelContainerId, // String
 		height: ACS.vConst.MODELVIEW_GUIDESIGNERSIZEY
 	});
 	guiStage.add(guiLayer);
-	// draw the model:
+	// draw a rectangle over the whole layer - only then mouse-events can be caught with layer.on(...) in KineticJS
+	var transparentRect = new Kinetic.Rect({
+		x: 0,
+		y: 0,
+		width: ACS.vConst.MODELVIEW_MODELDESIGNERSIZEX,
+		height: ACS.vConst.MODELVIEW_MODELDESIGNERSIZEY,
+		fill: 'transparent',
+		strokeWidth: 0,
+		listening: true
+	});
+	modelLayer.add(transparentRect);
+	// draw the model
 	drawCompleteModel();
-	// register event-handlers:
+	// register event-handlers
 	model.events.registerHandler('modelChangedEvent', function() {
 		drawCompleteModel();
 	});
 	
 	model.events.registerHandler('componentAddedEvent', function() {
-		if (model.componentList.length > 0) componentViewList.push(ACS.componentView(model.componentList[model.componentList.length - 1], modelLayer, guiLayer));
+		if (model.componentList.length > 0) componentViewList.push(ACS.componentView(model.componentList[model.componentList.length - 1], model, modelLayer, guiLayer));
 		modelLayer.draw();
 	});
 
@@ -143,7 +154,7 @@ ACS.modelView = function(	modelContainerId, // String
 		var found = false;
 		var i = 0;
 		while (!found && (i < dataChannelViewList.length)) {
-			if (dataChannelViewList[i].getChannel() === model.dataChannelList[i]) {
+			if (dataChannelViewList[i].getChannel() !== model.dataChannelList[i]) {
 				dataChannelViewList[i].destroy();
 				dataChannelViewList.splice(i, 1);
 				modelLayer.draw();
@@ -162,7 +173,7 @@ ACS.modelView = function(	modelContainerId, // String
 		var found = false;
 		var i = 0;
 		while (!found && (i < eventChannelViewList.length)) {
-			if (eventChannelViewList[i].getChannel() === model.eventChannelList[i]) {
+			if (eventChannelViewList[i].getChannel() !== model.eventChannelList[i]) {
 				eventChannelViewList[i].destroy();
 				eventChannelViewList.splice(i, 1);
 				modelLayer.draw();
@@ -170,7 +181,22 @@ ACS.modelView = function(	modelContainerId, // String
 			}
 			i++;
 		}
-	});	
+	});
+	
+	// register mouse-event handlers
+	modelLayer.on('mousemove', function() {
+		if ((model.dataChannelList.length > 0) && (!model.dataChannelList[model.dataChannelList.length - 1].getInputPort())) {
+			var mousePos = modelStage.getPointerPosition();
+			dataChannelViewList[dataChannelViewList.length - 1].setEndPoint(mousePos.x, mousePos.y);
+			this.draw();
+		}
+	});
+	
+	modelLayer.on('click', function() {
+		if ((model.dataChannelList.length > 0) && (!model.dataChannelList[model.dataChannelList.length - 1].getInputPort())) {
+			model.removeDataChannel(model.dataChannelList[model.dataChannelList.length - 1]);
+		}
+	});
 	
 	return returnObj;
 }
