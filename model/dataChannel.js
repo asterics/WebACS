@@ -1,7 +1,7 @@
 ACS.dataChannel = function(id) { // String
 	// private variables
-	inputPort = null;
-	outputPort = null;
+	var inputPort = null;
+	var outputPort = null;
 		
 	// private methods
 	

@@ -244,7 +244,7 @@ ACS.menuView = function(modelList) { // ACS.modelList
 	});
 	
 	// componentCollection changed handler
-	modelList.getActModel().events.registerHandler('componentCollectionChanged', function() {
+	modelList.getActModel().events.registerHandler('componentCollectionChangedEvent', function() {
 		log.info('The componentCollection has been changed!');
 		returnObj.setComponentMenu();
 	});

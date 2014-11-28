@@ -433,14 +433,14 @@ ACS.model = function(filename) { // String
 		// loads a component collection from a user-chosen file
 		
 		// componentCollection = ...
-		this.events.fireEvent('componentCollectionChanged');
+		this.events.fireEvent('componentCollectionChangedEvent');
 		return componentCollection; // (XML document)
 	}
 	
 	// constructor code
 	componentCollection = loadDefaultComponentCollection();
 	log.debug('the component-id of the first component in the collection is "'+componentCollection.getElementsByTagName('componentType').item(0).attributes.getNamedItem('id').nodeValue+'"');
-	returnObj.events.fireEvent('componentCollectionChanged');
+	returnObj.events.fireEvent('componentCollectionChangedEvent');
 	
 	return returnObj;
 }

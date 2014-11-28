@@ -27,7 +27,7 @@ ACS.eventChannelView = function(ec, // ACS.eventChannel
 	
 	var getComponentHeight = function(component) {
 		// determine height of the component, depending on the amount of input- and/or output-ports
-		var elementHeight = COMPONENTVIEW_ELEMENTHEIGHT;
+		var elementHeight = ACS.vConst.COMPONENTVIEW_ELEMENTHEIGHT;
 		if ((component.outputPortList.length > 3) || (component.inputPortList.length > 3)) {
 			if (component.outputPortList.length > component.inputPortList.length) {
 				elementHeight = elementHeight + (component.outputPortList.length-3) * ACS.vConst.COMPONENTVIEW_PORTHEIGHTPLUSGAP;
@@ -76,7 +76,7 @@ ACS.eventChannelView = function(ec, // ACS.eventChannel
 	}
 	
 	// constructor code
-	returnObj.line.stroke('rgb(229, 117, 117)');
+	returnObj.line.stroke(ACS.vConst.EVENTCHANNELVIEW_STROKECOLOR);
 	if (ec !== {}) {
 		if ((ec.trigger) && (ec.trigger !== {})) startComponent = ec.trigger.getParentComponent();
 		if ((ec.listener) && (ec.listener !== {})) endComponent = ec.listener.getParentComponent();

@@ -9,9 +9,28 @@ ACS.channelView = function(modelLayer) { // Kinetic.Layer
 	
 	returnObj.line = new Kinetic.Line({
 		points: [0, 0, 0, 0],
-		stroke: 'black',
-		strokeWidth: 2
+		stroke: ACS.vConst.CHANNELVIEW_STROKECOLOR,
+		strokeWidth: 2,
+		// set custom hitRegion to be smaller than actual channel to avoid KinteicJs antiAliasing-bug
+		hitFunc: function(context) {
+			context.beginPath();
+			context.moveTo(returnObj.line.points()[0], returnObj.line.points()[1]);
+			var channelEnd = [];
+			if (returnObj.line.points()[2] > returnObj.line.points()[0])
+				channelEnd[0] = returnObj.line.points()[2]-2;
+			else
+				channelEnd[0] = returnObj.line.points()[2]+2;
+			if (returnObj.line.points()[3] > returnObj.line.points()[1])
+				channelEnd[1] = returnObj.line.points()[3]-2;
+			else
+				channelEnd[1] = returnObj.line.points()[3]+2;			
+			context.lineTo(channelEnd[0], channelEnd[1]);
+			context.closePath();
+			context.fillStrokeShape(this);
+		}
 	});
+	
+	returnObj.line.on('click', function() {log.debug('clicked on channel')});
 
 	returnObj.setStartPoint = function(x, y) {
 		if (returnObj.line) {
@@ -39,10 +58,6 @@ ACS.channelView = function(modelLayer) { // Kinetic.Layer
 	
 	returnObj.getVisible = function() {
 		return visible;
-	}
-	
-	returnObj.reDraw = function() {
-		returnObj.line.points([x, y, returnObj.line.points()[2], returnObj.line.points()[3]]);
 	}
 	
 	returnObj.destroy = function() {

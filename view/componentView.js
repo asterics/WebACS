@@ -11,6 +11,13 @@ ACS.componentView = function(	component, // ACS.component
 	var eventInPortView = null;
 
 	// private methods
+	var channelExists = function(outPort, inPort) {
+		for (var i = 0; i < model.dataChannelList.length; i++) {
+			if ((model.dataChannelList[i].getOutputPort() === outPort) && (model.dataChannelList[i].getInputPort() === inPort)) return true;
+		}
+		return false;
+	}
+	
 	var buildView = function() {
 		// determine height of the element, depending on the amount of input- and/or output-ports
 		var elementHeight = ACS.vConst.COMPONENTVIEW_ELEMENTHEIGHT;
@@ -27,8 +34,8 @@ ACS.componentView = function(	component, // ACS.component
 			y: component.getY(),
 			width: ACS.vConst.COMPONENTVIEW_ELEMENTWIDTH,
 			height: elementHeight,
-			fill: 'rgba(168,222,222,0.8)',
-			stroke: 'black',
+			fill: ACS.vConst.COMPONENTVIEW_COMPONENTCOLOR,
+			stroke: ACS.vConst.COMPONENTVIEW_STROKECOLOR,
 			strokeWidth: 1,
 			cornerRadius: 5,
 			listening: true
@@ -39,8 +46,8 @@ ACS.componentView = function(	component, // ACS.component
 			y: component.getY(),
 			width: ACS.vConst.COMPONENTVIEW_ELEMENTWIDTH,
 			height: ACS.vConst.COMPONENTVIEW_TOPRECTHEIGHT,
-			fill: 'rgb(255,254,46)',
-			stroke: 'black',
+			fill: ACS.vConst.COMPONENTVIEW_COMPONENTHEADERCOLOR,
+			stroke: ACS.vConst.COMPONENTVIEW_STROKECOLOR,
 			strokeWidth: 1,
 			cornerRadius: 5,
 			listening: false
@@ -50,7 +57,7 @@ ACS.componentView = function(	component, // ACS.component
 			y: component.getY() + ACS.vConst.COMPONENTVIEW_HEADERTEXTPOSITIONY,
 			text: component.getId(),
 			fontSize: ACS.vConst.COMPONENTVIEW_FONTSIZE,
-			fill: 'black',
+			fill: ACS.vConst.COMPONENTVIEW_TEXTCOLOR,
 			width: ACS.vConst.COMPONENTVIEW_HEADERTEXTWIDTH,
 			wrap: 'char'
 		});
@@ -62,28 +69,29 @@ ACS.componentView = function(	component, // ACS.component
 				y: component.getY() + ACS.vConst.COMPONENTVIEW_FIRSTINPUTPORTY + ACS.vConst.COMPONENTVIEW_PORTHEIGHTPLUSGAP * i,
 				width: ACS.vConst.COMPONENTVIEW_PORTWIDTH,
 				height: ACS.vConst.COMPONENTVIEW_PORTHEIGHT,
-				fill: 'rgb(138,175,241)',
-				stroke: 'black',
+				fill: ACS.vConst.COMPONENTVIEW_INPUTPORTCOLOR,
+				stroke: ACS.vConst.COMPONENTVIEW_STROKECOLOR,
 				strokeWidth: 1,
 				cornerRadius: 3,
-				listening: true
-				//port: 'input',
-				//DOMElement: compInputPorts[i]
+				listening: true,
 			});	
 			inputPortViewList[i]['label'] = new Kinetic.Text({
 				x: component.getX() + ACS.vConst.COMPONENTVIEW_INPUTPORTLABELPOSITIONX,
 				y: component.getY() + ACS.vConst.COMPONENTVIEW_FIRSTINPUTPORTY + 1 + ACS.vConst.COMPONENTVIEW_PORTHEIGHTPLUSGAP * i,
 				text: component.inputPortList[i].getId(),
 				fontSize: ACS.vConst.COMPONENTVIEW_FONTSIZE,
-				fill: 'black',
+				fill: ACS.vConst.COMPONENTVIEW_TEXTCOLOR,
 				width: ACS.vConst.COMPONENTVIEW_PORTLABELWIDTH
 			});
 			// listen for click event on port
 			inputPortViewList[i]['port'].on('click', function(inPort) {
 				return function(evt) {
-					evt.cancelBubble = true;
-					if ((model.dataChannelList.length > 0) && (!model.dataChannelList[model.dataChannelList.length - 1].inputPort)) {
-						model.dataChannelList[model.dataChannelList.length - 1].setInputPort(inPort);
+					log.debug('clicked inputport');
+					if ((model.dataChannelList.length > 0) && (!model.dataChannelList[model.dataChannelList.length - 1].getInputPort())) {
+						if (!channelExists(model.dataChannelList[model.dataChannelList.length - 1].getOutputPort(), inPort)) {
+							evt.cancelBubble = true;
+							model.dataChannelList[model.dataChannelList.length - 1].setInputPort(inPort);
+						}
 					}
 				}
 			}(component.inputPortList[i]));
@@ -96,8 +104,8 @@ ACS.componentView = function(	component, // ACS.component
 				y: component.getY() + ACS.vConst.COMPONENTVIEW_FIRSTOUTPUTPORTPOSITIONY + ACS.vConst.COMPONENTVIEW_PORTHEIGHTPLUSGAP * i,
 				width: ACS.vConst.COMPONENTVIEW_PORTWIDTH,
 				height: ACS.vConst.COMPONENTVIEW_PORTHEIGHT,
-				fill: 'rgb(197,89,89)',
-				stroke: 'black',
+				fill: ACS.vConst.COMPONENTVIEW_OUTPUTPORTCOLOR,
+				stroke: ACS.vConst.COMPONENTVIEW_STROKECOLOR,
 				strokeWidth: 1,
 				cornerRadius: 3,
 				listening: true
@@ -109,17 +117,20 @@ ACS.componentView = function(	component, // ACS.component
 				y: component.getY() + ACS.vConst.COMPONENTVIEW_FIRSTOUTPUTPORTPOSITIONY + 1 + ACS.vConst.COMPONENTVIEW_PORTHEIGHTPLUSGAP * i,
 				text: component.outputPortList[i].getId(),
 				fontSize: ACS.vConst.COMPONENTVIEW_FONTSIZE,
-				fill: 'black',
+				fill: ACS.vConst.COMPONENTVIEW_TEXTCOLOR,
 				align: 'right',
 				width: ACS.vConst.COMPONENTVIEW_PORTLABELWIDTH
 			});
 			// listen for click event on port
 			outputPortViewList[i]['port'].on('click', function(outPort) {
 				return function(evt) {
-					evt.cancelBubble = true;
-					var ch = ACS.dataChannel('tempId'); // TODO: generate a proper ID or drop ID for channels
-					ch.setOutputPort(outPort);
-					model.addDataChannel(ch);
+					log.debug('clicked outputport');
+					if (!((model.dataChannelList.length > 0) && (!model.dataChannelList[model.dataChannelList.length - 1].getInputPort()))) {
+						evt.cancelBubble = true;
+						var ch = ACS.dataChannel('tempId'); // TODO: generate a proper ID or drop ID for channels
+						ch.setOutputPort(outPort);
+						model.addDataChannel(ch);
+					}
 				}
 			}(component.outputPortList[i]));
 		}
@@ -127,9 +138,9 @@ ACS.componentView = function(	component, // ACS.component
 		if (component.listenEventList.length > 0) {
 			eventInPortView = new Kinetic.Shape({
 				x: component.getX() + ACS.vConst.COMPONENTVIEW_EVENTLISTENERPORTPOSITIONX,
-				y: component.getY()+elementHeight - ACS.vConst.COMPONENTVIEW_EVENTPORTYINSIDECOMPONENT,
-				fill: 'rgb(82,253,65)',
-				stroke: 'black',
+				y: component.getY() + elementHeight - ACS.vConst.COMPONENTVIEW_EVENTPORTYINSIDECOMPONENT,
+				fill: ACS.vConst.COMPONENTVIEW_EVENTINPUTPORTCOLOR,
+				stroke: ACS.vConst.COMPONENTVIEW_STROKECOLOR,
 				strokeWidth: 1,
 				drawFunc: function(context) {
 					context.beginPath();
@@ -143,16 +154,14 @@ ACS.componentView = function(	component, // ACS.component
 					context.fillStrokeShape(this);
 				},
 				listening: true
-				//port: 'eventIn',
-				//DOMElementArray: compInputEvents
 			});	
 		}
 		if (component.triggerEventList.length > 0) {
 			eventOutPortView = new Kinetic.Shape({
 				x: component.getX() + ACS.vConst.COMPONENTVIEW_EVENTTRIGGERPORTPOSITIONX,
 				y: component.getY()+elementHeight - ACS.vConst.COMPONENTVIEW_EVENTPORTYINSIDECOMPONENT,
-				fill: 'rgb(214,66,251)',
-				stroke: 'black',
+				fill: ACS.vConst.COMPONENTVIEW_EVENTOUTPUTPORTCOLOR,
+				stroke: ACS.vConst.COMPONENTVIEW_STROKECOLOR,
 				strokeWidth: 1,
 				drawFunc: function(context) {
 					context.beginPath();
@@ -166,8 +175,6 @@ ACS.componentView = function(	component, // ACS.component
 					context.fillStrokeShape(this);
 				},
 				listening: true
-				//port: 'eventOut',
-				//DOMElementArray: compOutputEvents
 			});	
 		}
 		// group all parts and make component draggable
