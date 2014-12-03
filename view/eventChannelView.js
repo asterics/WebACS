@@ -1,7 +1,7 @@
 ACS.eventChannelView = function(ec, // ACS.eventChannel
+								startComponent, // ACS.component
 								modelLayer) { // Kinetic.Layer
 	// private variables
-	var startComponent = null;
 	var endComponent = null;
 	
 	// private methods
@@ -50,6 +50,10 @@ ACS.eventChannelView = function(ec, // ACS.eventChannel
 		setHandlerforTrigger();
 	}
 	
+	returnObj.getStartComponent = function(c) {
+		return startComponent;
+	}	
+	
 	returnObj.setEndComponent = function(c) {
 		endComponent = c;
 		returnObj.line.points([	returnObj.line.points()[0],
@@ -57,6 +61,10 @@ ACS.eventChannelView = function(ec, // ACS.eventChannel
 								endComponent.getX() + ACS.vConst.EVENTCHANNELVIEW_LISTENERPOSX,
 								endComponent.getY() + getComponentHeight(endComponent) + ACS.vConst.EVENTCHANNELVIEW_LISTENERBELOWCOMPONENT]);
 		setHandlerForListener();
+	}
+	
+	returnObj.getEndComponent = function(c) {
+		return endComponent;
 	}
 	
 	returnObj.setEventChannel = function(c) {
@@ -77,24 +85,14 @@ ACS.eventChannelView = function(ec, // ACS.eventChannel
 	
 	// constructor code
 	returnObj.line.stroke(ACS.vConst.EVENTCHANNELVIEW_STROKECOLOR);
-	if (ec !== {}) {
-		if ((ec.trigger) && (ec.trigger !== {})) startComponent = ec.trigger.getParentComponent();
-		if ((ec.listener) && (ec.listener !== {})) endComponent = ec.listener.getParentComponent();
-	}
-	if (startComponent) {
-		if (endComponent) { // if we already have both ends of the channel
-			returnObj.line.points([	startComponent.getX() + ACS.vConst.EVENTCHANNELVIEW_TRIGGERPOSX,
-									startComponent.getY() + getComponentHeight(startComponent) + ACS.vConst.EVENTCHANNELVIEW_TRIGGERBELOWCOMPONENT,
-									endComponent.getX() + ACS.vConst.EVENTCHANNELVIEW_LISTENERPOSX,
-									endComponent.getY() + getComponentHeight(endComponent) + ACS.vConst.EVENTCHANNELVIEW_LISTENERBELOWCOMPONENT]);
-			setHandlerForListener();
-		} else {
-			// draw a line with length == 0 - target coordinates will be set on mouse move
-			returnObj.line.points([	startComponent.getX() + ACS.vConst.EVENTCHANNELVIEW_TRIGGERPOSX,
-									startComponent.getY() + getComponentHeight(ec.trigger.getParentComponent()) + ACS.vConst.EVENTCHANNELVIEW_TRIGGERBELOWCOMPONENT,
-									startComponent.getX() + ACS.vConst.EVENTCHANNELVIEW_TRIGGERPOSX,
-									startComponent.getY() + getComponentHeight(ec.trigger.getParentComponent()) + ACS.vConst.EVENTCHANNELVIEW_TRIGGERBELOWCOMPONENT]);
-		}
+	if (ec && (ec !== {})) {
+		returnObj.setEventChannel(ec);
+	} else if (startComponent) {
+		// draw a line with length == 0 - target coordinates will be set on mouse move
+		returnObj.line.points([	startComponent.getX() + ACS.vConst.EVENTCHANNELVIEW_TRIGGERPOSX,
+								startComponent.getY() + getComponentHeight(startComponent) + ACS.vConst.EVENTCHANNELVIEW_TRIGGERBELOWCOMPONENT,
+								startComponent.getX() + ACS.vConst.EVENTCHANNELVIEW_TRIGGERPOSX,
+								startComponent.getY() + getComponentHeight(startComponent) + ACS.vConst.EVENTCHANNELVIEW_TRIGGERBELOWCOMPONENT]);
 		setHandlerForTrigger();	
 	}
 	

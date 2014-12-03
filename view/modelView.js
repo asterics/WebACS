@@ -26,13 +26,13 @@ ACS.modelView = function(	modelContainerId, // String
 		visualAreaMarkerViewList = [];
 		// instantiate new views:
 		for (i = 0; i < model.componentList.length; i++) {
-			componentViewList[i] = ACS.componentView(model.componentList[i], model, modelLayer, guiLayer);
+			componentViewList[i] = ACS.componentView(model.componentList[i], model, returnObj, modelLayer, guiLayer);
 		}
 		for (i = 0; i < model.dataChannelList.length; i++) {
 			dataChannelViewList[i] = ACS.dataChannelView(model.dataChannelList[i], modelLayer);
 		}
 		for (i = 0; i < model.eventChannelList.length; i++) {
-			eventChannelViewList[i] = ACS.eventChannelView(model.eventChannelList[i], modelLayer);
+			eventChannelViewList[i] = ACS.eventChannelView(model.eventChannelList[i], null, modelLayer);
 		}
 		for (i = 0; i < model.visualAreaMarkerList.length; i++) {
 			visualAreaMarkerViewList[i] = ACS.visualAreaMarkerView(model.visualAreaMarkerList[i], modelLayer);
@@ -46,6 +46,24 @@ ACS.modelView = function(	modelContainerId, // String
 	
 	returnObj.getModel = function() {
 		return model;
+	}
+	
+	returnObj.addEventChannelView = function(ecv) {
+		eventChannelViewList[eventChannelViewList.length] = ecv;
+	}
+	
+	returnObj.removeEventChannelView = function(ecv) {
+		for (var i = 0; i < eventChannelViewList.length; i++) {
+			if (eventChannelViewList[i] === ecv) {
+				eventChannelViewList.splice(i, 1);
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	returnObj.getEventChannelViewList = function() {
+		return eventChannelViewList;
 	}
 	
 	// constructor code
@@ -127,7 +145,7 @@ ACS.modelView = function(	modelContainerId, // String
 	});
 	
 	model.events.registerHandler('componentAddedEvent', function() {
-		if (model.componentList.length > 0) componentViewList.push(ACS.componentView(model.componentList[model.componentList.length - 1], model, modelLayer, guiLayer));
+		if (model.componentList.length > 0) componentViewList.push(ACS.componentView(model.componentList[model.componentList.length - 1], model, returnObj, modelLayer, guiLayer));
 		modelLayer.draw();
 	});
 
@@ -189,6 +207,10 @@ ACS.modelView = function(	modelContainerId, // String
 			var mousePos = modelStage.getPointerPosition();
 			dataChannelViewList[dataChannelViewList.length - 1].setEndPoint(mousePos.x, mousePos.y);
 			this.draw();
+		} else if ((eventChannelViewList.length > 0) && (!eventChannelViewList[eventChannelViewList.length - 1].getEndComponent())) {
+			var mousePos = modelStage.getPointerPosition();
+			eventChannelViewList[eventChannelViewList.length - 1].setEndPoint(mousePos.x, mousePos.y)
+			this.draw();
 		}
 	});
 	
@@ -196,6 +218,10 @@ ACS.modelView = function(	modelContainerId, // String
 		log.debug('clicked layer');
 		if ((model.dataChannelList.length > 0) && (!model.dataChannelList[model.dataChannelList.length - 1].getInputPort())) {
 			model.removeDataChannel(model.dataChannelList[model.dataChannelList.length - 1]);
+		} else if ((eventChannelViewList.length > 0) && (!eventChannelViewList[eventChannelViewList.length - 1].getEndComponent())) {
+			eventChannelViewList[eventChannelViewList.length - 1].destroy();
+			eventChannelViewList.pop();
+			this.draw();
 		}
 	});
 	

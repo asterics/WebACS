@@ -1,4 +1,5 @@
 ACS.groupComponentView = function(	gc, // ACS.groupComponent
+									modelView, // ACS.modelView
 									modelLayer, // Kinetic.Layer
 									guiLayer) { // Kinetic.Layer
 	// private variables
@@ -6,7 +7,7 @@ ACS.groupComponentView = function(	gc, // ACS.groupComponent
 	// private methods
 	
 	// public stuff
-	var returnObj = ACS.componentView(gc, modelLayer, guiLayer);
+	var returnObj = ACS.componentView(gc, modelView, modelLayer, guiLayer);
 
 	returnObj.destroy = function() {
 		// TODO

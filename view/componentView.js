@@ -1,5 +1,6 @@
 ACS.componentView = function(	component, // ACS.component
 								model, // ACS.model
+								modelView, // ACS.modelView
 								modelLayer, // Kinetic.Layer
 								guiLayer) { // Kinetic.Layer
 	// private variables
@@ -14,6 +15,14 @@ ACS.componentView = function(	component, // ACS.component
 	var channelExists = function(outPort, inPort) {
 		for (var i = 0; i < model.dataChannelList.length; i++) {
 			if ((model.dataChannelList[i].getOutputPort() === outPort) && (model.dataChannelList[i].getInputPort() === inPort)) return true;
+		}
+		return false;
+	}
+	
+	var eventChannelViewExists = function(startComp, endComp) {
+		var ecvl = modelView.getEventChannelViewList();
+		for (var i = 0; i < ecvl.length; i++) {
+			if ((ecvl[i].getStartComponent() === startComp) && (ecvl[i].getEndComponent() === endComp)) return true;
 		}
 		return false;
 	}
@@ -155,6 +164,17 @@ ACS.componentView = function(	component, // ACS.component
 				},
 				listening: true
 			});	
+			eventInPortView.on('click', function(evt) {
+				log.debug('clicked eventInputPort');
+				var ecvl = modelView.getEventChannelViewList();
+				if ((ecvl.length > 0) && (!ecvl[ecvl.length - 1].getEndComponent())) {
+					if (!eventChannelViewExists(ecvl[ecvl.length - 1].getStartComponent(), component)) {
+						evt.cancelBubble = true;
+						ecvl[ecvl.length - 1].setEndComponent(component);
+						modelLayer.draw();
+					}
+				}
+			});
 		}
 		if (component.triggerEventList.length > 0) {
 			eventOutPortView = new Kinetic.Shape({
@@ -175,7 +195,16 @@ ACS.componentView = function(	component, // ACS.component
 					context.fillStrokeShape(this);
 				},
 				listening: true
-			});	
+			});
+			// listen for click event on port
+			eventOutPortView.on('click', function(evt) {
+				log.debug('clicked eventOutputPort');
+				var ecvl = modelView.getEventChannelViewList();
+				if (!((ecvl.length > 0) && (!ecvl[ecvl.length - 1].getEndComponent()))) {
+					evt.cancelBubble = true;
+					modelView.addEventChannelView(ACS.eventChannelView(null, component, modelLayer));
+				}
+			});
 		}
 		// group all parts and make component draggable
 		view = new Kinetic.Group({
