@@ -1,4 +1,4 @@
-ACS.channel = function(id) { // String; TODO: decide if ID is really needed
+ACS.channel = function(id) { // String
 	// private variables
 	var isSelected = false;
 
@@ -7,7 +7,7 @@ ACS.channel = function(id) { // String; TODO: decide if ID is really needed
 	// public stuff
 	var returnObj = {};
 	
-	returnObj.description = "";
+	returnObj.description = '';
 	returnObj.events = ACS.eventManager();
 	
 	returnObj.getId = function() {

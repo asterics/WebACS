@@ -1,21 +1,7 @@
-ACS.portType = {
-	INPUT: 1,
-	OUTPUT: 2
-};
-
-ACS.portDataType = {
-	BOOLEAN: 1,
-	BYTE: 2,
-	CHAR: 3,
-	INTEGER: 4,
-	DOUBLE: 5,
-	STRING: 6
-};
-
 ACS.port = function(id, // String; can be changed, but must be unique
 					parentComponent, // ACS.component
 					type, // ACS.portType
-					dataType, // ACS.portDataType
+					dataType, // ACS.dataType
 					position, // int
 					mustBeConnected) { // bool
 	// private variables
@@ -26,6 +12,7 @@ ACS.port = function(id, // String; can be changed, but must be unique
 	var returnObj = {};
 	
 	returnObj.propertyList = [];
+	returnObj.sync = false;
 	
 	returnObj.getId = function() {
 		return id;

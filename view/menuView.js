@@ -78,6 +78,11 @@ ACS.menuView = function(modelList) { // ACS.modelList
 	}
 	document.getElementById('connectAREBtn').addEventListener('click', handleConnectARE);
 	
+/*	var handleNewModel = function(e) {
+		modelList.addNewModel();
+	}
+	document.getElementById("newModelBtn").addEventListener('click', handleNewModel);*/
+
 	var fileSelector = document.createElement('input'); // create "hidden" input element for choosing file
 	fileSelector.setAttribute('type', 'file');
 	var handleSelectedFile = function(e) {
@@ -105,6 +110,11 @@ ACS.menuView = function(modelList) { // ACS.modelList
 		}
 	}
 	document.getElementById("openModelBtn").addEventListener('click', handleOpenModel);
+	
+	var handleSaveModel = function(e) {
+		modelList.getActModel().saveModel();
+	}
+	document.getElementById("saveModelBtn").addEventListener('click', handleSaveModel);
 	
 	// Menu-Button-Handlers - Components-Menu
 	var stopLevel1Timer = function() {

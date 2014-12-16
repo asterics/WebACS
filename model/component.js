@@ -1,9 +1,3 @@
-ACS.componentType = {
-	SENSOR: 1,
-	PROCESSOR: 2,
-	ACTUATOR: 3
-};
-
 ACS.component = function(id, // String; can be changed, but must be unique
 						 componentTypeId, // String
 						 description, // String
