@@ -78,10 +78,10 @@ ACS.menuView = function(modelList) { // ACS.modelList
 	}
 	document.getElementById('connectAREBtn').addEventListener('click', handleConnectARE);
 	
-/*	var handleNewModel = function(e) {
+	var handleNewModel = function(e) {
 		modelList.addNewModel();
 	}
-	document.getElementById("newModelBtn").addEventListener('click', handleNewModel);*/
+	document.getElementById("newModelBtn").addEventListener('click', handleNewModel);
 
 	var fileSelector = document.createElement('input'); // create "hidden" input element for choosing file
 	fileSelector.setAttribute('type', 'file');
@@ -194,11 +194,20 @@ ACS.menuView = function(modelList) { // ACS.modelList
 	var returnObj = {};
 	
 	returnObj.setComponentMenu = function() {
-		var compColl = modelList.getActModel().getComponentCollection();
-		var sensorsBtn = document.getElementById('sensorsBtnListElement');
-		var processorsBtn = document.getElementById('processorsBtnListElement');
-		var actuatorsBtn = document.getElementById('actuatorsBtnListElement');
-		var components = compColl.getElementsByTagName('componentType');
+		// first empty the menu...
+		var sensorsBtnList = document.getElementById('sensorsBtnList');
+		var processorsBtnList = document.getElementById('processorsBtnList');
+		var actuatorsBtnList = document.getElementById('actuatorsBtnList');
+		var savedGroupsBtnList = document.getElementById('savedGroupsBtnList');
+		while (sensorsBtnList.hasChildNodes()) sensorsBtnList.removeChild(sensorsBtnList.childNodes[0]);
+		while (processorsBtnList.hasChildNodes()) processorsBtnList.removeChild(processorsBtnList.childNodes[0]);
+		while (actuatorsBtnList.hasChildNodes()) actuatorsBtnList.removeChild(actuatorsBtnList.childNodes[0]);
+		while (savedGroupsBtnList.hasChildNodes()) savedGroupsBtnList.removeChild(savedGroupsBtnList.childNodes[0]);
+		// ...and empty the dataList for the quickSelect
+		var dataList = document.getElementById('componentsDataList');
+		while (dataList.hasChildNodes()) dataList.removeChild(dataList.childNodes[0]);
+		// fill the menu with the new content
+		var components = modelList.getActModel().getComponentCollection().getElementsByTagName('componentType');
 		// set the subcategories:
 		for (var i = 0; i < components.length; i++) {
 			var actCompName = components.item(i).attributes.getNamedItem('id').textContent.slice(9); // the slice eliminates the "asterics."
