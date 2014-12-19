@@ -27,11 +27,11 @@ ACS.eventManager = function() {
 	}
 
 	returnObj.fireEvent = function(eventName) {
+		log.info('the event ' + eventName + ' has been fired and the handlers (if any) are now being called...');
 		if (!events[eventName]) {
 			return false;
 		} else {
 			for (var i = 0; i < events[eventName].length; i++) {
-				log.info('the event ' + eventName + ' has been fired and the handlers are now being called...');
 				events[eventName][i](arguments);
 			}
 		}

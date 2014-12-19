@@ -27,7 +27,7 @@ ACS.component = function(id, // String; can be changed, but must be unique
 	
 	returnObj.setId = function(newId) {
 		id = newId;
-		returnObj.events.fireEvent('componentChangedEvent');
+		//returnObj.events.fireEvent('componentChangedEvent');
 	}
 
 	returnObj.getComponentTypeId = function() {
@@ -57,7 +57,7 @@ ACS.component = function(id, // String; can be changed, but must be unique
 	returnObj.setNewPosition = function(newX, newY) {
 		x = newX;
 		y = newY;
-		returnObj.events.fireEvent('componentChangedEvent');
+		//returnObj.events.fireEvent('componentChangedEvent');
 		returnObj.events.fireEvent('componentPositionChangedEvent');
 	}
 
@@ -71,7 +71,7 @@ ACS.component = function(id, // String; can be changed, but must be unique
 	
 	returnObj.setIsSelected = function(newIsSelected) {
 		isSelected = newIsSelected;
-		returnObj.events.fireEvent('componentChangedEvent');
+		//returnObj.events.fireEvent('componentChangedEvent');
 	}			
 
 	// constructor code

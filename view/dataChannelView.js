@@ -11,7 +11,6 @@ ACS.dataChannelView = function(	dc, // ACS.dataChannel
 									returnObj.line.points()[1], 
 									inputPort.getParentComponent().getX() - ACS.vConst.DATACHANNELVIEW_INPUTPORTLEFTOFCOMPONENT,
 									inputPort.getParentComponent().getY() + ACS.vConst.DATACHANNELVIEW_FIRSTINPUTPORTDOCKINGPOINTY + ACS.vConst.COMPONENTVIEW_PORTHEIGHTPLUSGAP * inputPort.getPosition()]);
-			modelLayer.draw();
 		});
 	}
 	
@@ -42,7 +41,6 @@ ACS.dataChannelView = function(	dc, // ACS.dataChannel
 								outputPort.getParentComponent().getY() + ACS.vConst.DATACHANNELVIEW_FIRSTOUTPUTPORTDOCKINGPOINTY + ACS.vConst.COMPONENTVIEW_PORTHEIGHTPLUSGAP * outputPort.getPosition(), 
 								returnObj.line.points()[2], 
 								returnObj.line.points()[3]]);
-		modelLayer.draw();
 	});
 	
 	dc.events.registerHandler('dataChannelCompletedEvent', function() {

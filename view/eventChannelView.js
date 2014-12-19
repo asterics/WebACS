@@ -11,7 +11,6 @@ ACS.eventChannelView = function(ec, // ACS.eventChannel
 									returnObj.line.points()[1], 
 									endComponent.getX() + ACS.vConst.EVENTCHANNELVIEW_LISTENERPOSX,
 									endComponent.getY() + getComponentHeight(endComponent) + ACS.vConst.EVENTCHANNELVIEW_LISTENERBELOWCOMPONENT]);
-			modelLayer.draw();
 		});
 	}
 	
@@ -21,7 +20,6 @@ ACS.eventChannelView = function(ec, // ACS.eventChannel
 									startComponent.getY() + getComponentHeight(startComponent) + ACS.vConst.EVENTCHANNELVIEW_TRIGGERBELOWCOMPONENT, 
 									returnObj.line.points()[2], 
 									returnObj.line.points()[3]]);
-			modelLayer.draw();
 		});
 	}
 	

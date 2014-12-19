@@ -215,13 +215,13 @@ ACS.modelView = function(	modelContainerId, // String
 	});
 	
 	modelLayer.on('click', function() {
-		log.debug('clicked layer');
 		if ((model.dataChannelList.length > 0) && (!model.dataChannelList[model.dataChannelList.length - 1].getInputPort())) {
 			model.removeDataChannel(model.dataChannelList[model.dataChannelList.length - 1]);
 		} else if ((eventChannelViewList.length > 0) && (!eventChannelViewList[eventChannelViewList.length - 1].getEndComponent())) {
 			eventChannelViewList[eventChannelViewList.length - 1].destroy();
 			eventChannelViewList.pop();
 			this.draw();
+			log.debug('eventChannel dropped');
 		}
 	});
 	

@@ -12,9 +12,9 @@ ACS.componentView = function(	component, // ACS.component
 	var eventInPortView = null;
 
 	// private methods
-	var channelExists = function(outPort, inPort) {
+	var channelExists = function(inPort) {
 		for (var i = 0; i < model.dataChannelList.length; i++) {
-			if ((model.dataChannelList[i].getOutputPort() === outPort) && (model.dataChannelList[i].getInputPort() === inPort)) return true;
+			if (model.dataChannelList[i].getInputPort() === inPort) return true;
 		}
 		return false;
 	}
@@ -97,7 +97,7 @@ ACS.componentView = function(	component, // ACS.component
 				return function(evt) {
 					log.debug('clicked inputport');
 					if ((model.dataChannelList.length > 0) && (!model.dataChannelList[model.dataChannelList.length - 1].getInputPort())) {
-						if (!channelExists(model.dataChannelList[model.dataChannelList.length - 1].getOutputPort(), inPort)) {
+						if (!channelExists(inPort)) {
 							evt.cancelBubble = true;
 							model.dataChannelList[model.dataChannelList.length - 1].setInputPort(inPort);
 						}
@@ -165,7 +165,6 @@ ACS.componentView = function(	component, // ACS.component
 				listening: true
 			});	
 			eventInPortView.on('click', function(evt) {
-				log.debug('clicked eventInputPort');
 				var ecvl = modelView.getEventChannelViewList();
 				if ((ecvl.length > 0) && (!ecvl[ecvl.length - 1].getEndComponent())) {
 					if (!eventChannelViewExists(ecvl[ecvl.length - 1].getStartComponent(), component)) {
@@ -227,7 +226,7 @@ ACS.componentView = function(	component, // ACS.component
 		// set this component to highest z-value of all on the layer
 		view.on('mousedown', function() {
 			this.moveToTop();
-		});		
+		});	
 		view.on('dragmove', function() {
 			component.setNewPosition(mainRect.getAbsolutePosition().x, mainRect.getAbsolutePosition().y);
 		});
