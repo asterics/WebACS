@@ -13,7 +13,7 @@ ACS.modelList = function() {
 	
 	returnObj.removeSubstituteFilename = function() { // is called when actModel is removed or loaded from a file
 		var actNumber = list[returnObj.actIndex].getFilename().slice(7); // removing the 7-letter-word "newfile" leaves the number
-		if ((filenameCounter - 1) === actNumber) filenameCounter--;
+		if ((filenameCounter - 1) + '' === actNumber) filenameCounter--;
 	}	
 	
 	returnObj.addNewModel = function() {
@@ -21,7 +21,6 @@ ACS.modelList = function() {
 		filenameCounter++;
 		this.events.fireEvent('actModelChangedEvent');
 		this.events.fireEvent('newModelAddedEvent');
-		
 		list[this.actIndex].events.registerHandler('filenameBeingChangedEvent', returnObj.removeSubstituteFilename);
 	}
 	
@@ -49,7 +48,7 @@ ACS.modelList = function() {
 		list.splice(this.actIndex, 1);
 		if (this.actIndex > (list.length - 1)) this.actIndex--; // if no more models to the right, go to the left
 		if (this.actIndex === -1) { // if list is empty, add a new empty model again
-			this.actIndex = (list.push(ACS.model())) - 1;
+			returnObj.addNewModel();
 		}
 		this.events.fireEvent('actModelChangedEvent');
 	}

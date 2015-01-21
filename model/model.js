@@ -325,6 +325,7 @@ ACS.model = function(filename) { // String
 	returnObj.events = ACS.eventManager();
 	returnObj.modelName = generateModelName();
 	returnObj.acsVersion = ACS.mConst.MODELGUI_ACSVERSION;
+	returnObj.hasBeenChanged = false;
 	
 	returnObj.getFilename = function() {
 		return filename;
@@ -355,6 +356,7 @@ ACS.model = function(filename) { // String
 				returnObj.events.fireEvent('modelChangedEvent');
 			};
 			fr.readAsText(loadFile);
+			returnObj.hasBeenChanged = false;
 		}
 	}
 	
@@ -484,7 +486,17 @@ ACS.model = function(filename) { // String
 		saveString += '</model>';
 		// actually save the string
 		var blob = new Blob([saveString], {type: 'text/plain;charset=utf-8'});
-		saveAs(blob, 'model.acs');
+		var saveName;
+		if (filename.substring(filename.length-4, filename.length) === '.acs') {
+			saveName = prompt('Save file as: ', filename);
+		} else {
+			saveName = prompt('Save file as: ', filename + '.acs');
+		}
+		if (saveName) {
+			saveAs(blob, saveName);
+			if (saveName !== returnObj.getFilename()) returnObj.setFilename(saveName);
+			returnObj.hasBeenChanged = false;
+		}
 	}
 	
 	returnObj.getModelXMLString = function() {
@@ -494,6 +506,7 @@ ACS.model = function(filename) { // String
 	returnObj.addComponent = function(comp) { // ACS.component
 		// TODO: this function might prove useless, in which case it can be removed
 		this.events.fireEvent('componentAddedEvent');
+		returnObj.hasBeenChanged = true;
 	}
 	
 	returnObj.addComponentByName = function(compName) {
@@ -578,33 +591,39 @@ ACS.model = function(filename) { // String
 																parseInt(compXml.getElementsByTagName('gui').item(0).getElementsByTagName('height').item(0).textContent),
 																isExternal);
 			}
+			returnObj.hasBeenChanged = true;
 			this.events.fireEvent('componentAddedEvent');
 		}
 	}
 	
 	returnObj.removeComponent = function(comp) { // ACS.component
-
+		// TODO
+		returnObj.hasBeenChanged = true;
 		this.events.fireEvent('componentRemovedEvent');
 		return removedComponent;
 	}
 	
 	returnObj.addDataChannel = function(ch) { // ACS.channel
 		returnObj.dataChannelList.push(ch);
+		returnObj.hasBeenChanged = true;
 		this.events.fireEvent('dataChannelAddedEvent');
 	}
 	
 	returnObj.removeDataChannel = function(ch) { // ACS.channel
 		returnObj.dataChannelList.splice(returnObj.dataChannelList.indexOf(ch), 1);
+		returnObj.hasBeenChanged = true;
 		this.events.fireEvent('dataChannelRemovedEvent');
 	}	
 
 	returnObj.addEventChannel = function(ch) { // ACS.channel
 		returnObj.eventChannelList.push(ch);
+		returnObj.hasBeenChanged = true;
 		this.events.fireEvent('eventChannelAddedEvent');
 	}
 	
 	returnObj.removeEventChannel = function(ch) { // ACS.channel
 		returnObj.eventChannelList.splice(returnObj.dataChannelList.indexOf(ch), 1);
+		returnObj.hasBeenChanged = true;
 		this.events.fireEvent('eventChannelRemovedEvent');
 	}		
 	

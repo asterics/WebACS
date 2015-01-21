@@ -48,6 +48,10 @@ ACS.modelView = function(	modelContainerId, // String
 		return model;
 	}
 	
+	returnObj.getModelContainerId = function() {
+		return modelContainerId;
+	}
+	
 	returnObj.addEventChannelView = function(ecv) {
 		eventChannelViewList[eventChannelViewList.length] = ecv;
 	}

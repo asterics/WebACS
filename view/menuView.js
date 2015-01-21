@@ -111,6 +111,15 @@ ACS.menuView = function(modelList) { // ACS.modelList
 	}
 	document.getElementById("openModelBtn").addEventListener('click', handleOpenModel);
 	
+	var handleCloseModel = function(e) {
+		var m = modelList.getActModel();
+		if ((m.hasBeenChanged) && (confirm('Save changes to ' + m.getFilename() + ' before closing?'))) {
+			m.saveModel();
+		}
+		modelList.removeModel();
+	}
+	document.getElementById("closeModelBtn").addEventListener('click', handleCloseModel);
+	
 	var handleSaveModel = function(e) {
 		modelList.getActModel().saveModel();
 	}
@@ -273,6 +282,14 @@ ACS.menuView = function(modelList) { // ACS.modelList
 		log.info('A different model has been set to active');
 		returnObj.setComponentMenu();
 	});
+	
+	// window closing handler
+	window.onbeforeunload = function() {
+		while ((modelList.getLength() > 1) || (modelList.getActModel().hasBeenChanged)) {
+			handleCloseModel();
+		}
+		//return ACS.vConst.MENUVIEW_BEFOREUNLOADMESSAGE;
+	}
 	
 	return returnObj;
 }
