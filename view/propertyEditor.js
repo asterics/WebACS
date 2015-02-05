@@ -24,7 +24,10 @@ ACS.propertyEditor = function(modelList) {
 	div.setAttribute('role', 'tabpanel');
 	document.getElementById(ACS.vConst.PROPERTYEDITOR_MOTHERPANEL).appendChild(div);
 	propertiesTabPanel.updatePanel();
-	li.click(); // activate the propertiesTab		
+	// activate the propertiesTab (a simple li.click() will not work in safari)
+	var click_ev = document.createEvent("MouseEvents");
+	click_ev.initEvent("click", true, true);
+	li.dispatchEvent(click_ev);	
 	
 	return returnObj;
 }

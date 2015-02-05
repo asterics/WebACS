@@ -5,7 +5,8 @@ ACS.component = function(id, // String; can be changed, but must be unique
 						 x, // int
 						 y, // int
 						 type, // ACS.componentType
-						 isSelected) { // bool
+						 isSelected, // bool
+						 foundInComponentCollection) { // bool (if false, the component will be a skeleton only and removed by the view)
 	// private variables
 
 	// private methods
@@ -20,6 +21,8 @@ ACS.component = function(id, // String; can be changed, but must be unique
 	returnObj.propertyList = [];
 	returnObj.gui = null;
 	returnObj.events = ACS.eventManager();
+	returnObj.matchesComponentCollection = true;
+	returnObj.foundInComponentCollection = foundInComponentCollection;
 	
 	returnObj.getId = function() {
 		return id;

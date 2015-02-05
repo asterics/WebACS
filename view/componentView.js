@@ -205,6 +205,18 @@ ACS.componentView = function(	component, // ACS.component
 				}
 			});
 		}
+		// define the error marker
+		var errorRect = new Kinetic.Rect({ 
+			x: component.getX() - ACS.vConst.COMPONENTVIEW_ERRORMARKERWIDTH,
+			y: component.getY() - ACS.vConst.COMPONENTVIEW_ERRORMARKERWIDTH,
+			width: ACS.vConst.COMPONENTVIEW_ELEMENTWIDTH + (2 * ACS.vConst.COMPONENTVIEW_ERRORMARKERWIDTH),
+			height: elementHeight + (2 * ACS.vConst.COMPONENTVIEW_ERRORMARKERWIDTH),
+			fill: ACS.vConst.COMPONENTVIEW_ERRORMARKERCOLOR,
+			stroke: ACS.vConst.COMPONENTVIEW_ERRORMARKERCOLOR,
+			strokeWidth: 1,
+			cornerRadius: 0,
+			listening: true
+		});
 		// group all parts and make component draggable
 		view = new Kinetic.Group({
 			draggable: true
@@ -223,6 +235,11 @@ ACS.componentView = function(	component, // ACS.component
 		}
 		if (eventInPortView) {view.add(eventInPortView)};
 		if (eventOutPortView) {view.add(eventOutPortView)};
+		// draw the error marker round the component, in case the component did not match the collection
+		if (!component.matchesComponentCollection) {
+			view.add(errorRect);
+			errorRect.setZIndex(-1000);
+		}
 		// set this component to highest z-value of all on the layer
 		view.on('mousedown', function() {
 			this.moveToTop();

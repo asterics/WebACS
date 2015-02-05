@@ -49,103 +49,156 @@ ACS.model = function(filename) { // String
 				if (components.item(i).getElementsByTagName('description')) description = components.item(i).getElementsByTagName('description').item(0).textContent;
 				// seek the component in the componentCollection, since not all information is saved in the model
 				var fullComponent = findComponentInCollection(compTypeId);
-				// TODO: if fullComponent was not found in collection, react adequately
-				
-				// find out the component's type:
-				var compType = 0;
-				switch (fullComponent.getElementsByTagName('type').item(0).textContent) {
-					case 'actuator': 	compType = ACS.componentType.ACTUATOR;
-										break;
-					case 'processor':	compType = ACS.componentType.PROCESSOR;
-										break;
-					case 'sensor':		compType = ACS.componentType.SENSOR;
-										break;					
-				}
-				
-				// build the component-object:
-				componentList[i] = ACS.component(	components.item(i).attributes.getNamedItem('id').textContent,
-													compTypeId,
-													description,
-													fullComponent.getElementsByTagName('singleton').item(0).textContent,
-													parseInt(components.item(i).getElementsByTagName('layout').item(0).getElementsByTagName('posX').item(0).textContent),
-													parseInt(components.item(i).getElementsByTagName('layout').item(0).getElementsByTagName('posY').item(0).textContent),
-													compType,
-													false);
-															
-				// build inputPortList:
-				var inputPortsFull = fullComponent.getElementsByTagName('inputPort');
-				var inputPortsModel = components.item(i).getElementsByTagName('inputPort');
-				for (var j = 0; j < inputPortsFull.length; j++) {
-					var portDataType = getDataType(inputPortsFull.item(j).getElementsByTagName('dataType').item(0).textContent);
-					// build the port object:
-					componentList[i].inputPortList[j] = ACS.port(	inputPortsModel.item(j).attributes.getNamedItem('portTypeID').textContent,
-																	componentList[i],
-																	ACS.portType.INPUT,
-																	portDataType,
-																	j,
-																	inputPortsFull.item(j).getElementsByTagName('mustBeConnected').item(0).textContent);
-					// TODO: add the port's properties
-					if (inputPortsModel.item(j).attributes.getNamedItem('sync')) componentList[i].inputPortList[j].sync = inputPortsModel.item(j).attributes.getNamedItem('sync').textContent;
-				}
-				
-				// build outputPortList:
-				var outputPortsFull = fullComponent.getElementsByTagName('outputPort');
-				var outputPortsModel = components.item(i).getElementsByTagName('outputPort');
-				for (var j = 0; j < outputPortsFull.length; j++) {
-					var portDataType = getDataType(outputPortsFull.item(j).getElementsByTagName('dataType').item(0).textContent);
-					// build the port object:
-					componentList[i].outputPortList[j] = ACS.port(	outputPortsModel.item(j).attributes.getNamedItem('portTypeID').textContent,
-																	componentList[i],
-																	ACS.portType.OUTPUT,
-																	portDataType,
-																	j,
-																	false);
-					// TODO: add the port's properties
-				}
-				
-				// build listenEventList:
-				var listenEvents = fullComponent.getElementsByTagName('eventListenerPort');
-				for (var j = 0; j < listenEvents.length; j++) {
-					componentList[i].listenEventList[j] = ACS.event(listenEvents.item(j).attributes.getNamedItem('id').textContent,
-																	listenEvents.item(j).getElementsByTagName('description').item(0).textContent,
-																	componentList[i]);
-				}
-				
-				// build triggerEventList:
-				var triggerEvents = fullComponent.getElementsByTagName('eventTriggererPort');
-				for (var j = 0; j < triggerEvents.length; j++) {
-					componentList[i].triggerEventList[j] = ACS.event(	triggerEvents.item(j).attributes.getNamedItem('id').textContent,
-																		triggerEvents.item(j).getElementsByTagName('description').item(0).textContent,
-																		componentList[i]);
-				}
-
-				// build propertyList:
-				var propertiesFull = fullComponent.getElementsByTagName('property');
-				var propertiesModel = components.item(i).getElementsByTagName('property');
-				for (j = 0; j < propertiesModel.length; j++) {
-					componentList[i].propertyList.push(ACS.property(propertiesModel.item(j).attributes.getNamedItem('name').textContent, 
-																	getDataType(propertiesFull.item(j).attributes.getNamedItem('type').textContent), 
-																	propertiesModel.item(j).attributes.getNamedItem('value').textContent));
-					if (propertiesFull.item(j).attributes.getNamedItem('description'))
-						componentList[i].propertyList[componentList[i].propertyList.length - 1].description = propertiesFull.item(j).attributes.getNamedItem('description').textContent;
-					if (propertiesFull.item(j).attributes.getNamedItem('combobox'))
-						componentList[i].propertyList[componentList[i].propertyList.length - 1].combobox = propertiesFull.item(j).attributes.getNamedItem('combobox').textContent;
-					if (propertiesFull.item(j).attributes.getNamedItem('getStringList'))
-						componentList[i].propertyList[componentList[i].propertyList.length - 1].getStringList = propertiesFull.item(j).attributes.getNamedItem('getStringList').textContent;
-				}
-				
-				// build the gui object:
-				if (components.item(i).getElementsByTagName('gui')) {
-					var isExternal = false;
-					if (fullComponent.getElementsByTagName('gui').item(0) && fullComponent.getElementsByTagName('gui').item(0).attributes.getNamedItem('IsExternalGUIElement')) {
-						isExternal = fullComponent.getElementsByTagName('gui').item(0).attributes.getNamedItem('IsExternalGUIElement').textContent;
+				if (fullComponent === null) { // i.e. component was not found in componentCollection
+					componentList[i] = ACS.component(	components.item(i).attributes.getNamedItem('id').textContent,
+														compTypeId,
+														'',
+														false,
+														0,
+														0,
+														0,
+														false,
+														false);
+				} else {
+					// find out the component's type:
+					var compType = 0;
+					switch (fullComponent.getElementsByTagName('type').item(0).textContent) {
+						case 'actuator': 	compType = ACS.componentType.ACTUATOR;
+											break;
+						case 'processor':	compType = ACS.componentType.PROCESSOR;
+											break;
+						case 'sensor':		compType = ACS.componentType.SENSOR;
+											break;					
 					}
-					if (components.item(i).getElementsByTagName('gui').item(0) ) {
-						componentList[i].gui = ACS.gui(	parseInt(components.item(i).getElementsByTagName('gui').item(0).getElementsByTagName('posX').item(0).textContent),
-														parseInt(components.item(i).getElementsByTagName('gui').item(0).getElementsByTagName('posY').item(0).textContent),
-														parseInt(components.item(i).getElementsByTagName('gui').item(0).getElementsByTagName('width').item(0).textContent),
-														parseInt(components.item(i).getElementsByTagName('gui').item(0).getElementsByTagName('height').item(0).textContent),
-														isExternal);
+					
+					// build the component-object:
+					componentList[i] = ACS.component(	components.item(i).attributes.getNamedItem('id').textContent,
+														compTypeId,
+														description,
+														fullComponent.getElementsByTagName('singleton').item(0).textContent,
+														parseInt(components.item(i).getElementsByTagName('layout').item(0).getElementsByTagName('posX').item(0).textContent),
+														parseInt(components.item(i).getElementsByTagName('layout').item(0).getElementsByTagName('posY').item(0).textContent),
+														compType,
+														false,
+														true);
+																
+					// build inputPortList:
+					var inputPortsFull = fullComponent.getElementsByTagName('inputPort');
+					var inputPortsModel = components.item(i).getElementsByTagName('inputPort');
+					var numInPorts = inputPortsFull.length;
+					if (numInPorts < inputPortsModel.length) numInPorts = inputPortsModel.length; // in case the amount of ports has been reduced by developer in component collection
+					for (var j = 0; j < numInPorts; j++) {
+						if (inputPortsFull[j]) {
+							var portDataType = getDataType(inputPortsFull.item(j).getElementsByTagName('dataType').item(0).textContent);
+							var portTypeId = '';
+							if (inputPortsModel.item(j)) {
+								portTypeId = inputPortsModel.item(j).attributes.getNamedItem('portTypeID').textContent;
+							} else {
+								// in case new ports have been added to component in collection
+								portTypeId = inputPortsFull.item(j).attributes.getNamedItem('id').textContent;
+								componentList[i].matchesComponentCollection = false;
+							}
+							// build the port object:
+							componentList[i].inputPortList[j] = ACS.port(	portTypeId,
+																			componentList[i],
+																			ACS.portType.INPUT,
+																			portDataType,
+																			j,
+																			inputPortsFull.item(j).getElementsByTagName('mustBeConnected').item(0).textContent);
+							// TODO: add the port's properties
+							if (inputPortsModel.item(j).attributes.getNamedItem('sync')) componentList[i].inputPortList[j].sync = inputPortsModel.item(j).attributes.getNamedItem('sync').textContent;
+						} else { // if the port was deleted by developer
+							componentList[i].matchesComponentCollection = false;
+						}
+					}
+					
+					// build outputPortList:
+					var outputPortsFull = fullComponent.getElementsByTagName('outputPort');
+					var outputPortsModel = components.item(i).getElementsByTagName('outputPort');
+					var numOutPorts = outputPortsFull.length;
+					if (numOutPorts < outputPortsModel.length) numOutPorts = outputPortsModel.length; // in case the amount of ports has been reduced by developer in component collection
+					for (var j = 0; j < numOutPorts; j++) {
+						if (outputPortsFull[j]) {
+							var portDataType = getDataType(outputPortsFull.item(j).getElementsByTagName('dataType').item(0).textContent);
+							var portTypeId = '';
+							if (outputPortsModel.item(j)) {
+								portTypeId = outputPortsModel.item(j).attributes.getNamedItem('portTypeID').textContent;
+							} else {
+								// in case new ports have been added to component in collection
+								portTypeId = outputPortsFull.item(j).attributes.getNamedItem('id').textContent;
+								componentList[i].matchesComponentCollection = false;
+							}
+							// build the port object:
+							componentList[i].outputPortList[j] = ACS.port(	portTypeId,
+																			componentList[i],
+																			ACS.portType.OUTPUT,
+																			portDataType,
+																			j,
+																			false);
+							// TODO: add the port's properties
+						} else { // if the port was deleted by developer
+							componentList[i].matchesComponentCollection = false;
+						}
+					}
+					
+					// build listenEventList:
+					var listenEvents = fullComponent.getElementsByTagName('eventListenerPort');
+					for (var j = 0; j < listenEvents.length; j++) {
+						componentList[i].listenEventList[j] = ACS.event(listenEvents.item(j).attributes.getNamedItem('id').textContent,
+																		listenEvents.item(j).getElementsByTagName('description').item(0).textContent,
+																		componentList[i]);
+					}
+					
+					// build triggerEventList:
+					var triggerEvents = fullComponent.getElementsByTagName('eventTriggererPort');
+					for (var j = 0; j < triggerEvents.length; j++) {
+						componentList[i].triggerEventList[j] = ACS.event(	triggerEvents.item(j).attributes.getNamedItem('id').textContent,
+																			triggerEvents.item(j).getElementsByTagName('description').item(0).textContent,
+																			componentList[i]);
+					}
+
+					// build propertyList:
+					var propertiesFull = fullComponent.getElementsByTagName('property');
+					var propertiesModel = components.item(i).getElementsByTagName('property');
+					var numProps = propertiesFull.length;
+					if (numProps < propertiesModel.length) numProps = propertiesModel.length; // in case the amount of properties has been reduced by developer in component collection
+					for (j = 0; j < numProps; j++) {
+						if (propertiesFull[j]) {
+							var propertyValue = '';
+							if (propertiesModel.item(j)) {
+								propertyValue = propertiesModel.item(j).attributes.getNamedItem('value').textContent;
+							} else {
+								// in case a new property has been added to component in collection
+								propertyValue = propertiesFull.item(j).attributes.getNamedItem('value').textContent;
+								componentList[i].matchesComponentCollection = false;
+							}
+							componentList[i].propertyList.push(ACS.property(propertiesFull.item(j).attributes.getNamedItem('name').textContent, 
+																			getDataType(propertiesFull.item(j).attributes.getNamedItem('type').textContent), 
+																			propertyValue));
+							if (propertiesFull.item(j).attributes.getNamedItem('description'))
+								componentList[i].propertyList[componentList[i].propertyList.length - 1].description = propertiesFull.item(j).attributes.getNamedItem('description').textContent;
+							if (propertiesFull.item(j).attributes.getNamedItem('combobox'))
+								componentList[i].propertyList[componentList[i].propertyList.length - 1].combobox = propertiesFull.item(j).attributes.getNamedItem('combobox').textContent;
+							if (propertiesFull.item(j).attributes.getNamedItem('getStringList'))
+								componentList[i].propertyList[componentList[i].propertyList.length - 1].getStringList = propertiesFull.item(j).attributes.getNamedItem('getStringList').textContent;
+						} else { // if the property was deleted by developer
+							componentList[i].matchesComponentCollection = false;
+						}
+					}
+					
+					// build the gui object:
+					if (components.item(i).getElementsByTagName('gui')) {
+						var isExternal = false;
+						if (fullComponent.getElementsByTagName('gui').item(0) && fullComponent.getElementsByTagName('gui').item(0).attributes.getNamedItem('IsExternalGUIElement')) {
+							isExternal = fullComponent.getElementsByTagName('gui').item(0).attributes.getNamedItem('IsExternalGUIElement').textContent;
+						}
+						if (components.item(i).getElementsByTagName('gui').item(0) ) {
+							componentList[i].gui = ACS.gui(	parseInt(components.item(i).getElementsByTagName('gui').item(0).getElementsByTagName('posX').item(0).textContent),
+															parseInt(components.item(i).getElementsByTagName('gui').item(0).getElementsByTagName('posY').item(0).textContent),
+															parseInt(components.item(i).getElementsByTagName('gui').item(0).getElementsByTagName('width').item(0).textContent),
+															parseInt(components.item(i).getElementsByTagName('gui').item(0).getElementsByTagName('height').item(0).textContent),
+															isExternal);
+						}
 					}
 				}
 			}
@@ -178,18 +231,40 @@ ACS.model = function(filename) { // String
 		if (channels_section) {
 			var channels = channels_section.getElementsByTagName('channel');
 			for (var i = 0; i < channels.length; i++) {
-				dataChannelList[i] = ACS.dataChannel(channels.item(i).attributes.getNamedItem('id').textContent);
-				if (channels.item(i).getElementsByTagName('description').item(0)) dataChannelList[i].description = channels.item(i).getElementsByTagName('description').item(0).textContent;
+				dataChannelList.push(ACS.dataChannel(channels.item(i).attributes.getNamedItem('id').textContent));
+				if (channels.item(i).getElementsByTagName('description').item(0)) dataChannelList[dataChannelList.length-1].description = channels.item(i).getElementsByTagName('description').item(0).textContent;
 				// get the source port:
 				var sourceCompId = channels.item(i).getElementsByTagName('source').item(0).getElementsByTagName('component').item(0).attributes.getNamedItem('id').textContent;
 				var sourcePortId = channels.item(i).getElementsByTagName('source').item(0).getElementsByTagName('port').item(0).attributes.getNamedItem('id').textContent;
 				var sourceComponent = findComponentById(componentList, sourceCompId);
-				dataChannelList[i].setOutputPort(findPortById(sourceComponent, sourcePortId, false));
-				// get the target port:
-				var targetCompId = channels.item(i).getElementsByTagName('target').item(0).getElementsByTagName('component').item(0).attributes.getNamedItem('id').textContent;
-				var targetPortId = channels.item(i).getElementsByTagName('target').item(0).getElementsByTagName('port').item(0).attributes.getNamedItem('id').textContent;
-				var targetComponent = findComponentById(componentList, targetCompId);
-				dataChannelList[i].setInputPort(findPortById(targetComponent, targetPortId, true));
+				if (sourceComponent && (sourceComponent.foundInComponentCollection)) {
+					var outPort = findPortById(sourceComponent, sourcePortId, false);
+					if (outPort) {
+						dataChannelList[dataChannelList.length-1].setOutputPort(outPort);
+						// get the target port:
+						var targetCompId = channels.item(i).getElementsByTagName('target').item(0).getElementsByTagName('component').item(0).attributes.getNamedItem('id').textContent;
+						var targetPortId = channels.item(i).getElementsByTagName('target').item(0).getElementsByTagName('port').item(0).attributes.getNamedItem('id').textContent;
+						var targetComponent = findComponentById(componentList, targetCompId);
+						if (targetComponent && (targetComponent.foundInComponentCollection)) {
+							var inPort = findPortById(targetComponent, targetPortId, true);
+							if (inPort) {
+								dataChannelList[dataChannelList.length-1].setInputPort(inPort);
+							} else {
+								// in case the matching inputPort was not found on the component, delete the channel again
+								dataChannelList.pop();
+							}
+						} else {
+							// in case the target component was not found in the component collection, delete the channel again
+							dataChannelList.pop();
+						}
+					} else {
+						// in case the matching outputPort was not found on the component, delete the channel again
+						dataChannelList.pop();
+					}
+				} else {
+					// in case the source component was not found in the component collection, delete the channel again
+					dataChannelList.pop();
+				}
 			}
 		}
 		return dataChannelList;
@@ -535,6 +610,7 @@ ACS.model = function(filename) { // String
 															pos[0],
 															pos[1],
 															compType,
+															true,
 															true);
 			// build inputPortList:
 			var inputPorts = compXml.getElementsByTagName('inputPort');
@@ -597,10 +673,21 @@ ACS.model = function(filename) { // String
 	}
 	
 	returnObj.removeComponent = function(comp) { // ACS.component
-		// TODO
+		if (returnObj.componentList.indexOf(comp) > -1) {
+			// first delete all channels that lead to or from this component
+			for (var i = 0; i < returnObj.dataChannelList.length; i++) {
+				if (returnObj.dataChannelList[i].getInputPort().getParentComponent() === comp) returnObj.removeDataChannel(returnObj.dataChannelList[i]);
+				if (returnObj.dataChannelList[i].getOutputPort().getParentComponent() === comp) returnObj.removeDataChannel(returnObj.dataChannelList[i]);
+			}
+			for (var i = 0; i < returnObj.eventChannelList.length; i++) {
+				if (returnObj.eventChannelList[i].listener.getParentComponent() === comp) returnObj.removeEventChannel(returnObj.eventChannelList[i]);
+				if (returnObj.eventChannelList[i].trigger.getParentComponent() === comp) returnObj.removeEventChannel(returnObj.eventChannelList[i]);
+			}
+			// then delete the component itself
+			returnObj.componentList.splice(returnObj.componentList.indexOf(comp), 1);
+		}
 		returnObj.hasBeenChanged = true;
 		this.events.fireEvent('componentRemovedEvent');
-		return removedComponent;
 	}
 	
 	returnObj.addDataChannel = function(ch) { // ACS.channel
@@ -610,7 +697,7 @@ ACS.model = function(filename) { // String
 	}
 	
 	returnObj.removeDataChannel = function(ch) { // ACS.channel
-		returnObj.dataChannelList.splice(returnObj.dataChannelList.indexOf(ch), 1);
+		if (returnObj.dataChannelList.indexOf(ch) > -1) returnObj.dataChannelList.splice(returnObj.dataChannelList.indexOf(ch), 1);
 		returnObj.hasBeenChanged = true;
 		this.events.fireEvent('dataChannelRemovedEvent');
 	}	
@@ -622,7 +709,7 @@ ACS.model = function(filename) { // String
 	}
 	
 	returnObj.removeEventChannel = function(ch) { // ACS.channel
-		returnObj.eventChannelList.splice(returnObj.dataChannelList.indexOf(ch), 1);
+		if (returnObj.eventChannelList.indexOf(ch) > -1) returnObj.eventChannelList.splice(returnObj.eventChannelList.indexOf(ch), 1);
 		returnObj.hasBeenChanged = true;
 		this.events.fireEvent('eventChannelRemovedEvent');
 	}		

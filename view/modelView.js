@@ -25,9 +25,38 @@ ACS.modelView = function(	modelContainerId, // String
 		for (i = 0; i < visualAreaMarkerViewList.length; i++) visualAreaMarkerViewList[i].destroy();
 		visualAreaMarkerViewList = [];
 		// instantiate new views:
+		var removedComponents = [];
+		var changedComponents = [];
 		for (i = 0; i < model.componentList.length; i++) {
-			componentViewList[i] = ACS.componentView(model.componentList[i], model, returnObj, modelLayer, guiLayer);
+			if (model.componentList[i].foundInComponentCollection) {
+				componentViewList.push(ACS.componentView(model.componentList[i], model, returnObj, modelLayer, guiLayer));
+				if (!model.componentList[i].matchesComponentCollection) {
+					changedComponents.push(model.componentList[i]);
+				}
+			} else {
+				removedComponents.push(model.componentList[i]);
+			}
 		}
+		// alert the user in case some components were not found in the component collection and therefore removed from the model
+		if (removedComponents.length > 0) {
+			var alertString = 'The definition of the following components was not found in the component\ncollection - they have therefore been removed from the model:\n\n';
+			for (j = 0; j < removedComponents.length; j++) {
+				model.removeComponent(removedComponents[j]);
+				var compTypeId = removedComponents[j].getComponentTypeId();
+				alertString = alertString + removedComponents[j].getId() + ' ('	+ compTypeId.substring(9, compTypeId.length) + ')\n';
+			}
+			alert(alertString);
+		}
+		// alert the user in case some components do not match the component collection, in which case ports and properties would be reset to default values
+		if (changedComponents.length > 0) {
+			var alertString = 'The definition of the following components did not match the component\ncollection - undefined properties or ports have been reset to default values:\n\n';
+			for (j = 0; j < changedComponents.length; j++) {
+				var compTypeId = changedComponents[j].getComponentTypeId();
+				alertString = alertString + changedComponents[j].getId() + ' ('	+ compTypeId.substring(9, compTypeId.length) + ')\n';
+			}
+			alert(alertString);
+		}
+		
 		for (i = 0; i < model.dataChannelList.length; i++) {
 			dataChannelViewList[i] = ACS.dataChannelView(model.dataChannelList[i], modelLayer);
 		}
@@ -108,7 +137,10 @@ ACS.modelView = function(	modelContainerId, // String
 	div.setAttribute('role', 'tabpanel');
 	document.getElementById(modelContainerId).appendChild(div);
 	modelTabPanel.updatePanel();
-	li1.click(); // activate the modelTab			
+	// activate the modelTab (a simple li1.click() will not work in safari)
+	var click_ev = document.createEvent("MouseEvents");
+	click_ev.initEvent("click", true, true);
+	li1.dispatchEvent(click_ev);
 	// initiate Stages and Layers and add Layers:
 	modelStage = new Kinetic.Stage({
 		container: 'modelPanel' + modelContainerId,
@@ -154,16 +186,19 @@ ACS.modelView = function(	modelContainerId, // String
 	});
 
 	model.events.registerHandler('componentRemovedEvent', function() {
-		var found = false;
 		var i = 0;
-		while (!found && (i < componentViewList.length)) {
-			if (componentViewList[i].getComponent() === model.componentList[i]) {
+		for (var i = 0; i < componentViewList.length; i++) {
+			var found = false;
+			for (var j = 0; j < model.componentList.length; j++) {
+				if (componentViewList[i].getComponent() === model.componentList[j]) {
+					found = true;
+				}
+			}
+			if (!found) {
 				componentViewList[i].destroy();
 				componentViewList.splice(i, 1);
 				modelLayer.draw();
-				found = true;
 			}
-			i++;
 		}
 	});
 

@@ -85,6 +85,8 @@ ACS.menuView = function(modelList) { // ACS.modelList
 
 	var fileSelector = document.createElement('input'); // create "hidden" input element for choosing file
 	fileSelector.setAttribute('type', 'file');
+	fileSelector.setAttribute('class', 'hidden'); // must be added to DOM in order for the click event to work in IE
+	document.getElementById('mainMenuPanel').appendChild(fileSelector);
 	var handleSelectedFile = function(e) {
 		if (fileSelector.files[0]) {
 			var loadFile = fileSelector.files[0];
@@ -109,7 +111,7 @@ ACS.menuView = function(modelList) { // ACS.modelList
 			log.warn('file APIs not supported by browser');
 		}
 	}
-	document.getElementById("openModelBtn").addEventListener('click', handleOpenModel);
+	document.getElementById('openModelBtn').addEventListener('click', handleOpenModel);
 	
 	var handleCloseModel = function(e) {
 		var m = modelList.getActModel();

@@ -29,7 +29,10 @@ ACS.canvasView = function(modelList) { // ACS.modelList
 		modelViewList[panelId] = ACS.modelView('canvasPanel' + panelId, actModel);
 		panelId++;
 		canvasTabPanel.updatePanel();
-		li.click(); // activate the tab
+		// activate the tab (a simple li.click() will not work in safari)
+		var click_ev = document.createEvent("MouseEvents");
+		click_ev.initEvent("click", true, true);
+		li.dispatchEvent(click_ev);
 		// register the handler for changing the filename in the tablist
 		actModel.events.registerHandler('filenameBeingChangedEvent', function() {
 			li.textContent = actModel.getFilename();
