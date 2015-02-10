@@ -52,7 +52,7 @@ ACS.vConst = {
 	EVENTCHANNELVIEW_STROKECOLOR: 'rgb(229, 117, 117)',
 	// menuView
 	MENUVIEW_MENUMOTHERPANEL: 'mainMenuPanel',
-	MENUVIEW_BEFOREUNLOADMESSAGE: 'CAUTION: you will loose all unsaved changes, if you continue!',
+	MENUVIEW_BEFOREUNLOADMESSAGE: 'At least one model has not been saved. If you leave now, you will loose all unsaved changes!',
 	// modelView
 	MODELVIEW_MODELDESIGNERHEADER: 'Model Designer',
 	MODELVIEW_GUIDESIGNERHEADER: 'GUI Designer',

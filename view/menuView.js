@@ -120,12 +120,12 @@ ACS.menuView = function(modelList) { // ACS.modelList
 		}
 		modelList.removeModel();
 	}
-	document.getElementById("closeModelBtn").addEventListener('click', handleCloseModel);
+	document.getElementById('closeModelBtn').addEventListener('click', handleCloseModel);
 	
 	var handleSaveModel = function(e) {
 		modelList.getActModel().saveModel();
 	}
-	document.getElementById("saveModelBtn").addEventListener('click', handleSaveModel);
+	document.getElementById('saveModelBtn').addEventListener('click', handleSaveModel);
 	
 	// Menu-Button-Handlers - Components-Menu
 	var stopLevel1Timer = function() {
@@ -151,7 +151,7 @@ ACS.menuView = function(modelList) { // ACS.modelList
 		activeLevel2Timer = window.setTimeout(function(){	document.getElementById(id).setAttribute('class', 'compMenuL2 compMenu hiddenMenu');
 															cameFromElement = null;
 														}, 100);
-    }	
+    }
 	
 	var handleCompMenu = function(elementId, menuId, e) {
 		if ((e.type === 'mouseenter') || (e.type === 'focus')) {
@@ -287,10 +287,14 @@ ACS.menuView = function(modelList) { // ACS.modelList
 	
 	// window closing handler
 	window.onbeforeunload = function() {
-		while ((modelList.getLength() > 1) || (modelList.getActModel().hasBeenChanged)) {
+		// the desireable behaviour would be the following - sadly currently it only works in IE...
+		/*while ((modelList.getLength() > 0) && (modelList.getActModel().hasBeenChanged)) {
 			handleCloseModel();
+		}*/
+		// ... so we're using the second best option:
+		for (var i = 0; i < modelList.getLength(); i++) {
+			if (modelList.getModelAtIndex(i).hasBeenChanged) return ACS.vConst.MENUVIEW_BEFOREUNLOADMESSAGE;
 		}
-		//return ACS.vConst.MENUVIEW_BEFOREUNLOADMESSAGE;
 	}
 	
 	return returnObj;
