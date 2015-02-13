@@ -74,7 +74,11 @@ ACS.component = function(id, // String; can be changed, but must be unique
 	
 	returnObj.setIsSelected = function(newIsSelected) {
 		isSelected = newIsSelected;
-		//returnObj.events.fireEvent('componentChangedEvent');
+		if (isSelected) {
+			returnObj.events.fireEvent('selectedEvent');
+		} else {
+			returnObj.events.fireEvent('deSelectedEvent');
+		}
 	}			
 
 	// constructor code

@@ -58,10 +58,10 @@ ACS.modelView = function(	modelContainerId, // String
 		}
 		
 		for (i = 0; i < model.dataChannelList.length; i++) {
-			dataChannelViewList[i] = ACS.dataChannelView(model.dataChannelList[i], modelLayer);
+			dataChannelViewList[i] = ACS.dataChannelView(model.dataChannelList[i], model, modelLayer);
 		}
 		for (i = 0; i < model.eventChannelList.length; i++) {
-			eventChannelViewList[i] = ACS.eventChannelView(model.eventChannelList[i], null, modelLayer);
+			eventChannelViewList[i] = ACS.eventChannelView(model.eventChannelList[i], null, model, modelLayer);
 		}
 		for (i = 0; i < model.visualAreaMarkerList.length; i++) {
 			visualAreaMarkerViewList[i] = ACS.visualAreaMarkerView(model.visualAreaMarkerList[i], modelLayer);
@@ -203,7 +203,7 @@ ACS.modelView = function(	modelContainerId, // String
 	});
 
 	model.events.registerHandler('dataChannelAddedEvent', function() {
-		dataChannelViewList.push(ACS.dataChannelView(model.dataChannelList[model.dataChannelList.length -1], modelLayer, guiLayer));
+		dataChannelViewList.push(ACS.dataChannelView(model.dataChannelList[model.dataChannelList.length -1], model, modelLayer));
 		modelLayer.draw();
 	});
 
@@ -222,7 +222,7 @@ ACS.modelView = function(	modelContainerId, // String
 	});
 
 	model.events.registerHandler('eventChannelAddedEvent', function() {
-		eventChannelViewList.push(ACS.eventChannelView(model.eventChannelList[model.eventChannelList.length -1], modelLayer, guiLayer));
+		eventChannelViewList.push(ACS.eventChannelView(model.eventChannelList[model.eventChannelList.length -1], model, modelLayer));
 		modelLayer.draw();
 	});
 
@@ -254,6 +254,7 @@ ACS.modelView = function(	modelContainerId, // String
 	});
 	
 	modelLayer.on('click', function() {
+		model.deSelectAll();
 		if ((model.dataChannelList.length > 0) && (!model.dataChannelList[model.dataChannelList.length - 1].getInputPort())) {
 			model.removeDataChannel(model.dataChannelList[model.dataChannelList.length - 1]);
 		} else if ((eventChannelViewList.length > 0) && (!eventChannelViewList[eventChannelViewList.length - 1].getEndComponent())) {

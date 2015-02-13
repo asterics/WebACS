@@ -10,6 +10,7 @@ ACS.componentView = function(	component, // ACS.component
 	var outputPortViewList = [];
 	var eventOutPortView = null;
 	var eventInPortView = null;
+	var selectedRect = null;
 
 	// private methods
 	var channelExists = function(inPort) {
@@ -201,10 +202,22 @@ ACS.componentView = function(	component, // ACS.component
 				var ecvl = modelView.getEventChannelViewList();
 				if (!((ecvl.length > 0) && (!ecvl[ecvl.length - 1].getEndComponent()))) {
 					evt.cancelBubble = true;
-					modelView.addEventChannelView(ACS.eventChannelView(null, component, modelLayer));
+					modelView.addEventChannelView(ACS.eventChannelView(null, component, model, modelLayer));
 				}
 			});
 		}
+		// define the selection frame
+		selectedRect = new Kinetic.Rect({ 
+			x: component.getX() - ACS.vConst.COMPONENTVIEW_SELECTIONFRAMEWIDTH,
+			y: component.getY() - ACS.vConst.COMPONENTVIEW_SELECTIONFRAMEWIDTH,
+			width: ACS.vConst.COMPONENTVIEW_ELEMENTWIDTH + (2 * ACS.vConst.COMPONENTVIEW_SELECTIONFRAMEWIDTH),
+			height: elementHeight + (2 * ACS.vConst.COMPONENTVIEW_SELECTIONFRAMEWIDTH),
+			fill: ACS.vConst.COMPONENTVIEW_SELECTIONFRAMECOLOR,
+			stroke: ACS.vConst.COMPONENTVIEW_SELECTIONFRAMESTROKECOLOR,
+			strokeWidth: 1,
+			cornerRadius: 0,
+			listening: true
+		});		
 		// define the error marker
 		var errorRect = new Kinetic.Rect({ 
 			x: component.getX() - ACS.vConst.COMPONENTVIEW_ERRORMARKERWIDTH,
@@ -241,9 +254,19 @@ ACS.componentView = function(	component, // ACS.component
 			errorRect.setZIndex(-1000);
 		}
 		// set this component to highest z-value of all on the layer
-		view.on('mousedown', function() {
+		view.on('mousedown', function(e) {
 			this.moveToTop();
-		});	
+		});
+		// do the selecting
+		view.on('click', function(e) {
+			if (e.evt.ctrlKey) {
+				component.setIsSelected(!component.getIsSelected());
+			} else {
+				model.deSelectAll();
+				component.setIsSelected(true);
+			}
+			e.cancelBubble = true;
+		});
 		view.on('dragmove', function() {
 			component.setNewPosition(mainRect.getAbsolutePosition().x, mainRect.getAbsolutePosition().y);
 		});
@@ -279,7 +302,17 @@ ACS.componentView = function(	component, // ACS.component
 	}
 	
 	// constructor code
-	buildView();	
+	buildView();
+	// register event handlers
+	component.events.registerHandler('selectedEvent', function() {
+		view.add(selectedRect);
+		selectedRect.setZIndex(-100);
+		modelLayer.draw();
+	});
+	component.events.registerHandler('deSelectedEvent', function() {
+		selectedRect.remove();
+		modelLayer.draw();
+	});	
 	
 	return returnObj;
 }

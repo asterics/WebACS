@@ -1,4 +1,5 @@
-ACS.channelView = function(modelLayer) { // Kinetic.Layer
+ACS.channelView = function(model, // ACS.model
+						   modelLayer) { // Kinetic.Layer
 	// private variables
 	var visible = true;
 	
@@ -10,8 +11,10 @@ ACS.channelView = function(modelLayer) { // Kinetic.Layer
 	returnObj.line = new Kinetic.Line({
 		points: [0, 0, 0, 0],
 		stroke: ACS.vConst.CHANNELVIEW_STROKECOLOR,
-		strokeWidth: 2,
-		// set custom hitRegion to be smaller than actual channel to avoid KinteicJs antiAliasing-bug
+		strokeWidth: ACS.vConst.CHANNELVIEW_STROKEWIDTH,
+		dash: [5, 5],
+		dashEnabled: false,
+		// set custom hitRegion to be shorter than actual channel to avoid KinteicJs antiAliasing-bug
 		hitFunc: function(context) {
 			context.beginPath();
 			context.moveTo(returnObj.line.points()[0], returnObj.line.points()[1]);
@@ -25,8 +28,9 @@ ACS.channelView = function(modelLayer) { // Kinetic.Layer
 			else
 				channelEnd[1] = returnObj.line.points()[3]+2;			
 			context.lineTo(channelEnd[0], channelEnd[1]);
-			context.closePath();
+			this.setStrokeWidth(ACS.vConst.CHANNELVIEW_HITREGIONWIDTH);
 			context.fillStrokeShape(this);
+			this.setStrokeWidth(ACS.vConst.CHANNELVIEW_STROKEWIDTH);
 		}
 	});
 	

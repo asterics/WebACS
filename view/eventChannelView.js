@@ -1,5 +1,6 @@
 ACS.eventChannelView = function(ec, // ACS.eventChannel
 								startComponent, // ACS.component
+								model, // ACS.model
 								modelLayer) { // Kinetic.Layer
 	// private variables
 	var endComponent = null;
@@ -37,7 +38,7 @@ ACS.eventChannelView = function(ec, // ACS.eventChannel
 	}
 	
 	// public stuff
-	var returnObj = ACS.channelView(modelLayer);
+	var returnObj = ACS.channelView(model, modelLayer);
 
 	returnObj.setStartComponent = function(c) {
 		startComponent = c;
@@ -93,6 +94,27 @@ ACS.eventChannelView = function(ec, // ACS.eventChannel
 								startComponent.getY() + getComponentHeight(startComponent) + ACS.vConst.EVENTCHANNELVIEW_TRIGGERBELOWCOMPONENT]);
 		setHandlerForTrigger();	
 	}
-	
+	// do the selecting
+	returnObj.line.on('click', function(e) {
+		if (e.evt.ctrlKey) {
+			ec.setIsSelected(!ec.getIsSelected());
+		} else {
+			model.deSelectAll();
+			ec.setIsSelected(true);
+		}
+		e.cancelBubble = true;
+	});
+	// register event handlers for selecting
+	ec.events.registerHandler('selectedEvent', function() {
+		returnObj.line.stroke(ACS.vConst.EVENTCHANNELVIEW_SELECTEDSTROKECOLOR);
+		returnObj.line.dashEnabled(true);
+		modelLayer.draw();
+	});
+	ec.events.registerHandler('deSelectedEvent', function() {
+		returnObj.line.stroke(ACS.vConst.EVENTCHANNELVIEW_STROKECOLOR);
+		returnObj.line.dashEnabled(false);
+		modelLayer.draw();
+	});	
+
 	return returnObj;
 }

@@ -726,6 +726,18 @@ ACS.model = function(filename) { // String
 		return componentCollection; // (XML document)
 	}
 	
+	returnObj.deSelectAll = function() {
+		for (var i = 0; i < returnObj.componentList.length; i++) {
+			if (returnObj.componentList[i].getIsSelected()) returnObj.componentList[i].setIsSelected(false);
+		}
+		for (var i = 0; i < returnObj.dataChannelList.length; i++) {
+			if (returnObj.dataChannelList[i].getIsSelected()) returnObj.dataChannelList[i].setIsSelected(false);
+		}
+		for (var i = 0; i < returnObj.eventChannelList.length; i++) {
+			if (returnObj.eventChannelList[i].getIsSelected()) returnObj.eventChannelList[i].setIsSelected(false);
+		}
+	}	
+	
 	// constructor code
 	componentCollection = loadDefaultComponentCollection();
 	log.debug('the component-id of the first component in the collection is "'+componentCollection.getElementsByTagName('componentType').item(0).attributes.getNamedItem('id').nodeValue+'"');

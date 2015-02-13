@@ -1,4 +1,5 @@
 ACS.dataChannelView = function(	dc, // ACS.dataChannel
+								model, // ACS.model
 								modelLayer) { // Kinetic.Layer
 	// private variables
 	var outputPort = dc.getOutputPort();
@@ -15,7 +16,7 @@ ACS.dataChannelView = function(	dc, // ACS.dataChannel
 	}
 	
 	// public stuff
-	var returnObj = ACS.channelView(modelLayer);
+	var returnObj = ACS.channelView(model, modelLayer);
 	
 	returnObj.getChannel = function() {
 		return dc;
@@ -53,6 +54,28 @@ ACS.dataChannelView = function(	dc, // ACS.dataChannel
 		setHandlerForInputPort();
 		modelLayer.draw();
 	});
-		
+	
+	// do the selecting
+	returnObj.line.on('click', function(e) {
+		if (e.evt.ctrlKey) {
+			dc.setIsSelected(!dc.getIsSelected());
+		} else {
+			model.deSelectAll();
+			dc.setIsSelected(true);
+		}
+		e.cancelBubble = true;
+	});
+	// register event handlers for selecting
+	dc.events.registerHandler('selectedEvent', function() {
+		returnObj.line.stroke(ACS.vConst.DATACHANNELVIEW_SELECTEDSTROKECOLOR);
+		returnObj.line.dashEnabled(true);
+		modelLayer.draw();
+	});
+	dc.events.registerHandler('deSelectedEvent', function() {
+		returnObj.line.stroke(ACS.vConst.DATACHANNELVIEW_STROKECOLOR);
+		returnObj.line.dashEnabled(false);
+		modelLayer.draw();
+	});		
+	
 	return returnObj;
 }

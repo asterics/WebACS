@@ -20,6 +20,11 @@ ACS.channel = function(id) { // String
 	
 	returnObj.setIsSelected = function(newIsSelected) {
 		isSelected = newIsSelected;
+		if (isSelected) {
+			returnObj.events.fireEvent('selectedEvent');
+		} else {
+			returnObj.events.fireEvent('deSelectedEvent');
+		}		
 	}	
 
 	// constructor code

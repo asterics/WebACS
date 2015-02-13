@@ -13,11 +13,10 @@ ACS.view = function(modelList) { // ACS.modelList
 	menu.setComponentMenu();
 	// catch keyboard shortcuts
 	document.addEventListener('keydown', function(e) {
-		var event = e || window.event; // need window.event in IE
-		switch (event.keyCode) {
+		switch (e.keyCode) {
 			case 49: // Ctrl-1 for menu
-				if (event.ctrlKey) {
-					event.cancelBubble = true;
+				if (e.ctrlKey) {
+					e.cancelBubble = true;
 					var tablist = document.getElementById('mainMenuTablist').getElementsByClassName('tab');
 					for (var i = 0; i < tablist.length; i++) {
 						if (tablist.item(i).attributes.getNamedItem('aria-selected').value === 'true') {
@@ -27,8 +26,8 @@ ACS.view = function(modelList) { // ACS.modelList
 				}
 				break;
 			case 50: // Ctrl-2 for model panel
-				if (event.ctrlKey) {
-					event.cancelBubble = true;
+				if (e.ctrlKey) {
+					e.cancelBubble = true;
 					var tablist = document.getElementById(ACS.vConst.CANVASVIEW_TABLIST).getElementsByClassName('tab');
 					for (var i = 0; i < tablist.length; i++) {
 						if (tablist.item(i).attributes.getNamedItem('aria-selected').value === 'true') {
@@ -38,8 +37,8 @@ ACS.view = function(modelList) { // ACS.modelList
 				}
 				break;
 			case 51: // Ctrl-3 for model designer
-				if (event.ctrlKey) {
-					event.cancelBubble = true;
+				if (e.ctrlKey) {
+					e.cancelBubble = true;
 					var tablist = document.getElementById(ACS.vConst.CANVASVIEW_TABLIST).getElementsByClassName('tab');
 					for (var i = 0; i < tablist.length; i++) {
 						if (tablist.item(i).attributes.getNamedItem('aria-selected').value === 'true') {
@@ -52,8 +51,8 @@ ACS.view = function(modelList) { // ACS.modelList
 				}
 				break;				
 			case 52: // Ctrl-4 for gui designer
-				if (event.ctrlKey) {
-					event.cancelBubble = true;
+				if (e.ctrlKey) {
+					e.cancelBubble = true;
 					var tablist = document.getElementById(ACS.vConst.CANVASVIEW_TABLIST).getElementsByClassName('tab');
 					for (var i = 0; i < tablist.length; i++) {
 						if (tablist.item(i).attributes.getNamedItem('aria-selected').value === 'true') {
@@ -66,8 +65,8 @@ ACS.view = function(modelList) { // ACS.modelList
 				}
 				break;
 			case 53: // Ctrl-5 for property editor
-				if (event.ctrlKey) {
-					event.cancelBubble = true;
+				if (e.ctrlKey) {
+					e.cancelBubble = true;
 					var tablist = document.getElementById('propertyEditorTablist').getElementsByClassName('tab');
 					for (var i = 0; i < tablist.length; i++) {
 						if (tablist.item(i).attributes.getNamedItem('aria-selected').value === 'true') {
