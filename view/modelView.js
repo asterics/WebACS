@@ -61,13 +61,34 @@ ACS.modelView = function(	modelContainerId, // String
 			dataChannelViewList[i] = ACS.dataChannelView(model.dataChannelList[i], model, modelLayer);
 		}
 		for (i = 0; i < model.eventChannelList.length; i++) {
-			eventChannelViewList[i] = ACS.eventChannelView(model.eventChannelList[i], null, model, modelLayer);
+			var ecv = getEventChannelView(model.eventChannelList[i].trigger.getParentComponent(), model.eventChannelList[i].listener.getParentComponent());
+			if (ecv) {
+				ecv.ecList.push(model.eventChannelList[i]);
+			} else {
+				eventChannelViewList.push(ACS.eventChannelView(model.eventChannelList[i], null, model, modelLayer));
+			}
 		}
 		for (i = 0; i < model.visualAreaMarkerList.length; i++) {
 			visualAreaMarkerViewList[i] = ACS.visualAreaMarkerView(model.visualAreaMarkerList[i], modelLayer);
 		}
 		// actually do the drawing:
 		modelLayer.draw();
+	}
+	
+	var eventChannelExists = function(ec) {
+		for (var i = 0; i < model.eventChannelList.length; i++) {
+			if (model.eventChannelList[i] === ec) return true;
+		}
+		return false;
+	}
+	
+	var getEventChannelView = function(startC, endC) {
+		for (var i = 0; i < eventChannelViewList.length; i++) {
+			if ((eventChannelViewList[i].getStartComponent() === startC) && (eventChannelViewList[i].getEndComponent() === endC)) {
+				return eventChannelViewList[i];
+			}
+		}
+		return null;
 	}
 	
 	// public stuff
@@ -82,13 +103,18 @@ ACS.modelView = function(	modelContainerId, // String
 	}
 	
 	returnObj.addEventChannelView = function(ecv) {
-		eventChannelViewList[eventChannelViewList.length] = ecv;
+		eventChannelViewList.push(ecv);
 	}
 	
 	returnObj.removeEventChannelView = function(ecv) {
 		for (var i = 0; i < eventChannelViewList.length; i++) {
 			if (eventChannelViewList[i] === ecv) {
+				for (var j = 0; j < eventChannelViewList[i].ecList.length; j++) {
+					model.removeEventChannel(eventChannelViewList[i].ecList[j]);
+				}
+				eventChannelViewList[i].destroy();
 				eventChannelViewList.splice(i, 1);
+				modelLayer.draw();
 				return true;
 			}
 		}
@@ -222,19 +248,26 @@ ACS.modelView = function(	modelContainerId, // String
 	});
 
 	model.events.registerHandler('eventChannelAddedEvent', function() {
-		eventChannelViewList.push(ACS.eventChannelView(model.eventChannelList[model.eventChannelList.length -1], model, modelLayer));
-		modelLayer.draw();
+		var ecv = getEventChannelView(model.eventChannelList[model.eventChannelList.length -1].listener.getParentComponent(), model.eventChannelList[model.eventChannelList.length -1].trigger.getParentComponent());
+		if (ecv) {
+			ecv.ecList.push(model.eventChannelList[model.eventChannelList.length -1]);
+		} else {
+			eventChannelViewList.push(ACS.eventChannelView(model.eventChannelList[model.eventChannelList.length -1], null, model, modelLayer));
+			modelLayer.draw();
+		}	
 	});
 
 	model.events.registerHandler('eventChannelRemovedEvent', function() {
 		var found = false;
 		var i = 0;
 		while (!found && (i < eventChannelViewList.length)) {
-			if (eventChannelViewList[i].getChannel() !== model.eventChannelList[i]) {
-				eventChannelViewList[i].destroy();
-				eventChannelViewList.splice(i, 1);
-				modelLayer.draw();
-				found = true;
+			var j = 0;
+			while (!found && (eventChannelViewList[i].ecList.length)) {
+				if (!eventChannelExists(eventChannelViewList[i].ecList[j])) {
+					eventChannelViewList[i].ecList.splice(j, 1);
+					found = true;
+				}
+				j++;
 			}
 			i++;
 		}

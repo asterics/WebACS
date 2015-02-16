@@ -36,9 +36,11 @@ ACS.eventChannelView = function(ec, // ACS.eventChannel
 		}
 		return elementHeight;
 	}
-	
+
 	// public stuff
 	var returnObj = ACS.channelView(model, modelLayer);
+	
+	returnObj.ecList = [];
 
 	returnObj.setStartComponent = function(c) {
 		startComponent = c;
@@ -66,8 +68,11 @@ ACS.eventChannelView = function(ec, // ACS.eventChannel
 		return endComponent;
 	}
 	
-	returnObj.setEventChannel = function(c) {
-		ec = c;
+	// constructor code
+	returnObj.line.stroke(ACS.vConst.EVENTCHANNELVIEW_STROKECOLOR);
+	if (ec && (ec !== {})) {
+		// set start- and endComponent according to the eventChannel passed in the constructor
+		returnObj.ecList.push(ec);
 		startComponent = ec.trigger.getParentComponent();
 		endComponent = ec.listener.getParentComponent();
 		returnObj.line.points([	startComponent.getX() + ACS.vConst.EVENTCHANNELVIEW_TRIGGERPOSX,
@@ -75,19 +80,9 @@ ACS.eventChannelView = function(ec, // ACS.eventChannel
 								endComponent.getX() + ACS.vConst.EVENTCHANNELVIEW_LISTENERPOSX,
 								endComponent.getY() + getComponentHeight(endComponent) + ACS.vConst.EVENTCHANNELVIEW_LISTENERBELOWCOMPONENT]);
 		setHandlerForTrigger();
-		setHandlerForListener();		
-	}
-	
-	returnObj.getChannel = function() {
-		return ec;
-	}
-	
-	// constructor code
-	returnObj.line.stroke(ACS.vConst.EVENTCHANNELVIEW_STROKECOLOR);
-	if (ec && (ec !== {})) {
-		returnObj.setEventChannel(ec);
+		setHandlerForListener();	
 	} else if (startComponent) {
-		// draw a line with length == 0 - target coordinates will be set on mouse move
+		// if there is no complete channel yet (i.e. it is being drawn), draw a line with length == 0 - target coordinates will be set on mouse move
 		returnObj.line.points([	startComponent.getX() + ACS.vConst.EVENTCHANNELVIEW_TRIGGERPOSX,
 								startComponent.getY() + getComponentHeight(startComponent) + ACS.vConst.EVENTCHANNELVIEW_TRIGGERBELOWCOMPONENT,
 								startComponent.getX() + ACS.vConst.EVENTCHANNELVIEW_TRIGGERPOSX,
@@ -97,24 +92,39 @@ ACS.eventChannelView = function(ec, // ACS.eventChannel
 	// do the selecting
 	returnObj.line.on('click', function(e) {
 		if (e.evt.ctrlKey) {
-			ec.setIsSelected(!ec.getIsSelected());
+			// invert selection status
+			var newStatus = !returnObj.ecList[0].getIsSelected();
+			for (var i = 0; i < returnObj.ecList.length; i++) {
+				returnObj.ecList[i].setIsSelected(newStatus);
+			}
 		} else {
+			// select only this channel
 			model.deSelectAll();
-			ec.setIsSelected(true);
+			for (var i = 0; i < returnObj.ecList.length; i++) {
+				returnObj.ecList[i].setIsSelected(true);
+			}			
 		}
 		e.cancelBubble = true;
 	});
 	// register event handlers for selecting
-	ec.events.registerHandler('selectedEvent', function() {
-		returnObj.line.stroke(ACS.vConst.EVENTCHANNELVIEW_SELECTEDSTROKECOLOR);
-		returnObj.line.dashEnabled(true);
-		modelLayer.draw();
-	});
-	ec.events.registerHandler('deSelectedEvent', function() {
-		returnObj.line.stroke(ACS.vConst.EVENTCHANNELVIEW_STROKECOLOR);
-		returnObj.line.dashEnabled(false);
-		modelLayer.draw();
-	});	
+	for (var i = 0; i < returnObj.ecList.length; i++) {
+		returnObj.ecList[i].events.registerHandler('selectedEvent', function() {
+			// make sure selection is only done once, if several channels are connected
+			if (!returnObj.line.dashEnabled()) {
+				returnObj.line.stroke(ACS.vConst.EVENTCHANNELVIEW_SELECTEDSTROKECOLOR);
+				returnObj.line.dashEnabled(true);
+				modelLayer.draw();
+			}
+		});
+		returnObj.ecList[i].events.registerHandler('deSelectedEvent', function() {
+			// make sure deSelection is only done once, if several channels are connected
+			if (returnObj.line.dashEnabled()) {
+				returnObj.line.stroke(ACS.vConst.EVENTCHANNELVIEW_STROKECOLOR);
+				returnObj.line.dashEnabled(false);
+				modelLayer.draw();
+			}
+		});
+	}
 
 	return returnObj;
 }
