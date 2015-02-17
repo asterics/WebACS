@@ -452,7 +452,7 @@ ACS.model = function(filename) { // String
 				saveString += '\t\t\t<ports>\r';
 				// save the inputPorts
 				for (var j = 0; j < returnObj.componentList[i].inputPortList.length; j++) {
-					saveString += '\t\t\t\t<inputPort portTypeId="' + returnObj.componentList[i].inputPortList[j].getId() + '" sync="' + returnObj.componentList[i].inputPortList[j].sync + '">\r';
+					saveString += '\t\t\t\t<inputPort portTypeID="' + returnObj.componentList[i].inputPortList[j].getId() + '" sync="' + returnObj.componentList[i].inputPortList[j].sync + '">\r';
 					if (returnObj.componentList[i].inputPortList[j].propertyList.length > 0) {
 						saveString += '\t\t\t\t\t<properties>\r';
 						for (var k = 0; k < returnObj.componentList[i].inputPortList[j].propertyList.length; k++) {
@@ -464,7 +464,7 @@ ACS.model = function(filename) { // String
 				}
 				// save the outputPorts
 				for (var j = 0; j < returnObj.componentList[i].outputPortList.length; j++) {
-					saveString += '\t\t\t\t<outputPort portTypeId="' + returnObj.componentList[i].outputPortList[j].getId() + '">\r';
+					saveString += '\t\t\t\t<outputPort portTypeID="' + returnObj.componentList[i].outputPortList[j].getId() + '">\r';
 					if (returnObj.componentList[i].outputPortList[j].propertyList.length > 0) {
 						saveString += '\t\t\t\t\t<properties>\r';
 						for (var k = 0; k < returnObj.componentList[i].outputPortList[j].propertyList.length; k++) {
@@ -653,8 +653,18 @@ ACS.model = function(filename) { // String
 																				returnObj.componentList[newIdx]);
 			}
 			// build propertyList:
-			// TODO: redefine property class in architecture following specification of propertyType in bundle_model.xsd
-					
+			var properties = compXml.getElementsByTagName('property');
+			for (j = 0; j < properties.length; j++) {
+				returnObj.componentList[newIdx].propertyList.push(ACS.property(properties.item(j).attributes.getNamedItem('name').textContent, 
+																			   getDataType(properties.item(j).attributes.getNamedItem('type').textContent), 
+																			   properties.item(j).attributes.getNamedItem('value').textContent));
+				if (properties.item(j).attributes.getNamedItem('description'))
+					returnObj.componentList[newIdx].propertyList[returnObj.componentList[newIdx].propertyList.length - 1].description = properties.item(j).attributes.getNamedItem('description').textContent;
+				if (properties.item(j).attributes.getNamedItem('combobox'))
+					returnObj.componentList[newIdx].propertyList[returnObj.componentList[newIdx].propertyList.length - 1].combobox = properties.item(j).attributes.getNamedItem('combobox').textContent;
+				if (properties.item(j).attributes.getNamedItem('getStringList'))
+					returnObj.componentList[newIdx].propertyList[returnObj.componentList[newIdx].propertyList.length - 1].getStringList = properties.item(j).attributes.getNamedItem('getStringList').textContent;
+			}
 			// build the gui object:
 			if (compXml.getElementsByTagName('gui').item(0)) {
 				var isExternal = false;
