@@ -105,6 +105,19 @@ ACS.componentView = function(	component, // ACS.component
 					}
 				}
 			}(component.inputPortList[i]));
+			// highlight port when mouse is over hitGraph
+			inputPortViewList[i]['port'].on('mouseover', function(inPort) {
+				return function(e) {
+					inPort.strokeWidth(3);
+					modelLayer.draw();
+				}
+			}(inputPortViewList[i]['port']));
+			inputPortViewList[i]['port'].on('mouseout', function(inPort) {
+				return function(e) {
+					inPort.strokeWidth(1);
+					modelLayer.draw();
+				}
+			}(inputPortViewList[i]['port']));
 		}
 		// construct output ports and their Labels
 		for (var i = 0; i < component.outputPortList.length; i++) {
@@ -143,6 +156,19 @@ ACS.componentView = function(	component, // ACS.component
 					}
 				}
 			}(component.outputPortList[i]));
+			// highlight port when mouse is over hitGraph
+			outputPortViewList[i]['port'].on('mouseover', function(outPort) {
+				return function(e) {
+					outPort.strokeWidth(3);
+					modelLayer.draw();
+				}
+			}(outputPortViewList[i]['port']));
+			outputPortViewList[i]['port'].on('mouseout', function(outPort) {
+				return function(e) {
+					outPort.strokeWidth(1);
+					modelLayer.draw();
+				}
+			}(outputPortViewList[i]['port']));			
 		}
 		// construct event-input and event-output ports, if necessary
 		if (component.listenEventList.length > 0) {
@@ -175,6 +201,15 @@ ACS.componentView = function(	component, // ACS.component
 					}
 				}
 			});
+			// highlight port when mouse is over hitGraph
+			eventInPortView.on('mouseover', function(e) {
+				eventInPortView.strokeWidth(3);
+				modelLayer.draw();
+			});
+			eventInPortView.on('mouseout', function(e) {
+				eventInPortView.strokeWidth(1);
+				modelLayer.draw();
+			});			
 		}
 		if (component.triggerEventList.length > 0) {
 			eventOutPortView = new Kinetic.Shape({
@@ -205,6 +240,15 @@ ACS.componentView = function(	component, // ACS.component
 					modelView.addEventChannelView(ACS.eventChannelView(null, component, model, modelLayer));
 				}
 			});
+			// highlight port when mouse is over hitGraph
+			eventOutPortView.on('mouseover', function(e) {
+				eventOutPortView.strokeWidth(3);
+				modelLayer.draw();
+			});
+			eventOutPortView.on('mouseout', function(e) {
+				eventOutPortView.strokeWidth(1);
+				modelLayer.draw();
+			});				
 		}
 		// define the selection frame
 		selectedRect = new Kinetic.Rect({ 

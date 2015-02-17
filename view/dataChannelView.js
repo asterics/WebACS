@@ -55,6 +55,15 @@ ACS.dataChannelView = function(	dc, // ACS.dataChannel
 		modelLayer.draw();
 	});
 	
+	// highlight channel when mouse is over hitGraph
+	returnObj.line.on('mouseover', function(e) {
+		returnObj.line.strokeWidth(ACS.vConst.CHANNELVIEW_STROKEWIDTH+2);
+		modelLayer.draw();
+	});
+	returnObj.line.on('mouseout', function(e) {
+		returnObj.line.strokeWidth(ACS.vConst.CHANNELVIEW_STROKEWIDTH);
+		modelLayer.draw();
+	});
 	// do the selecting
 	returnObj.line.on('click', function(e) {
 		if (e.evt.ctrlKey) {
