@@ -586,7 +586,12 @@ ACS.model = function(filename) { // String
 	
 	returnObj.addComponentByName = function(compName) {
 		// does nothing if compName does not exist
-		var compTypeId = 'asterics.' + compName;
+		var compTypeId;
+		if (compName.indexOf('Oska') > -1) { 
+			compTypeId = compName;
+		} else {
+			compTypeId = 'asterics.' + compName;
+		}
 		var compXml = findComponentInCollection(compTypeId);
 		if (compXml) {
 			// find out the component's type:

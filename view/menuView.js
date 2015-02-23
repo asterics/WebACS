@@ -221,7 +221,8 @@ ACS.menuView = function(modelList) { // ACS.modelList
 		var components = modelList.getActModel().getComponentCollection().getElementsByTagName('componentType');
 		// set the subcategories:
 		for (var i = 0; i < components.length; i++) {
-			var actCompName = components.item(i).attributes.getNamedItem('id').textContent.slice(9); // the slice eliminates the "asterics."
+			var actCompName = components.item(i).attributes.getNamedItem('id').textContent;
+			if (actCompName.indexOf('Oska') === -1) actCompName = actCompName.slice(9); // the slice eliminates the "asterics."
 			var type = components.item(i).getElementsByTagName('type').item(0).textContent;
 			var subtype = components.item(i).getElementsByTagName('type').item(0).attributes.getNamedItem('subtype').textContent;
 			var subtypeNoSpace = removeWhiteSpace(subtype);
