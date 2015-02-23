@@ -251,7 +251,7 @@ ACS.componentView = function(	component, // ACS.component
 			});				
 		}
 		// define the selection frame
-		selectedRect = new Kinetic.Rect({ 
+		selectedRect = new Kinetic.Rect({
 			x: component.getX() - ACS.vConst.COMPONENTVIEW_SELECTIONFRAMEWIDTH,
 			y: component.getY() - ACS.vConst.COMPONENTVIEW_SELECTIONFRAMEWIDTH,
 			width: ACS.vConst.COMPONENTVIEW_ELEMENTWIDTH + (2 * ACS.vConst.COMPONENTVIEW_SELECTIONFRAMEWIDTH),
@@ -277,7 +277,6 @@ ACS.componentView = function(	component, // ACS.component
 		// group all parts and make component draggable
 		view = new Kinetic.Group({
 			draggable: true
-			//doNotSelectOnNextClick: false
 		});
 		view.add(mainRect);
 		view.add(topRect);
@@ -300,6 +299,7 @@ ACS.componentView = function(	component, // ACS.component
 		// set this component to highest z-value of all on the layer
 		view.on('mousedown', function(e) {
 			this.moveToTop();
+			e.cancelBubble = true; // prevents modelView from starting a focusRect
 		});
 		// do the selecting
 		view.on('click', function(e) {
@@ -309,7 +309,6 @@ ACS.componentView = function(	component, // ACS.component
 				model.deSelectAll();
 				component.setIsSelected(true);
 			}
-			e.cancelBubble = true;
 		});
 		view.on('dragmove', function() {
 			component.setNewPosition(mainRect.getAbsolutePosition().x, mainRect.getAbsolutePosition().y);
@@ -343,6 +342,10 @@ ACS.componentView = function(	component, // ACS.component
 	
 	returnObj.destroy = function() {
 		if (view) view.destroy();
+	}
+	
+	returnObj.getView = function() {
+		return view;
 	}
 	
 	// constructor code

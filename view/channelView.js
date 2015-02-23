@@ -34,7 +34,9 @@ ACS.channelView = function(model, // ACS.model
 		}
 	});
 	
-	returnObj.line.on('click', function() {log.debug('clicked on channel')});
+	returnObj.line.on('mousedown', function(e) {
+		e.cancelBubble = true; // prevents modelView from starting a focusRect
+	});
 
 	returnObj.setStartPoint = function(x, y) {
 		if (returnObj.line) {

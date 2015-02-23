@@ -111,7 +111,7 @@ ACS.eventChannelView = function(ec, // ACS.eventChannel
 			model.deSelectAll();
 			for (var i = 0; i < returnObj.ecList.length; i++) {
 				returnObj.ecList[i].setIsSelected(true);
-			}			
+			}
 		}
 		e.cancelBubble = true;
 	});

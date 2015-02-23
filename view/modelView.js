@@ -11,6 +11,7 @@ ACS.modelView = function(	modelContainerId, // String
 	var modelLayer; // Kinetic.Layer
 	var guiStage; // Kinetic.Stage
 	var guiLayer; // Kinetic.Layer
+	var focusRect = null; // Kinetic.Rect
 	
 	// private methods
 	var drawCompleteModel = function() {
@@ -89,6 +90,115 @@ ACS.modelView = function(	modelContainerId, // String
 			}
 		}
 		return null;
+	}
+	
+	var sortCorners = function(shape) { // returns an Object defining the corners of the given Kinetic.Shape: tl: top-left, tr: top-right, br: bottom-right, bl: bottom-left	
+		var corners = {tl: [], tr: [], br: [], bl: []};
+		// set all x-coordinates
+		if (shape.width() < 0) {
+			corners.tl[0] = shape.x() + shape.width();
+			corners.tr[0] = shape.x();
+			corners.br[0] = shape.x();
+			corners.bl[0] = shape.x() + shape.width();
+		} else {
+			corners.tl[0] = shape.x();
+			corners.tr[0] = shape.x() + shape.width();
+			corners.br[0] = shape.x() + shape.width();
+			corners.bl[0] = shape.x();
+		}
+		// set all y-coordinates
+		if (shape.height() < 0) {
+			corners.tl[1] = shape.y() + shape.height();
+			corners.tr[1] = shape.y() + shape.height();
+			corners.br[1] = shape.y();
+			corners.bl[1] = shape.y();
+		} else {
+			corners.tl[1] = shape.y();
+			corners.tr[1] = shape.y();
+			corners.br[1] = shape.y() + shape.height();
+			corners.bl[1] = shape.y() + shape.height();
+		}
+		return corners;
+	}
+	
+	var pointInRect = function(x, y, rectCorners) { // rectCorners is an Object defining the corners of a rectangle: tl: top-left, tr: top-right, br: bottom-right, bl: bottom-left
+		if (((x > rectCorners.tl[0]) && (x < rectCorners.tr[0])) && ((y > rectCorners.tl[1]) && (y < rectCorners.bl[1]))) {
+			return true;
+		}
+		return false;
+	}
+	
+	var selectInFocusRect = function() {
+		var selectList = [];
+		var focusRectCorners = sortCorners(focusRect); // Object defining the corners of the focusRect: tl: top-left, tr: top-right, br: bottom-right, bl: bottom-left	
+		// check all components for intersection with focusRect
+		for (var i = 0; i < componentViewList.length; i++) {
+			var intersectionFound = false;
+			var viewCorners = sortCorners(componentViewList[i].getView().children[0]);
+			for (var j = viewCorners.tl[0]; j < viewCorners.tr[0]; j++) {
+				if (pointInRect(j, viewCorners.tl[1], focusRectCorners) || pointInRect(j, viewCorners.bl[1], focusRectCorners)) {
+					intersectionFound = true;
+					break;
+				}
+			}
+			if (!intersectionFound) {
+				for (var j = viewCorners.tl[1]; j < viewCorners.bl[1]; j++) {
+					if (pointInRect(viewCorners.tl[0], j, focusRectCorners) || pointInRect(viewCorners.tr[0], j, focusRectCorners)) {
+						intersectionFound = true;
+						break;
+					}
+				}
+			}
+			if (intersectionFound) {
+				selectList.push(componentViewList[i].getComponent());
+				log.debug('component selected');
+			}
+		}
+		// check all dataChannels for intersection with focusRect
+		for (var i = 0; i < dataChannelViewList.length; i++) {
+			var intersectionFound = false;
+			var points = dataChannelViewList[i].line.getPoints();
+			var lineDef = {
+				startPoint: [points[0], points[1]],
+				vector: [points[2] - points[0], points[3] - points[1]]
+			}
+			for (var j = 0; j < 1; j+=0.01) {
+				if (pointInRect(lineDef.startPoint[0] + j * lineDef.vector[0], lineDef.startPoint[1] + j * lineDef.vector[1], focusRectCorners)) {
+					intersectionFound = true;
+					break;
+				}
+			}
+			if (intersectionFound) {
+				selectList.push(dataChannelViewList[i].getChannel());
+				log.debug('dataChannel selected');
+			}
+		}
+		// check all eventChannels for intersection with focusRect
+		for (var i = 0; i < eventChannelViewList.length; i++) {
+			var intersectionFound = false;
+			var points = eventChannelViewList[i].line.getPoints();
+			var lineDef = {
+				startPoint: [points[0], points[1]],
+				vector: [points[2] - points[0], points[3] - points[1]]
+			}
+			for (var j = 0; j < 1; j+=0.01) {
+				if (pointInRect(lineDef.startPoint[0] + j * lineDef.vector[0], lineDef.startPoint[1] + j * lineDef.vector[1], focusRectCorners)) {
+					intersectionFound = true;
+					break;
+				}
+			}
+			if (intersectionFound) {
+				for (var j = 0; j < eventChannelViewList[i].ecList.length; j++) {
+					selectList.push(eventChannelViewList[i].ecList[j]);
+				}
+				log.debug('eventChannel selected');
+			}
+		}
+		// delete earlier selections and select all elements in the list
+		model.deSelectAll();
+		for (var i = 0; i < selectList.length; i++) {
+			selectList[i].setIsSelected(true);
+		}
 	}
 	
 	// public stuff
@@ -275,19 +385,23 @@ ACS.modelView = function(	modelContainerId, // String
 	
 	// register mouse-event handlers
 	modelLayer.on('mousemove', function() {
+		var mousePos = modelStage.getPointerPosition();
 		if ((model.dataChannelList.length > 0) && (!model.dataChannelList[model.dataChannelList.length - 1].getInputPort())) {
-			var mousePos = modelStage.getPointerPosition();
 			dataChannelViewList[dataChannelViewList.length - 1].setEndPoint(mousePos.x, mousePos.y);
 			this.draw();
 		} else if ((eventChannelViewList.length > 0) && (!eventChannelViewList[eventChannelViewList.length - 1].getEndComponent())) {
-			var mousePos = modelStage.getPointerPosition();
 			eventChannelViewList[eventChannelViewList.length - 1].setEndPoint(mousePos.x, mousePos.y)
 			this.draw();
+		} else if (focusRect) {
+			focusRect.width(mousePos.x - focusRect.x() - 2); // the "- 2" is a workaround to KineticJS' anti-aliasing-bug
+			focusRect.height(mousePos.y - focusRect.y() - 2); // the "- 2" is a workaround to KineticJS' anti-aliasing-bug
+			modelLayer.draw();
 		}
 	});
 	
 	modelLayer.on('click', function() {
-		model.deSelectAll();
+		var mousePos = modelStage.getPointerPosition();
+		if (!modelStage.getIntersection(mousePos.x, mousePos.y)) model.deSelectAll();
 		if ((model.dataChannelList.length > 0) && (!model.dataChannelList[model.dataChannelList.length - 1].getInputPort())) {
 			model.removeDataChannel(model.dataChannelList[model.dataChannelList.length - 1]);
 		} else if ((eventChannelViewList.length > 0) && (!eventChannelViewList[eventChannelViewList.length - 1].getEndComponent())) {
@@ -295,6 +409,44 @@ ACS.modelView = function(	modelContainerId, // String
 			eventChannelViewList.pop();
 			this.draw();
 			log.debug('eventChannel dropped');
+		}
+	});
+	
+	modelLayer.on('mousedown', function() {
+		if (!((model.dataChannelList.length > 0) && (!model.dataChannelList[model.dataChannelList.length - 1].getInputPort()))) {
+			var mousePos = modelStage.getPointerPosition();
+			if (focusRect) focusRect.destroy();
+			focusRect = new Kinetic.Rect({ 
+				x: mousePos.x - 2, // the "- 2" is a workaround to KineticJS' anti-aliasing-bug
+				y: mousePos.y - 2, // the "- 2" is a workaround to KineticJS' anti-aliasing-bug
+				width: 0,
+				height: 0,
+				fill: ACS.vConst.MODELVIEW_FOCUSRECTCOLOR,
+				stroke: ACS.vConst.MODELVIEW_FOCUSRECTSTROKECOLOR,
+				strokeWidth: 1,
+				listening: true
+			});
+			modelLayer.add(focusRect);
+			modelLayer.draw();
+		}
+	});
+	
+	modelLayer.on('mouseup', function() {
+		if (focusRect) {
+			selectInFocusRect();
+			focusRect.destroy();
+			focusRect = null;
+			modelLayer.draw();
+		}
+	});
+	
+	modelStage.on('contentMouseover', function(e) {
+		// if mouse-button was released while outside the stage
+		if (focusRect && e.evt.buttons === 0) {
+			selectInFocusRect();
+			focusRect.destroy();
+			focusRect = null;
+			modelLayer.draw();
 		}
 	});
 	
