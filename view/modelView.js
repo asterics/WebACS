@@ -129,7 +129,7 @@ ACS.modelView = function(	modelContainerId, // String
 	}
 	
 	var selectInFocusRect = function() {
-		var selectList = [];
+		model.deSelectAll(); // clears all earlier selections
 		var focusRectCorners = sortCorners(focusRect); // Object defining the corners of the focusRect: tl: top-left, tr: top-right, br: bottom-right, bl: bottom-left	
 		// check all components for intersection with focusRect
 		for (var i = 0; i < componentViewList.length; i++) {
@@ -150,7 +150,7 @@ ACS.modelView = function(	modelContainerId, // String
 				}
 			}
 			if (intersectionFound) {
-				selectList.push(componentViewList[i].getComponent());
+				model.addItemToSelection(componentViewList[i].getComponent());
 				log.debug('component selected');
 			}
 		}
@@ -169,7 +169,7 @@ ACS.modelView = function(	modelContainerId, // String
 				}
 			}
 			if (intersectionFound) {
-				selectList.push(dataChannelViewList[i].getChannel());
+				model.addItemToSelection(dataChannelViewList[i].getChannel());
 				log.debug('dataChannel selected');
 			}
 		}
@@ -189,20 +189,17 @@ ACS.modelView = function(	modelContainerId, // String
 			}
 			if (intersectionFound) {
 				for (var j = 0; j < eventChannelViewList[i].ecList.length; j++) {
-					selectList.push(eventChannelViewList[i].ecList[j]);
+					model.addItemToSelection(eventChannelViewList[i].ecList[j]);
 				}
 				log.debug('eventChannel selected');
 			}
-		}
-		// delete earlier selections and select all elements in the list
-		model.deSelectAll();
-		for (var i = 0; i < selectList.length; i++) {
-			selectList[i].setIsSelected(true);
 		}
 	}
 	
 	// public stuff
 	var returnObj = {};
+	
+	returnObj.selectedComponentsGroup = null;
 	
 	returnObj.getModel = function() {
 		return model;
@@ -309,6 +306,11 @@ ACS.modelView = function(	modelContainerId, // String
 		listening: true
 	});
 	modelLayer.add(transparentRect);
+	// initiate and add the Kinetic.Group that will hold the selected components (to make them draggable together)
+	returnObj.selectedComponentsGroup = new Kinetic.Group({
+		draggable: true
+	});
+	modelLayer.add(returnObj.selectedComponentsGroup);
 	// draw the model
 	drawCompleteModel();
 	// register event-handlers
@@ -399,9 +401,7 @@ ACS.modelView = function(	modelContainerId, // String
 		}
 	});
 	
-	modelLayer.on('click', function() {
-		var mousePos = modelStage.getPointerPosition();
-		if (!modelStage.getIntersection(mousePos.x, mousePos.y)) model.deSelectAll();
+	modelLayer.on('click', function(e) {
 		if ((model.dataChannelList.length > 0) && (!model.dataChannelList[model.dataChannelList.length - 1].getInputPort())) {
 			model.removeDataChannel(model.dataChannelList[model.dataChannelList.length - 1]);
 		} else if ((eventChannelViewList.length > 0) && (!eventChannelViewList[eventChannelViewList.length - 1].getEndComponent())) {
@@ -447,6 +447,17 @@ ACS.modelView = function(	modelContainerId, // String
 			focusRect.destroy();
 			focusRect = null;
 			modelLayer.draw();
+		}
+	});
+	
+	returnObj.selectedComponentsGroup.on('mousedown', function(e) {
+		e.cancelBubble = true; // avoids the starting of a focusRect
+	});
+	
+	returnObj.selectedComponentsGroup.on('dragmove', function() {
+		for (var i = 0; i <returnObj.selectedComponentsGroup.children.length; i++) {
+			var elem = returnObj.selectedComponentsGroup.getChildren()[i];
+			elem.attrs.comp.setNewPosition(elem.getChildren()[2].getAbsolutePosition().x, elem.getChildren()[2].getAbsolutePosition().y);
 		}
 	});
 	

@@ -105,12 +105,17 @@ ACS.eventChannelView = function(ec, // ACS.eventChannel
 			var newStatus = !returnObj.ecList[0].getIsSelected();
 			for (var i = 0; i < returnObj.ecList.length; i++) {
 				returnObj.ecList[i].setIsSelected(newStatus);
+				if (newStatus) {
+					model.addItemToSelection(returnObj.ecList[i]);
+				} else {
+					model.removeItemFromSelection(returnObj.ecList[i]);
+				}			
 			}
 		} else {
 			// select only this channel
 			model.deSelectAll();
 			for (var i = 0; i < returnObj.ecList.length; i++) {
-				returnObj.ecList[i].setIsSelected(true);
+				model.addItemToSelection(returnObj.ecList[i]);
 			}
 		}
 		e.cancelBubble = true;

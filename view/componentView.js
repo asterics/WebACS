@@ -6,6 +6,7 @@ ACS.componentView = function(	component, // ACS.component
 	// private variables
 	var visible = true;
 	var view = null;
+	var elementHeight = ACS.vConst.COMPONENTVIEW_ELEMENTHEIGHT;
 	var inputPortViewList = [];
 	var outputPortViewList = [];
 	var eventOutPortView = null;
@@ -30,7 +31,6 @@ ACS.componentView = function(	component, // ACS.component
 	
 	var buildView = function() {
 		// determine height of the element, depending on the amount of input- and/or output-ports
-		var elementHeight = ACS.vConst.COMPONENTVIEW_ELEMENTHEIGHT;
 		if ((component.outputPortList.length > 3) || (component.inputPortList.length > 3)) {
 			if (component.outputPortList.length > component.inputPortList.length) {
 				elementHeight = elementHeight + (component.outputPortList.length-3) * ACS.vConst.COMPONENTVIEW_PORTHEIGHTPLUSGAP;
@@ -261,7 +261,8 @@ ACS.componentView = function(	component, // ACS.component
 			strokeWidth: 1,
 			cornerRadius: 0,
 			listening: true
-		});		
+		});
+		selectedRect.hide();
 		// define the error marker
 		var errorRect = new Kinetic.Rect({ 
 			x: component.getX() - ACS.vConst.COMPONENTVIEW_ERRORMARKERWIDTH,
@@ -274,10 +275,14 @@ ACS.componentView = function(	component, // ACS.component
 			cornerRadius: 0,
 			listening: true
 		});
+		errorRect.hide();
 		// group all parts and make component draggable
 		view = new Kinetic.Group({
-			draggable: true
+			draggable: true,
+			comp: component
 		});
+		view.add(errorRect); // always added to keep sequence of components in view consistent
+		view.add(selectedRect); // always added to keep sequence of components in view consistent
 		view.add(mainRect);
 		view.add(topRect);
 		view.add(headerText);
@@ -291,30 +296,77 @@ ACS.componentView = function(	component, // ACS.component
 		}
 		if (eventInPortView) {view.add(eventInPortView)};
 		if (eventOutPortView) {view.add(eventOutPortView)};
-		// draw the error marker round the component, in case the component did not match the collection
+		// show the error marker round the component, in case the component did not match the collection
 		if (!component.matchesComponentCollection) {
-			view.add(errorRect);
-			errorRect.setZIndex(-1000);
+			errorRect.show();
 		}
-		// set this component to highest z-value of all on the layer
 		view.on('mousedown', function(e) {
-			this.moveToTop();
-			e.cancelBubble = true; // prevents modelView from starting a focusRect
+			this.moveToTop(); // set this component to highest z-value of all on the layer
+			if (!e.evt.ctrlKey && !component.getIsSelected()) {
+				// select only this component
+				model.deSelectAll();
+				model.addItemToSelection(component);
+			}
+			if (!component.getIsSelected()) {
+				e.cancelBubble = true;
+			}
 		});
-		// do the selecting
 		view.on('click', function(e) {
 			if (e.evt.ctrlKey) {
-				component.setIsSelected(!component.getIsSelected());
-			} else {
+				// invert selection status
+				var newStatus = !component.getIsSelected();
+				if (newStatus) {
+					model.addItemToSelection(component); 
+				} else {
+					model.removeItemFromSelection(component);
+				}
+			}/* else {
+				// select only this component
 				model.deSelectAll();
-				component.setIsSelected(true);
-			}
+				model.addItemToSelection(component);
+			}*/
 		});
 		view.on('dragmove', function() {
 			component.setNewPosition(mainRect.getAbsolutePosition().x, mainRect.getAbsolutePosition().y);
 		});
 		// add the group to the layer
 		modelLayer.add(view);
+	}
+
+	var setViewPosition = function() {
+		view.x(0);
+		view.y(0);
+		var ch = view.getChildren();
+		ch[0].x(component.getX() - ACS.vConst.COMPONENTVIEW_ERRORMARKERWIDTH); // errorRect
+		ch[0].y(component.getY() - ACS.vConst.COMPONENTVIEW_ERRORMARKERWIDTH); // errorRect
+		ch[1].x(component.getX() - ACS.vConst.COMPONENTVIEW_SELECTIONFRAMEWIDTH); // selectedRect
+		ch[1].y(component.getY() - ACS.vConst.COMPONENTVIEW_SELECTIONFRAMEWIDTH); // selectedRect
+		ch[2].x(component.getX()); // mainRect
+		ch[2].y(component.getY()); // mainRect
+		ch[3].x(component.getX()); // topRect
+		ch[3].y(component.getY()); // topRect
+		ch[4].x(component.getX() + ACS.vConst.COMPONENTVIEW_HEADERTEXTPOSITIONX); // headerText
+		ch[4].y(component.getY() + ACS.vConst.COMPONENTVIEW_HEADERTEXTPOSITIONY); // headerText
+		for (var i = 0; i < inputPortViewList.length; i++) {
+			inputPortViewList[i]['port'].x(component.getX() - ACS.vConst.COMPONENTVIEW_INPUTPORTLEFTOFCOMPONENT);
+			inputPortViewList[i]['port'].y(component.getY() + ACS.vConst.COMPONENTVIEW_FIRSTINPUTPORTY + ACS.vConst.COMPONENTVIEW_PORTHEIGHTPLUSGAP * i);
+			inputPortViewList[i]['label'].x(component.getX() + ACS.vConst.COMPONENTVIEW_INPUTPORTLABELPOSITIONX);
+			inputPortViewList[i]['label'].y(component.getY() + ACS.vConst.COMPONENTVIEW_FIRSTINPUTPORTY + 1 + ACS.vConst.COMPONENTVIEW_PORTHEIGHTPLUSGAP * i);
+		}
+		for (var i = 0; i < outputPortViewList.length; i++) {
+			outputPortViewList[i]['port'].x(component.getX() + ACS.vConst.COMPONENTVIEW_OUTPUTPORTPOSITIONX);
+			outputPortViewList[i]['port'].y(component.getY() + ACS.vConst.COMPONENTVIEW_FIRSTOUTPUTPORTPOSITIONY + ACS.vConst.COMPONENTVIEW_PORTHEIGHTPLUSGAP * i);
+			outputPortViewList[i]['label'].x(component.getX() + ACS.vConst.COMPONENTVIEW_OUTPUTPORTLABELPOSITIONX);
+			outputPortViewList[i]['label'].y(component.getY() + ACS.vConst.COMPONENTVIEW_FIRSTOUTPUTPORTPOSITIONY + 1 + ACS.vConst.COMPONENTVIEW_PORTHEIGHTPLUSGAP * i);
+		}	
+		if (eventInPortView) {
+			eventInPortView.x(component.getX() + ACS.vConst.COMPONENTVIEW_EVENTLISTENERPORTPOSITIONX);
+			eventInPortView.y(component.getY() + elementHeight - ACS.vConst.COMPONENTVIEW_EVENTPORTYINSIDECOMPONENT);
+		}
+		if (eventOutPortView) {
+			eventOutPortView.x(component.getX() + ACS.vConst.COMPONENTVIEW_EVENTTRIGGERPORTPOSITIONX);
+			eventOutPortView.y(component.getY() + elementHeight - ACS.vConst.COMPONENTVIEW_EVENTPORTYINSIDECOMPONENT);
+		}
 	}
 	
 	// public stuff
@@ -352,14 +404,21 @@ ACS.componentView = function(	component, // ACS.component
 	buildView();
 	// register event handlers
 	component.events.registerHandler('selectedEvent', function() {
-		view.add(selectedRect);
-		selectedRect.setZIndex(-100);
+		selectedRect.show();
+		view.setAttr('draggable', false);
+		modelView.selectedComponentsGroup.add(view);
+		view.x(view.getX() - modelView.selectedComponentsGroup.getX());
+		view.y(view.getY() - modelView.selectedComponentsGroup.getY());
 		modelLayer.draw();
 	});
 	component.events.registerHandler('deSelectedEvent', function() {
-		selectedRect.remove();
+		selectedRect.hide();
+		view.setAttr('draggable', true);
+		view.remove(); // view is in selectedComponentsGroup AND modelLayer, the remove-function only exists for removing from all parents, thus we need to remove and then add to the modelLayer again
+		modelLayer.add(view);
+		setViewPosition();
 		modelLayer.draw();
-	});	
-	
+	});
+
 	return returnObj;
 }

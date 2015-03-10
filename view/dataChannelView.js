@@ -66,11 +66,18 @@ ACS.dataChannelView = function(	dc, // ACS.dataChannel
 	});
 	// do the selecting
 	returnObj.line.on('click', function(e) {
-		if (e.evt.ctrlKey) {
-			dc.setIsSelected(!dc.getIsSelected());
+		if (e.evt.ctrlKey) { 
+			// invert selection status
+			var newStatus = !dc.getIsSelected();
+			if (newStatus) {
+				model.addItemToSelection(dc);
+			} else {
+				model.removeItemFromSelection(dc);
+			}
 		} else {
+			// select only this channel
 			model.deSelectAll();
-			dc.setIsSelected(true);
+			model.addItemToSelection(dc);
 		}
 		e.cancelBubble = true;
 	});

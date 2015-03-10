@@ -60,7 +60,6 @@ ACS.component = function(id, // String; can be changed, but must be unique
 	returnObj.setNewPosition = function(newX, newY) {
 		x = newX;
 		y = newY;
-		//returnObj.events.fireEvent('componentChangedEvent');
 		returnObj.events.fireEvent('componentPositionChangedEvent');
 	}
 

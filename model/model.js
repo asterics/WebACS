@@ -5,7 +5,7 @@ ACS.model = function(filename) { // String
 	// private methods
 	var loadDefaultComponentCollection = function() {
 		var xmlObj;
-		var httpRequest = new XMLHttpRequest(); 
+		var httpRequest = new XMLHttpRequest();
 		httpRequest.onreadystatechange = function() {
 			if (httpRequest.readyState === 4 && httpRequest.status === 200) {
 				xmlObj = httpRequest.responseXML;
@@ -396,10 +396,10 @@ ACS.model = function(filename) { // String
 	returnObj.undoStack = []; // Array<ACS.action>
 	returnObj.redoStack = []; // Array<ACS.action>
 	returnObj.metaDataList = []; // Array<ACS.metaData>
-	returnObj.selectedItemsList = []; // Array<Object>
 	returnObj.events = ACS.eventManager();
 	returnObj.modelName = generateModelName();
 	returnObj.acsVersion = ACS.mConst.MODELGUI_ACSVERSION;
+	returnObj.selectedItemsList = []; // Array<Object>
 	returnObj.hasBeenChanged = false;
 	
 	returnObj.getFilename = function() {
@@ -742,16 +742,28 @@ ACS.model = function(filename) { // String
 	}
 	
 	returnObj.deSelectAll = function() {
-		for (var i = 0; i < returnObj.componentList.length; i++) {
-			if (returnObj.componentList[i].getIsSelected()) returnObj.componentList[i].setIsSelected(false);
+		var actItem;
+		while (returnObj.selectedItemsList.length > 0) {
+			actItem = returnObj.selectedItemsList.pop();
+			actItem.setIsSelected(false);
 		}
-		for (var i = 0; i < returnObj.dataChannelList.length; i++) {
-			if (returnObj.dataChannelList[i].getIsSelected()) returnObj.dataChannelList[i].setIsSelected(false);
+	}
+	
+	returnObj.addItemToSelection = function(item) {
+		item.setIsSelected(true);
+		returnObj.selectedItemsList.push(item);
+	}
+	
+	returnObj.removeItemFromSelection = function(item) {
+		var itemIndex = returnObj.selectedItemsList.indexOf(item);
+		if (itemIndex > -1) {
+			returnObj.selectedItemsList.splice(itemIndex, 1);
+			item.setIsSelected(false);
+			return true;
+		} else {
+			return false;
 		}
-		for (var i = 0; i < returnObj.eventChannelList.length; i++) {
-			if (returnObj.eventChannelList[i].getIsSelected()) returnObj.eventChannelList[i].setIsSelected(false);
-		}
-	}	
+	}
 	
 	// constructor code
 	componentCollection = loadDefaultComponentCollection();
