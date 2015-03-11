@@ -124,6 +124,7 @@ ACS.eventChannelView = function(ec, // ACS.eventChannel
 	for (var i = 0; i < returnObj.ecList.length; i++) {
 		returnObj.ecList[i].events.registerHandler('selectedEvent', function() {
 			// make sure selection is only done once, if several channels are connected
+			var test = returnObj.line.dashEnabled();
 			if (!returnObj.line.dashEnabled()) {
 				returnObj.line.stroke(ACS.vConst.EVENTCHANNELVIEW_SELECTEDSTROKECOLOR);
 				returnObj.line.dashEnabled(true);

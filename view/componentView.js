@@ -320,11 +320,7 @@ ACS.componentView = function(	component, // ACS.component
 				} else {
 					model.removeItemFromSelection(component);
 				}
-			}/* else {
-				// select only this component
-				model.deSelectAll();
-				model.addItemToSelection(component);
-			}*/
+			}
 		});
 		view.on('dragmove', function() {
 			component.setNewPosition(mainRect.getAbsolutePosition().x, mainRect.getAbsolutePosition().y);
