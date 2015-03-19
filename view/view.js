@@ -99,10 +99,14 @@ ACS.view = function(modelList) { // ACS.modelList
 			case 122: // Ctrl-z for undo
 				if (e.ctrlKey) {
 					undoHandler();
+					stopEvent(e);
+					return false;					
 				}
 			case 121: // Ctrl-y for redo
 				if (e.ctrlKey) {
 					redoHandler();
+					stopEvent(e);
+					return false;					
 				}
 		}			
 	}
@@ -137,6 +141,6 @@ ACS.view = function(modelList) { // ACS.modelList
 	menu.events.registerHandler('deleteBtnPressedEvent', deleteSelectionHandler);
 	menu.events.registerHandler('undoBtnPressedEvent', undoHandler);
 	menu.events.registerHandler('redoBtnPressedEvent', redoHandler);
-		
+
 	return returnObj;
 }
