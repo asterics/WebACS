@@ -1,34 +1,88 @@
 ACS.dataChannelView = function(	dc, // ACS.dataChannel
 								model, // ACS.model
 								modelLayer) { // Kinetic.Layer
-	// private variables
+								
+// ***********************************************************************************************************************
+// ************************************************** private variables **************************************************
+// ***********************************************************************************************************************
 	var outputPort = dc.getOutputPort();
 	var inputPort = dc.getInputPort();
 	
-	// private methods
-	var setHandlerForInputPort = function() {
-		inputPort.getParentComponent().events.registerHandler('componentPositionChangedEvent', function() {
-			returnObj.line.points([	returnObj.line.points()[0], 
-									returnObj.line.points()[1], 
-									inputPort.getParentComponent().getX() - ACS.vConst.DATACHANNELVIEW_INPUTPORTLEFTOFCOMPONENT,
-									inputPort.getParentComponent().getY() + ACS.vConst.DATACHANNELVIEW_FIRSTINPUTPORTDOCKINGPOINTY + ACS.vConst.COMPONENTVIEW_PORTHEIGHTPLUSGAP * inputPort.getPosition()]);
-		});
+// ***********************************************************************************************************************
+// ************************************************** private methods ****************************************************
+// ***********************************************************************************************************************
+	
+	// ********************************************** handlers ***********************************************************
+	var componentPositionChangedEventHandlerInPort = function() {
+		returnObj.line.points([	returnObj.line.points()[0], 
+								returnObj.line.points()[1], 
+								inputPort.getParentComponent().getX() - ACS.vConst.DATACHANNELVIEW_INPUTPORTLEFTOFCOMPONENT,
+								inputPort.getParentComponent().getY() + ACS.vConst.DATACHANNELVIEW_FIRSTINPUTPORTDOCKINGPOINTY + ACS.vConst.COMPONENTVIEW_PORTHEIGHTPLUSGAP * inputPort.getPosition()]);
 	}
 	
-	// public stuff
+	var componentPositionChangedEventHandlerOutPort = function() {
+		returnObj.line.points([	outputPort.getParentComponent().getX() + ACS.vConst.DATACHANNELVIEW_OUTPUTPORTPOSITIONX, 
+								outputPort.getParentComponent().getY() + ACS.vConst.DATACHANNELVIEW_FIRSTOUTPUTPORTDOCKINGPOINTY + ACS.vConst.COMPONENTVIEW_PORTHEIGHTPLUSGAP * outputPort.getPosition(), 
+								returnObj.line.points()[2], 
+								returnObj.line.points()[3]]);
+	}
+	
+	var dataChannelCompletedEventHandler = function() {
+		// set endpoint and and handler for inputPort and redraw
+		inputPort = dc.getInputPort();
+		returnObj.line.points([	returnObj.line.points()[0], 
+								returnObj.line.points()[1], 
+								inputPort.getParentComponent().getX() - ACS.vConst.DATACHANNELVIEW_INPUTPORTLEFTOFCOMPONENT,
+								inputPort.getParentComponent().getY() + ACS.vConst.DATACHANNELVIEW_FIRSTINPUTPORTDOCKINGPOINTY + ACS.vConst.COMPONENTVIEW_PORTHEIGHTPLUSGAP * inputPort.getPosition()]);
+		inputPort.getParentComponent().events.registerHandler('componentPositionChangedEvent', componentPositionChangedEventHandlerInPort);
+		modelLayer.draw();
+	}
+
+	var selectedEventHandler = function() {
+		returnObj.line.stroke(ACS.vConst.DATACHANNELVIEW_SELECTEDSTROKECOLOR);
+		returnObj.line.dashEnabled(true);
+		modelLayer.draw();
+	}
+	
+	var deSelectedEventHandler = function() {
+		returnObj.line.stroke(ACS.vConst.DATACHANNELVIEW_STROKECOLOR);
+		returnObj.line.dashEnabled(false);
+		modelLayer.draw();
+	}
+	
+// ***********************************************************************************************************************
+// ************************************************** public stuff *******************************************************
+// ***********************************************************************************************************************
 	var returnObj = ACS.channelView(model, modelLayer);
 	
 	returnObj.getChannel = function() {
 		return dc;
 	}
 	
-	// constructor code
+	returnObj.destroy = function() {
+		// first remove all event handlers
+		inputPort.getParentComponent().events.removeHandler('componentPositionChangedEvent', componentPositionChangedEventHandlerInPort);
+		outputPort.getParentComponent().events.removeHandler('componentPositionChangedEvent', componentPositionChangedEventHandlerOutPort);
+		dc.events.removeHandler('dataChannelCompletedEvent', dataChannelCompletedEventHandler);
+		dc.events.removeHandler('selectedEvent', selectedEventHandler);
+		dc.events.removeHandler('deSelectedEvent', deSelectedEventHandler);
+		// de-select the channel
+		if (dc.getIsSelected()) {
+			model.removeItemFromSelection(dc);
+		}
+		// destroy the line
+		if (returnObj.line) returnObj.line.destroy();
+	}	
+	
+// ***********************************************************************************************************************
+// ************************************************** constructor code ***************************************************
+// ***********************************************************************************************************************
 	if (inputPort) {
 		returnObj.line.points([	outputPort.getParentComponent().getX() + ACS.vConst.DATACHANNELVIEW_OUTPUTPORTPOSITIONX, 
 								outputPort.getParentComponent().getY() + ACS.vConst.DATACHANNELVIEW_FIRSTOUTPUTPORTDOCKINGPOINTY + ACS.vConst.COMPONENTVIEW_PORTHEIGHTPLUSGAP * outputPort.getPosition(),
 								inputPort.getParentComponent().getX() - ACS.vConst.DATACHANNELVIEW_INPUTPORTLEFTOFCOMPONENT,
 								inputPort.getParentComponent().getY() + ACS.vConst.DATACHANNELVIEW_FIRSTINPUTPORTDOCKINGPOINTY + ACS.vConst.COMPONENTVIEW_PORTHEIGHTPLUSGAP * inputPort.getPosition()]);
-		setHandlerForInputPort();
+		inputPort.getParentComponent().events.registerHandler('componentPositionChangedEvent', componentPositionChangedEventHandlerInPort);
 	} else {
 		// draw a line with length == 0 - target coordinates will be set on mouse move
 		returnObj.line.points([	outputPort.getParentComponent().getX() + ACS.vConst.DATACHANNELVIEW_OUTPUTPORTPOSITIONX, 
@@ -36,24 +90,6 @@ ACS.dataChannelView = function(	dc, // ACS.dataChannel
 								outputPort.getParentComponent().getX() + ACS.vConst.DATACHANNELVIEW_OUTPUTPORTPOSITIONX, 
 								outputPort.getParentComponent().getY() + ACS.vConst.DATACHANNELVIEW_FIRSTOUTPUTPORTDOCKINGPOINTY + ACS.vConst.COMPONENTVIEW_PORTHEIGHTPLUSGAP * outputPort.getPosition()]);
 	}
-	
-	outputPort.getParentComponent().events.registerHandler('componentPositionChangedEvent', function() {
-		returnObj.line.points([	outputPort.getParentComponent().getX() + ACS.vConst.DATACHANNELVIEW_OUTPUTPORTPOSITIONX, 
-								outputPort.getParentComponent().getY() + ACS.vConst.DATACHANNELVIEW_FIRSTOUTPUTPORTDOCKINGPOINTY + ACS.vConst.COMPONENTVIEW_PORTHEIGHTPLUSGAP * outputPort.getPosition(), 
-								returnObj.line.points()[2], 
-								returnObj.line.points()[3]]);
-	});
-	
-	dc.events.registerHandler('dataChannelCompletedEvent', function() {
-		// set endpoint and and handler for inputPort and redraw
-		inputPort = dc.getInputPort();
-		returnObj.line.points([	returnObj.line.points()[0], 
-								returnObj.line.points()[1], 
-								inputPort.getParentComponent().getX() - ACS.vConst.DATACHANNELVIEW_INPUTPORTLEFTOFCOMPONENT,
-								inputPort.getParentComponent().getY() + ACS.vConst.DATACHANNELVIEW_FIRSTINPUTPORTDOCKINGPOINTY + ACS.vConst.COMPONENTVIEW_PORTHEIGHTPLUSGAP * inputPort.getPosition()]);
-		setHandlerForInputPort();
-		modelLayer.draw();
-	});
 	
 	// highlight channel when mouse is over hitGraph
 	returnObj.line.on('mouseover', function(e) {
@@ -64,6 +100,7 @@ ACS.dataChannelView = function(	dc, // ACS.dataChannel
 		returnObj.line.strokeWidth(ACS.vConst.CHANNELVIEW_STROKEWIDTH);
 		modelLayer.draw();
 	});
+	
 	// do the selecting
 	returnObj.line.on('click', function(e) {
 		if (e.evt.ctrlKey) { 
@@ -81,17 +118,12 @@ ACS.dataChannelView = function(	dc, // ACS.dataChannel
 		}
 		e.cancelBubble = true;
 	});
-	// register event handlers for selecting
-	dc.events.registerHandler('selectedEvent', function() {
-		returnObj.line.stroke(ACS.vConst.DATACHANNELVIEW_SELECTEDSTROKECOLOR);
-		returnObj.line.dashEnabled(true);
-		modelLayer.draw();
-	});
-	dc.events.registerHandler('deSelectedEvent', function() {
-		returnObj.line.stroke(ACS.vConst.DATACHANNELVIEW_STROKECOLOR);
-		returnObj.line.dashEnabled(false);
-		modelLayer.draw();
-	});		
+	
+	// register event handlers
+	outputPort.getParentComponent().events.registerHandler('componentPositionChangedEvent', componentPositionChangedEventHandlerOutPort);
+	dc.events.registerHandler('dataChannelCompletedEvent', dataChannelCompletedEventHandler);
+	dc.events.registerHandler('selectedEvent', selectedEventHandler);
+	dc.events.registerHandler('deSelectedEvent', deSelectedEventHandler);
 	
 	return returnObj;
 }

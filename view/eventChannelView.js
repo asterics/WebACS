@@ -2,28 +2,16 @@ ACS.eventChannelView = function(ec, // ACS.eventChannel
 								startComponent, // ACS.component
 								model, // ACS.model
 								modelLayer) { // Kinetic.Layer
-	// private variables
+								
+// ***********************************************************************************************************************
+// ************************************************** private variables **************************************************
+// ***********************************************************************************************************************
 	var endComponent = null;
 	
-	// private methods
-	var setHandlerForListener = function() {
-		endComponent.events.registerHandler('componentPositionChangedEvent', function() {
-			returnObj.line.points([	returnObj.line.points()[0], 
-									returnObj.line.points()[1], 
-									endComponent.getX() + ACS.vConst.EVENTCHANNELVIEW_LISTENERPOSX,
-									endComponent.getY() + getComponentHeight(endComponent) + ACS.vConst.EVENTCHANNELVIEW_LISTENERBELOWCOMPONENT]);
-		});
-	}
-	
-	var setHandlerForTrigger = function() {
-		startComponent.events.registerHandler('componentPositionChangedEvent', function() {
-			returnObj.line.points([	startComponent.getX() + ACS.vConst.EVENTCHANNELVIEW_TRIGGERPOSX,
-									startComponent.getY() + getComponentHeight(startComponent) + ACS.vConst.EVENTCHANNELVIEW_TRIGGERBELOWCOMPONENT, 
-									returnObj.line.points()[2], 
-									returnObj.line.points()[3]]);
-		});
-	}
-	
+// ***********************************************************************************************************************
+// ************************************************** private methods ****************************************************
+// ***********************************************************************************************************************
+	// ********************************************** private helper methods *********************************************
 	var getComponentHeight = function(component) {
 		// determine height of the component, depending on the amount of input- and/or output-ports
 		var elementHeight = ACS.vConst.COMPONENTVIEW_ELEMENTHEIGHT;
@@ -36,8 +24,44 @@ ACS.eventChannelView = function(ec, // ACS.eventChannel
 		}
 		return elementHeight;
 	}
+	
+	// ********************************************** handlers ***********************************************************
+	var componentPositionChangedEventHandlerListener = function() {
+			returnObj.line.points([	returnObj.line.points()[0], 
+									returnObj.line.points()[1], 
+									endComponent.getX() + ACS.vConst.EVENTCHANNELVIEW_LISTENERPOSX,
+									endComponent.getY() + getComponentHeight(endComponent) + ACS.vConst.EVENTCHANNELVIEW_LISTENERBELOWCOMPONENT]);
+	}
+	
+	var componentPositionChangedEventHandlerTrigger = function() {
+			returnObj.line.points([	startComponent.getX() + ACS.vConst.EVENTCHANNELVIEW_TRIGGERPOSX,
+									startComponent.getY() + getComponentHeight(startComponent) + ACS.vConst.EVENTCHANNELVIEW_TRIGGERBELOWCOMPONENT, 
+									returnObj.line.points()[2], 
+									returnObj.line.points()[3]]);
+	}
+	
+	var selectedEventHandler = function() {
+		// make sure selection is only done once, if several channels are connected
+		var test = returnObj.line.dashEnabled();
+		if (!returnObj.line.dashEnabled()) {
+			returnObj.line.stroke(ACS.vConst.EVENTCHANNELVIEW_SELECTEDSTROKECOLOR);
+			returnObj.line.dashEnabled(true);
+			modelLayer.draw();
+		}
+	}
 
-	// public stuff
+	var deSelectedEventHandler = function() {
+		// make sure deSelection is only done once, if several channels are connected
+		if (returnObj.line.dashEnabled()) {
+			returnObj.line.stroke(ACS.vConst.EVENTCHANNELVIEW_STROKECOLOR);
+			returnObj.line.dashEnabled(false);
+			modelLayer.draw();
+		}
+	}
+
+// ***********************************************************************************************************************
+// ************************************************** public stuff *******************************************************
+// ***********************************************************************************************************************
 	var returnObj = ACS.channelView(model, modelLayer);
 	
 	returnObj.ecList = [];
@@ -48,7 +72,7 @@ ACS.eventChannelView = function(ec, // ACS.eventChannel
 								startComponent.getY() + getComponentHeight(startComponent) + ACS.vConst.EVENTCHANNELVIEW_TRIGGERBELOWCOMPONENT,
 								returnObj.line.points()[2], 
 								returnObj.line.points()[3]]);
-		setHandlerforTrigger();
+		startComponent.events.registerHandler('componentPositionChangedEvent', componentPositionChangedEventHandlerTrigger);
 	}
 	
 	returnObj.getStartComponent = function(c) {
@@ -61,14 +85,32 @@ ACS.eventChannelView = function(ec, // ACS.eventChannel
 								returnObj.line.points()[1],
 								endComponent.getX() + ACS.vConst.EVENTCHANNELVIEW_LISTENERPOSX,
 								endComponent.getY() + getComponentHeight(endComponent) + ACS.vConst.EVENTCHANNELVIEW_LISTENERBELOWCOMPONENT]);
-		setHandlerForListener();
+		endComponent.events.registerHandler('componentPositionChangedEvent', componentPositionChangedEventHandlerListener);
 	}
 	
 	returnObj.getEndComponent = function(c) {
 		return endComponent;
 	}
 	
-	// constructor code
+	returnObj.destroy = function() {
+		// first remove all event handlers
+		startComponent.events.removeHandler('componentPositionChangedEvent', componentPositionChangedEventHandlerTrigger);
+		endComponent.events.removeHandler('componentPositionChangedEvent', componentPositionChangedEventHandlerListener);
+		for (var i = 0; i < returnObj.ecList.length; i++) {
+			returnObj.ecList[i].events.removeHandler('selectedEvent', selectedEventHandler);
+			returnObj.ecList[i].events.removeHandler('deSelectedEvent', deSelectedEventHandler);
+			// de-select the channels
+			if (returnObj.ecList[i].getIsSelected()) {
+				model.removeItemFromSelection(returnObj.ecList[i]);
+			}			
+		}
+		// then destroy the line
+		if (returnObj.line) returnObj.line.destroy();
+	}
+
+// ***********************************************************************************************************************
+// ************************************************** constructor code ***************************************************
+// ***********************************************************************************************************************
 	returnObj.line.stroke(ACS.vConst.EVENTCHANNELVIEW_STROKECOLOR);
 	if (ec && (ec !== {})) {
 		// set start- and endComponent according to the eventChannel passed in the constructor
@@ -79,15 +121,15 @@ ACS.eventChannelView = function(ec, // ACS.eventChannel
 								startComponent.getY() + getComponentHeight(startComponent) + ACS.vConst.EVENTCHANNELVIEW_TRIGGERBELOWCOMPONENT,
 								endComponent.getX() + ACS.vConst.EVENTCHANNELVIEW_LISTENERPOSX,
 								endComponent.getY() + getComponentHeight(endComponent) + ACS.vConst.EVENTCHANNELVIEW_LISTENERBELOWCOMPONENT]);
-		setHandlerForTrigger();
-		setHandlerForListener();	
+		startComponent.events.registerHandler('componentPositionChangedEvent', componentPositionChangedEventHandlerTrigger);
+		endComponent.events.registerHandler('componentPositionChangedEvent', componentPositionChangedEventHandlerListener);
 	} else if (startComponent) {
 		// if there is no complete channel yet (i.e. it is being drawn), draw a line with length == 0 - target coordinates will be set on mouse move
 		returnObj.line.points([	startComponent.getX() + ACS.vConst.EVENTCHANNELVIEW_TRIGGERPOSX,
 								startComponent.getY() + getComponentHeight(startComponent) + ACS.vConst.EVENTCHANNELVIEW_TRIGGERBELOWCOMPONENT,
 								startComponent.getX() + ACS.vConst.EVENTCHANNELVIEW_TRIGGERPOSX,
 								startComponent.getY() + getComponentHeight(startComponent) + ACS.vConst.EVENTCHANNELVIEW_TRIGGERBELOWCOMPONENT]);
-		setHandlerForTrigger();	
+		startComponent.events.registerHandler('componentPositionChangedEvent', componentPositionChangedEventHandlerTrigger);	
 	}
 	// highlight channel when mouse is over hitGraph
 	returnObj.line.on('mouseover', function(e) {
@@ -122,23 +164,8 @@ ACS.eventChannelView = function(ec, // ACS.eventChannel
 	});
 	// register event handlers for selecting
 	for (var i = 0; i < returnObj.ecList.length; i++) {
-		returnObj.ecList[i].events.registerHandler('selectedEvent', function() {
-			// make sure selection is only done once, if several channels are connected
-			var test = returnObj.line.dashEnabled();
-			if (!returnObj.line.dashEnabled()) {
-				returnObj.line.stroke(ACS.vConst.EVENTCHANNELVIEW_SELECTEDSTROKECOLOR);
-				returnObj.line.dashEnabled(true);
-				modelLayer.draw();
-			}
-		});
-		returnObj.ecList[i].events.registerHandler('deSelectedEvent', function() {
-			// make sure deSelection is only done once, if several channels are connected
-			if (returnObj.line.dashEnabled()) {
-				returnObj.line.stroke(ACS.vConst.EVENTCHANNELVIEW_STROKECOLOR);
-				returnObj.line.dashEnabled(false);
-				modelLayer.draw();
-			}
-		});
+		returnObj.ecList[i].events.registerHandler('selectedEvent', selectedEventHandler);
+		returnObj.ecList[i].events.registerHandler('deSelectedEvent', deSelectedEventHandler);
 	}
 
 	return returnObj;

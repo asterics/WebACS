@@ -1,44 +1,61 @@
 ACS.view = function(modelList) { // ACS.modelList
-	// private variables
+
+// ***********************************************************************************************************************
+// ************************************************** private variables **************************************************
+// ***********************************************************************************************************************
 	var menu = ACS.menuView(modelList);
 	var canvas = ACS.canvasView(modelList);
 	var propertyEditor = ACS.propertyEditor(modelList);
 
-	// private methods
-	
-	// public stuff
-	var returnObj = {};
+// ***********************************************************************************************************************
+// ************************************************** private methods ****************************************************
+// ***********************************************************************************************************************
+	var stopEvent = function(e) {
+		if (e.stopPropagation) {
+			e.stopPropagation();
+		} else {
+			e.cancelBubble = true;
+		}
+		if (e.preventDefault) e.preventDefault();
+	}
 
-	// constructor code
-	menu.setComponentMenu();
-	// catch keyboard shortcuts
-	document.addEventListener('keydown', function(e) {
-		switch (e.keyCode) {
-			case 49: // Ctrl-1 for menu
+	var handleKeydown = function(e) {
+		// catch Del to delete selected items
+		if (e.keyCode === 46) { // Del can't be caught by keyPress for not all browsers act consistently (see: http://unixpapa.com/js/key.html)
+			deleteSelection();
+			stopEvent(e);
+			return false;		
+		}
+	}
+	
+	var handleKeypress = function(e) {
+		switch (e.charCode) {
+			case 109: // Ctrl-m for menu
 				if (e.ctrlKey) {
-					e.cancelBubble = true;
 					var tablist = document.getElementById('mainMenuTablist').getElementsByClassName('tab');
 					for (var i = 0; i < tablist.length; i++) {
 						if (tablist.item(i).attributes.getNamedItem('aria-selected').value === 'true') {
 							tablist.item(i).focus();
 						}
 					}
+					stopEvent(e);
+					return false;
 				}
 				break;
-			case 50: // Ctrl-2 for model panel
+			case 102: // Ctrl-f for model panel (file)
 				if (e.ctrlKey) {
-					e.cancelBubble = true;
 					var tablist = document.getElementById(ACS.vConst.CANVASVIEW_TABLIST).getElementsByClassName('tab');
 					for (var i = 0; i < tablist.length; i++) {
 						if (tablist.item(i).attributes.getNamedItem('aria-selected').value === 'true') {
 							tablist.item(i).focus();
 						}
 					}
+					stopEvent(e);
+					return false;
 				}
 				break;
-			case 51: // Ctrl-3 for model designer
+			case 100: // Ctrl-d for model designer
 				if (e.ctrlKey) {
-					e.cancelBubble = true;
 					var tablist = document.getElementById(ACS.vConst.CANVASVIEW_TABLIST).getElementsByClassName('tab');
 					for (var i = 0; i < tablist.length; i++) {
 						if (tablist.item(i).attributes.getNamedItem('aria-selected').value === 'true') {
@@ -48,11 +65,12 @@ ACS.view = function(modelList) { // ACS.modelList
 							if (tab) tab.click();
 						}
 					}
+					stopEvent(e);
+					return false;
 				}
 				break;				
-			case 52: // Ctrl-4 for gui designer
+			case 103: // Ctrl-g for gui designer
 				if (e.ctrlKey) {
-					e.cancelBubble = true;
 					var tablist = document.getElementById(ACS.vConst.CANVASVIEW_TABLIST).getElementsByClassName('tab');
 					for (var i = 0; i < tablist.length; i++) {
 						if (tablist.item(i).attributes.getNamedItem('aria-selected').value === 'true') {
@@ -62,21 +80,53 @@ ACS.view = function(modelList) { // ACS.modelList
 							if (tab) tab.click();
 						}
 					}
+					stopEvent(e);
+					return false;
 				}
 				break;
-			case 53: // Ctrl-5 for property editor
+			case 112: // Ctrl-p for property editor
 				if (e.ctrlKey) {
-					e.cancelBubble = true;
-					var tablist = document.getElementById('propertyEditorTablist').getElementsByClassName('tab');
+					var tablist = document.getElementById('propertyEditorTabList').getElementsByClassName('tab');
 					for (var i = 0; i < tablist.length; i++) {
 						if (tablist.item(i).attributes.getNamedItem('aria-selected').value === 'true') {
 							tablist.item(i).focus();
 						}
 					}
+					stopEvent(e);
+					return false;
 				}
-				break;				
-		}
-	});	
+				break;
+			case 122: // Ctrl-z for undo
+				if (e.ctrlKey) {
+					modelList.getActModel().undoStack.pop().undo();
+				}
+			case 121: // Ctrl-y for redo
+				if (e.ctrlKey) {
+					modelList.getActModel().redoStack.pop().execute();
+				}
+		}			
+	}
+	
+	var deleteSelection = function() {
+		log.debug('deleteBtnPressed');
+		var remAct = ACS.removeItemListAction(modelList.getActModel());
+		remAct.execute();
+	}
+	
+// ***********************************************************************************************************************
+// ************************************************** public stuff *******************************************************
+// ***********************************************************************************************************************
+	var returnObj = {};
+
+// ***********************************************************************************************************************
+// ************************************************** constructor code ***************************************************
+// ***********************************************************************************************************************
+	menu.setComponentMenu();
+	// catch keyboard shortcuts
+	document.addEventListener('keydown', handleKeydown);
+	document.addEventListener('keypress', handleKeypress);
+	// register handlers for button-presses in menu
+	menu.events.registerHandler('deleteBtnPressedEvent', deleteSelection);
 		
 	return returnObj;
 }

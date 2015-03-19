@@ -1,7 +1,9 @@
 ACS.modelView = function(	modelContainerId, // String
 							model) { // ACS.model
 							
-	// private variables
+// ***********************************************************************************************************************
+// ************************************************** private variables **************************************************
+// ***********************************************************************************************************************
 	var modelTabPanel = ACS.tabPanel(modelContainerId, 'modelTab', 'modelPanel');
 	var componentViewList = []; // Array<ACS.componentView>
 	var dataChannelViewList = []; // Array<ACS.dataChannelView>
@@ -13,7 +15,9 @@ ACS.modelView = function(	modelContainerId, // String
 	var guiLayer; // Kinetic.Layer
 	var focusRect = null; // Kinetic.Rect
 	
-	// private methods
+// ***********************************************************************************************************************
+// ************************************************** private methods ****************************************************
+// ***********************************************************************************************************************
 	var drawCompleteModel = function() {
 		var i;
 		// destroy and delete the old views:
@@ -74,58 +78,6 @@ ACS.modelView = function(	modelContainerId, // String
 		}
 		// actually do the drawing:
 		modelLayer.draw();
-	}
-	
-	var eventChannelExists = function(ec) {
-		for (var i = 0; i < model.eventChannelList.length; i++) {
-			if (model.eventChannelList[i] === ec) return true;
-		}
-		return false;
-	}
-	
-	var getEventChannelView = function(startC, endC) {
-		for (var i = 0; i < eventChannelViewList.length; i++) {
-			if ((eventChannelViewList[i].getStartComponent() === startC) && (eventChannelViewList[i].getEndComponent() === endC)) {
-				return eventChannelViewList[i];
-			}
-		}
-		return null;
-	}
-	
-	var sortCorners = function(shape) { // returns an Object defining the corners of the given Kinetic.Shape: tl: top-left, tr: top-right, br: bottom-right, bl: bottom-left	
-		var corners = {tl: [], tr: [], br: [], bl: []};
-		// set all x-coordinates
-		if (shape.width() < 0) {
-			corners.tl[0] = shape.x() + shape.width();
-			corners.tr[0] = shape.x();
-			corners.br[0] = shape.x();
-			corners.bl[0] = shape.x() + shape.width();
-		} else {
-			corners.tl[0] = shape.x();
-			corners.tr[0] = shape.x() + shape.width();
-			corners.br[0] = shape.x() + shape.width();
-			corners.bl[0] = shape.x();
-		}
-		// set all y-coordinates
-		if (shape.height() < 0) {
-			corners.tl[1] = shape.y() + shape.height();
-			corners.tr[1] = shape.y() + shape.height();
-			corners.br[1] = shape.y();
-			corners.bl[1] = shape.y();
-		} else {
-			corners.tl[1] = shape.y();
-			corners.tr[1] = shape.y();
-			corners.br[1] = shape.y() + shape.height();
-			corners.bl[1] = shape.y() + shape.height();
-		}
-		return corners;
-	}
-	
-	var pointInRect = function(x, y, rectCorners) { // rectCorners is an Object defining the corners of a rectangle: tl: top-left, tr: top-right, br: bottom-right, bl: bottom-left
-		if (((x > rectCorners.tl[0]) && (x < rectCorners.tr[0])) && ((y > rectCorners.tl[1]) && (y < rectCorners.bl[1]))) {
-			return true;
-		}
-		return false;
 	}
 	
 	var selectInFocusRect = function() {
@@ -194,9 +146,150 @@ ACS.modelView = function(	modelContainerId, // String
 				log.debug('eventChannel selected');
 			}
 		}
+	}	
+	
+	// ********************************************** private helper methods *********************************************
+	var eventChannelExists = function(ec) {
+		for (var i = 0; i < model.eventChannelList.length; i++) {
+			if (model.eventChannelList[i] === ec) return true;
+		}
+		return false;
 	}
 	
-	// public stuff
+	var getEventChannelView = function(startC, endC) {
+		for (var i = 0; i < eventChannelViewList.length; i++) {
+			if ((eventChannelViewList[i].getStartComponent() === startC) && (eventChannelViewList[i].getEndComponent() === endC)) {
+				return eventChannelViewList[i];
+			}
+		}
+		return null;
+	}
+	
+	var sortCorners = function(shape) { // returns an Object defining the corners of the given Kinetic.Shape: tl: top-left, tr: top-right, br: bottom-right, bl: bottom-left	
+		var corners = {tl: [], tr: [], br: [], bl: []};
+		// set all x-coordinates
+		if (shape.width() < 0) {
+			corners.tl[0] = shape.x() + shape.width();
+			corners.tr[0] = shape.x();
+			corners.br[0] = shape.x();
+			corners.bl[0] = shape.x() + shape.width();
+		} else {
+			corners.tl[0] = shape.x();
+			corners.tr[0] = shape.x() + shape.width();
+			corners.br[0] = shape.x() + shape.width();
+			corners.bl[0] = shape.x();
+		}
+		// set all y-coordinates
+		if (shape.height() < 0) {
+			corners.tl[1] = shape.y() + shape.height();
+			corners.tr[1] = shape.y() + shape.height();
+			corners.br[1] = shape.y();
+			corners.bl[1] = shape.y();
+		} else {
+			corners.tl[1] = shape.y();
+			corners.tr[1] = shape.y();
+			corners.br[1] = shape.y() + shape.height();
+			corners.bl[1] = shape.y() + shape.height();
+		}
+		return corners;
+	}
+	
+	var pointInRect = function(x, y, rectCorners) { // rectCorners is an Object defining the corners of a rectangle: tl: top-left, tr: top-right, br: bottom-right, bl: bottom-left
+		if (((x > rectCorners.tl[0]) && (x < rectCorners.tr[0])) && ((y > rectCorners.tl[1]) && (y < rectCorners.bl[1]))) {
+			return true;
+		}
+		return false;
+	}
+	
+	// ********************************************** handlers ***********************************************************
+	var modelChangedEventHandler = function() {
+		drawCompleteModel();
+	}
+	
+	var componentAddedEventHandler = function() {
+		if (model.componentList.length > 0) componentViewList.push(ACS.componentView(model.componentList[model.componentList.length - 1], model, returnObj, modelLayer, guiLayer));
+		modelLayer.draw();
+	}
+	
+	var componentRemovedEventHandler = function() {
+		var i = 0;
+		for (var i = 0; i < componentViewList.length; i++) {
+			var found = false;
+			for (var j = 0; j < model.componentList.length; j++) {
+				if (componentViewList[i].getComponent() === model.componentList[j]) {
+					found = true;
+				}
+			}
+			if (!found) {
+				componentViewList[i].destroy();
+				componentViewList.splice(i, 1);
+				modelLayer.draw();
+			}
+		}
+	}
+	
+	var dataChannelAddedEventHandler = function() {
+		dataChannelViewList.push(ACS.dataChannelView(model.dataChannelList[model.dataChannelList.length -1], model, modelLayer));
+		modelLayer.draw();
+	}
+	
+	var dataChannelRemovedEventHandler = function() {
+		var found = false;
+		var i = 0;
+		while (!found && (i < dataChannelViewList.length)) {
+			if (dataChannelViewList[i].getChannel() !== model.dataChannelList[i]) {
+				dataChannelViewList[i].destroy();
+				dataChannelViewList.splice(i, 1);
+				modelLayer.draw();
+				found = true;
+			}
+			i++;
+		}
+	}
+	
+	var eventChannelAddedEventHandler = function() {
+		var ecv = getEventChannelView(model.eventChannelList[model.eventChannelList.length -1].trigger.getParentComponent(), model.eventChannelList[model.eventChannelList.length -1].listener.getParentComponent());
+		if (ecv) {
+			ecv.ecList.push(model.eventChannelList[model.eventChannelList.length -1]);
+		} else {
+			eventChannelViewList.push(ACS.eventChannelView(model.eventChannelList[model.eventChannelList.length -1], null, model, modelLayer));
+			modelLayer.draw();
+		}	
+	}
+	
+	var eventChannelRemovedEventHandler = function() {
+		var found = false;
+		var i = 0;
+		while (!found && (i < eventChannelViewList.length)) {
+			var j = 0;
+			while (!found && (j < eventChannelViewList[i].ecList.length)) {
+				if (!eventChannelExists(eventChannelViewList[i].ecList[j])) {
+					eventChannelViewList[i].ecList.splice(j, 1);
+					found = true;
+				}
+				j++;
+			}
+			i++;
+		}
+	}
+	
+	var eventChannelViewMightNeedRemovingEventHandler = function() {
+		// this event gets fired, when some items have been selected and deleted
+		var i = 0;
+		while (i < eventChannelViewList.length) {
+			if (eventChannelViewList[i].ecList.length === 0) {
+				eventChannelViewList[i].destroy();
+				eventChannelViewList.splice(i, 1);
+			} else {
+				i++;
+			}
+		}
+		modelLayer.draw();
+	}
+	
+// ***********************************************************************************************************************
+// ************************************************** public stuff *******************************************************
+// ***********************************************************************************************************************
 	var returnObj = {};
 	
 	returnObj.selectedComponentsGroup = null;
@@ -232,7 +325,9 @@ ACS.modelView = function(	modelContainerId, // String
 		return eventChannelViewList;
 	}
 	
-	// constructor code
+// ***********************************************************************************************************************
+// ************************************************** constructor code ***************************************************
+// ***********************************************************************************************************************
 	// initiate the tabPanel:
 	var ul = document.createElement('ul');
 	ul.setAttribute('id', modelContainerId + 'TabList');
@@ -314,76 +409,14 @@ ACS.modelView = function(	modelContainerId, // String
 	// draw the model
 	drawCompleteModel();
 	// register event-handlers
-	model.events.registerHandler('modelChangedEvent', function() {
-		drawCompleteModel();
-	});
-	
-	model.events.registerHandler('componentAddedEvent', function() {
-		if (model.componentList.length > 0) componentViewList.push(ACS.componentView(model.componentList[model.componentList.length - 1], model, returnObj, modelLayer, guiLayer));
-		modelLayer.draw();
-	});
-
-	model.events.registerHandler('componentRemovedEvent', function() {
-		var i = 0;
-		for (var i = 0; i < componentViewList.length; i++) {
-			var found = false;
-			for (var j = 0; j < model.componentList.length; j++) {
-				if (componentViewList[i].getComponent() === model.componentList[j]) {
-					found = true;
-				}
-			}
-			if (!found) {
-				componentViewList[i].destroy();
-				componentViewList.splice(i, 1);
-				modelLayer.draw();
-			}
-		}
-	});
-
-	model.events.registerHandler('dataChannelAddedEvent', function() {
-		dataChannelViewList.push(ACS.dataChannelView(model.dataChannelList[model.dataChannelList.length -1], model, modelLayer));
-		modelLayer.draw();
-	});
-
-	model.events.registerHandler('dataChannelRemovedEvent', function() {
-		var found = false;
-		var i = 0;
-		while (!found && (i < dataChannelViewList.length)) {
-			if (dataChannelViewList[i].getChannel() !== model.dataChannelList[i]) {
-				dataChannelViewList[i].destroy();
-				dataChannelViewList.splice(i, 1);
-				modelLayer.draw();
-				found = true;
-			}
-			i++;
-		}
-	});
-
-	model.events.registerHandler('eventChannelAddedEvent', function() {
-		var ecv = getEventChannelView(model.eventChannelList[model.eventChannelList.length -1].listener.getParentComponent(), model.eventChannelList[model.eventChannelList.length -1].trigger.getParentComponent());
-		if (ecv) {
-			ecv.ecList.push(model.eventChannelList[model.eventChannelList.length -1]);
-		} else {
-			eventChannelViewList.push(ACS.eventChannelView(model.eventChannelList[model.eventChannelList.length -1], null, model, modelLayer));
-			modelLayer.draw();
-		}	
-	});
-
-	model.events.registerHandler('eventChannelRemovedEvent', function() {
-		var found = false;
-		var i = 0;
-		while (!found && (i < eventChannelViewList.length)) {
-			var j = 0;
-			while (!found && (eventChannelViewList[i].ecList.length)) {
-				if (!eventChannelExists(eventChannelViewList[i].ecList[j])) {
-					eventChannelViewList[i].ecList.splice(j, 1);
-					found = true;
-				}
-				j++;
-			}
-			i++;
-		}
-	});
+	model.events.registerHandler('modelChangedEvent', modelChangedEventHandler);
+	model.events.registerHandler('componentAddedEvent', componentAddedEventHandler);
+	model.events.registerHandler('componentRemovedEvent', componentRemovedEventHandler);
+	model.events.registerHandler('dataChannelAddedEvent', dataChannelAddedEventHandler);
+	model.events.registerHandler('dataChannelRemovedEvent', dataChannelRemovedEventHandler);
+	model.events.registerHandler('eventChannelAddedEvent', eventChannelAddedEventHandler);
+	model.events.registerHandler('eventChannelRemovedEvent', eventChannelRemovedEventHandler);
+	model.events.registerHandler('eventChannelViewMightNeedRemovingEvent', eventChannelViewMightNeedRemovingEventHandler);
 	
 	// register mouse-event handlers
 	modelLayer.on('mousemove', function() {
@@ -403,7 +436,9 @@ ACS.modelView = function(	modelContainerId, // String
 	
 	modelLayer.on('click', function(e) {
 		if ((model.dataChannelList.length > 0) && (!model.dataChannelList[model.dataChannelList.length - 1].getInputPort())) {
-			model.removeDataChannel(model.dataChannelList[model.dataChannelList.length - 1]);
+			// started channel is dropped, because click was not on an inputPort
+			var ch = model.undoStack.pop();
+			ch.undo();
 		} else if ((eventChannelViewList.length > 0) && (!eventChannelViewList[eventChannelViewList.length - 1].getEndComponent())) {
 			eventChannelViewList[eventChannelViewList.length - 1].destroy();
 			eventChannelViewList.pop();

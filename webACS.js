@@ -1,5 +1,5 @@
 ACS.webACS = function() {
-	// private variables
+	// *************************************************************************************************************************
 	var modelList = ACS.modelList();
 	var view = ACS.view(modelList);
 

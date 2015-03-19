@@ -1,8 +1,13 @@
 ACS.model = function(filename) { // String
-	// private variables
+
+// ***********************************************************************************************************************
+// ************************************************** private variables **************************************************
+// ***********************************************************************************************************************
 	var componentCollection; // XML Document
 	
-	// private methods
+// ***********************************************************************************************************************
+// ************************************************** private methods ****************************************************
+// ***********************************************************************************************************************
 	var loadDefaultComponentCollection = function() {
 		var xmlObj;
 		var httpRequest = new XMLHttpRequest();
@@ -385,7 +390,9 @@ ACS.model = function(filename) { // String
 		return d + '/' + m + '/' + y + '_' + h + min;
 	}
 	
-	// public stuff
+// ***********************************************************************************************************************
+// ************************************************** public stuff *******************************************************
+// ***********************************************************************************************************************
 	var returnObj = {};
 	
 	returnObj.componentList = []; // Array<ACS.component>
@@ -578,14 +585,8 @@ ACS.model = function(filename) { // String
 		return xmlString;
 	}
 	
-	returnObj.addComponent = function(comp) { // ACS.component
-		// TODO: this function might prove useless, in which case it can be removed
-		this.events.fireEvent('componentAddedEvent');
-		returnObj.hasBeenChanged = true;
-	}
-	
-	returnObj.addComponentByName = function(compName) {
-		// does nothing if compName does not exist
+	returnObj.initiateComponentByName = function(compName) {
+		// returns null if compName does not exist
 		var compTypeId;
 		if (compName.indexOf('Oska') > -1) { 
 			compTypeId = compName;
@@ -607,27 +608,26 @@ ACS.model = function(filename) { // String
 			// find a free position for the new component
 			var pos = getFreePosition();
 			// build the component-object:
-			var newIdx = returnObj.componentList.length;
-			returnObj.componentList[newIdx] = ACS.component(compName + '.' + nextCompNameNumber(compName),
-															compTypeId,
-															compXml.getElementsByTagName('description').item(0).textContent,
-															compXml.getElementsByTagName('singleton').item(0).textContent,
-															pos[0],
-															pos[1],
-															compType,
-															true,
-															true);
+			var newComp = ACS.component(compName + '.' + nextCompNameNumber(compName),
+										compTypeId,
+										compXml.getElementsByTagName('description').item(0).textContent,
+										compXml.getElementsByTagName('singleton').item(0).textContent,
+										pos[0],
+										pos[1],
+										compType,
+										false,
+										true);
 			// build inputPortList:
 			var inputPorts = compXml.getElementsByTagName('inputPort');
 			for (var j = 0; j < inputPorts.length; j++) {
 				var portDataType = getDataType(inputPorts.item(j).getElementsByTagName('dataType').item(0).textContent);
 				// build the port object:
-				returnObj.componentList[newIdx].inputPortList[j] = ACS.port(inputPorts.item(j).attributes.getNamedItem('id').textContent,
-																			returnObj.componentList[newIdx],
-																			ACS.portType.INPUT,
-																			portDataType,
-																			j,
-																			inputPorts.item(j).getElementsByTagName('mustBeConnected').item(0).textContent);
+				newComp.inputPortList[j] = ACS.port(inputPorts.item(j).attributes.getNamedItem('id').textContent,
+													newComp,
+													ACS.portType.INPUT,
+													portDataType,
+													j,
+													inputPorts.item(j).getElementsByTagName('mustBeConnected').item(0).textContent);
 				// TODO: add the port's properties
 			}
 			// build outputPortList:
@@ -635,40 +635,40 @@ ACS.model = function(filename) { // String
 			for (var j = 0; j < outputPorts.length; j++) {
 				var portDataType = getDataType(outputPorts.item(j).getElementsByTagName('dataType').item(0).textContent);
 				// build the port object:
-				returnObj.componentList[newIdx].outputPortList[j] = ACS.port(	outputPorts.item(j).attributes.getNamedItem('id').textContent,
-																				returnObj.componentList[newIdx],
-																				ACS.portType.OUTPUT,
-																				portDataType,
-																				j,
-																				false);
+				newComp.outputPortList[j] = ACS.port(	outputPorts.item(j).attributes.getNamedItem('id').textContent,
+														newComp,
+														ACS.portType.OUTPUT,
+														portDataType,
+														j,
+														false);
 				// TODO: add the port's properties
 			}
 			// build listenEventList:
 			var listenEvents = compXml.getElementsByTagName('eventListenerPort');
 			for (var j = 0; j < listenEvents.length; j++) {
-				returnObj.componentList[newIdx].listenEventList[j] = ACS.event(	listenEvents.item(j).attributes.getNamedItem('id').textContent,
-																				listenEvents.item(j).getElementsByTagName('description').item(0).textContent,
-																				returnObj.componentList[newIdx]);
+				newComp.listenEventList[j] = ACS.event(	listenEvents.item(j).attributes.getNamedItem('id').textContent,
+														listenEvents.item(j).getElementsByTagName('description').item(0).textContent,
+														newComp);
 			}	
 			// build triggerEventList:
 			var triggerEvents = compXml.getElementsByTagName('eventTriggererPort');
 			for (var j = 0; j < triggerEvents.length; j++) {
-				returnObj.componentList[newIdx].triggerEventList[j] = ACS.event(triggerEvents.item(j).attributes.getNamedItem('id').textContent,
-																				triggerEvents.item(j).getElementsByTagName('description').item(0).textContent,
-																				returnObj.componentList[newIdx]);
+				newComp.triggerEventList[j] = ACS.event(triggerEvents.item(j).attributes.getNamedItem('id').textContent,
+														triggerEvents.item(j).getElementsByTagName('description').item(0).textContent,
+														newComp);
 			}
 			// build propertyList:
 			var properties = compXml.getElementsByTagName('property');
 			for (j = 0; j < properties.length; j++) {
-				returnObj.componentList[newIdx].propertyList.push(ACS.property(properties.item(j).attributes.getNamedItem('name').textContent, 
-																			   getDataType(properties.item(j).attributes.getNamedItem('type').textContent), 
-																			   properties.item(j).attributes.getNamedItem('value').textContent));
+				newComp.propertyList.push(ACS.property(properties.item(j).attributes.getNamedItem('name').textContent, 
+													   getDataType(properties.item(j).attributes.getNamedItem('type').textContent), 
+													   properties.item(j).attributes.getNamedItem('value').textContent));
 				if (properties.item(j).attributes.getNamedItem('description'))
-					returnObj.componentList[newIdx].propertyList[returnObj.componentList[newIdx].propertyList.length - 1].description = properties.item(j).attributes.getNamedItem('description').textContent;
+					newComp.propertyList[newComp.propertyList.length - 1].description = properties.item(j).attributes.getNamedItem('description').textContent;
 				if (properties.item(j).attributes.getNamedItem('combobox'))
-					returnObj.componentList[newIdx].propertyList[returnObj.componentList[newIdx].propertyList.length - 1].combobox = properties.item(j).attributes.getNamedItem('combobox').textContent;
+					newComp.propertyList[newComp.propertyList.length - 1].combobox = properties.item(j).attributes.getNamedItem('combobox').textContent;
 				if (properties.item(j).attributes.getNamedItem('getStringList'))
-					returnObj.componentList[newIdx].propertyList[returnObj.componentList[newIdx].propertyList.length - 1].getStringList = properties.item(j).attributes.getNamedItem('getStringList').textContent;
+					newComp.propertyList[newComp.propertyList.length - 1].getStringList = properties.item(j).attributes.getNamedItem('getStringList').textContent;
 			}
 			// build the gui object:
 			if (compXml.getElementsByTagName('gui').item(0)) {
@@ -676,31 +676,25 @@ ACS.model = function(filename) { // String
 				if (compXml.getElementsByTagName('gui').item(0).attributes.getNamedItem('IsExternalGUIElement')) {
 					isExternal = compXml.getElementsByTagName('gui').item(0).attributes.getNamedItem('IsExternalGUIElement').textContent;
 				}
-				returnObj.componentList[newIdx].gui = ACS.gui(	0,
-																0,
-																parseInt(compXml.getElementsByTagName('gui').item(0).getElementsByTagName('width').item(0).textContent),
-																parseInt(compXml.getElementsByTagName('gui').item(0).getElementsByTagName('height').item(0).textContent),
-																isExternal);
+				newComp.gui = ACS.gui(	0,
+										0,
+										parseInt(compXml.getElementsByTagName('gui').item(0).getElementsByTagName('width').item(0).textContent),
+										parseInt(compXml.getElementsByTagName('gui').item(0).getElementsByTagName('height').item(0).textContent),
+										isExternal);
 			}
-			returnObj.hasBeenChanged = true;
-			this.events.fireEvent('componentAddedEvent');
+			return newComp;
 		}
+		return null;
 	}
 	
+	returnObj.addComponent = function(comp) { // ACS.component
+		returnObj.componentList.push(comp);
+		this.events.fireEvent('componentAddedEvent');
+		returnObj.hasBeenChanged = true;
+	}	
+	
 	returnObj.removeComponent = function(comp) { // ACS.component
-		if (returnObj.componentList.indexOf(comp) > -1) {
-			// first delete all channels that lead to or from this component
-			for (var i = 0; i < returnObj.dataChannelList.length; i++) {
-				if (returnObj.dataChannelList[i].getInputPort().getParentComponent() === comp) returnObj.removeDataChannel(returnObj.dataChannelList[i]);
-				if (returnObj.dataChannelList[i].getOutputPort().getParentComponent() === comp) returnObj.removeDataChannel(returnObj.dataChannelList[i]);
-			}
-			for (var i = 0; i < returnObj.eventChannelList.length; i++) {
-				if (returnObj.eventChannelList[i].listener.getParentComponent() === comp) returnObj.removeEventChannel(returnObj.eventChannelList[i]);
-				if (returnObj.eventChannelList[i].trigger.getParentComponent() === comp) returnObj.removeEventChannel(returnObj.eventChannelList[i]);
-			}
-			// then delete the component itself
-			returnObj.componentList.splice(returnObj.componentList.indexOf(comp), 1);
-		}
+		returnObj.componentList.splice(returnObj.componentList.indexOf(comp), 1);
 		returnObj.hasBeenChanged = true;
 		this.events.fireEvent('componentRemovedEvent');
 	}
@@ -765,7 +759,9 @@ ACS.model = function(filename) { // String
 		}
 	}
 	
-	// constructor code
+// ***********************************************************************************************************************
+// ************************************************** constructor code ***************************************************
+// ***********************************************************************************************************************
 	componentCollection = loadDefaultComponentCollection();
 	log.debug('the component-id of the first component in the collection is "'+componentCollection.getElementsByTagName('componentType').item(0).attributes.getNamedItem('id').nodeValue+'"');
 	returnObj.events.fireEvent('componentCollectionChangedEvent');

@@ -1,7 +1,7 @@
 ACS.tabPanelKeyCodes = {
   TAB: 9,
   ENTER: 13,
-  ECS: 27,
+  ESC: 27,
   SPACE: 32,
   PGUP: 33,
   PGDOWN: 34,
@@ -17,7 +17,7 @@ ACS.tabPanelKeyCodes = {
 // - all tabs need to be of class "tab"
 // - all panels need to be of class "panel"
 ACS.tabPanel = function(id, tab, panel) { // String; the id of the div-container holding the tabPanel
-	// private variables
+	// *************************************************************************************************************************
 	var $panel = $('#' + id);  // the jQuery object for the panel
 	var $tabs = $panel.find('.' + tab); // Array of panel tabs.
 	var $panels = $panel.children('.' + panel); // Array of panels.			
@@ -334,7 +334,7 @@ ACS.tabPanel = function(id, tab, panel) { // String; the id of the div-container
 			return false;
 		}
 		switch (e.keyCode) {
-			case ACS.tabPanelKeyCodes.ECS: {
+			case ACS.tabPanelKeyCodes.ESC: {
 				e.stopPropagation();
 				e.preventDefault();
 				return false;

@@ -1,12 +1,60 @@
 ACS.canvasView = function(modelList) { // ACS.modelList
-	// private variables
+
+// ***********************************************************************************************************************
+// ************************************************** private variables **************************************************
+// ***********************************************************************************************************************
 	var canvasTabPanel = ACS.tabPanel(ACS.vConst.CANVASVIEW_MOTHERPANEL, 'canvasTab', 'canvasPanel');
 	var modelViewList = [];
 	var panelId = 0;
 	
-	// private methods
+// ***********************************************************************************************************************
+// ************************************************** private methods ****************************************************
+// ***********************************************************************************************************************
+	// ********************************************** handlers ***********************************************************
 	
-	// public stuff
+	// filenameBeingChangedEventHandler is defined in addActModelToView
+	
+	var newModelAddedEventHandler = function() {
+		returnObj.addActModelToView();
+	}
+	
+	var removingModelEventHandler = function() {
+		var removePanel = ''; // for the id of the panel that needs to be removed
+		// remove the modelView from the list:
+		for (var i = 0; i < modelViewList.length; i++) {
+			if (modelViewList[i] && (modelViewList[i].getModel() === modelList.getActModel())) {
+				removePanel = modelViewList[i].getModelContainerId();
+				modelViewList.splice(i, 1);
+			}
+		}
+		// remove the tab from the DOM:
+		document.getElementById(ACS.vConst.CANVASVIEW_TABLIST).removeChild(document.getElementById(removePanel.replace('Panel', 'Tab')));
+		document.getElementById(ACS.vConst.CANVASVIEW_MOTHERPANEL).removeChild(document.getElementById(removePanel));
+		// update the tabPanel:
+		canvasTabPanel.updatePanel();
+	}
+	
+	var tabSwitchedEventHandler = function() {
+		var elements = document.getElementById(ACS.vConst.CANVASVIEW_TABLIST).getElementsByClassName('tab');
+		for (var i = 0; i < elements.length; i++) {
+			if (elements[i].getAttribute('aria-selected') === 'true') modelList.setActModel(i);
+		}
+	}
+	
+	var actModelChangedEventHandler = function() {
+		// seek the panel matching the actModel:
+		for (var i = 0; i < modelViewList.length; i++) {
+			if (modelViewList[i] && (modelViewList[i].getModel() === modelList.getActModel())) {
+				// activate the tab
+				var tabId = modelViewList[i].getModelContainerId().replace('Panel', 'Tab');
+				document.getElementById(tabId).click();
+			}
+		}	
+	}
+	
+// ***********************************************************************************************************************
+// ************************************************** public stuff *******************************************************
+// ***********************************************************************************************************************
 	var returnObj = {};
 	
 	returnObj.addActModelToView = function() {
@@ -40,46 +88,16 @@ ACS.canvasView = function(modelList) { // ACS.modelList
 		});
 	}
 	
-	// constructor code
+// ***********************************************************************************************************************
+// ************************************************** constructor code ***************************************************
+// ***********************************************************************************************************************
 	returnObj.addActModelToView(); // add first model manually, because it has been created before registering the event handlers
-	
-	modelList.events.registerHandler('newModelAddedEvent', returnObj.addActModelToView);
 
-	modelList.events.registerHandler('removingModelEvent', function() {
-		var removePanel = ''; // for the id of the panel that needs to be removed
-		// remove the modelView from the list:
-		for (var i = 0; i < modelViewList.length; i++) {
-			if (modelViewList[i] && (modelViewList[i].getModel() === modelList.getActModel())) {
-				removePanel = modelViewList[i].getModelContainerId();
-				modelViewList.splice(i, 1);
-			}
-		}
-		// remove the tab from the DOM:
-		document.getElementById(ACS.vConst.CANVASVIEW_TABLIST).removeChild(document.getElementById(removePanel.replace('Panel', 'Tab')));
-		document.getElementById(ACS.vConst.CANVASVIEW_MOTHERPANEL).removeChild(document.getElementById(removePanel));
-		// update the tabPanel:
-		canvasTabPanel.updatePanel();
-	});
-	
-	canvasTabPanel.events.registerHandler('tabSwitchedEvent', function() {
-		var elements = document.getElementById(ACS.vConst.CANVASVIEW_TABLIST).getElementsByClassName('tab');
-		for (var i = 0; i < elements.length; i++) {
-			if (elements[i].getAttribute('aria-selected') === 'true') modelList.setActModel(i);
-		}
-	});
-	
-	// actModel changed handler
-	modelList.events.registerHandler('actModelChangedEvent', function() {
-		// seek the panel matching the actModel:
-		for (var i = 0; i < modelViewList.length; i++) {
-			if (modelViewList[i] && (modelViewList[i].getModel() === modelList.getActModel())) {
-				// activate the tab
-				var tabId = modelViewList[i].getModelContainerId().replace('Panel', 'Tab');
-				document.getElementById(tabId).click();
-			}
-		}	
-	});
-	
+	// register event handlers
+	modelList.events.registerHandler('newModelAddedEvent', newModelAddedEventHandler);
+	modelList.events.registerHandler('removingModelEvent', removingModelEventHandler);	
+	canvasTabPanel.events.registerHandler('tabSwitchedEvent', tabSwitchedEventHandler);
+	modelList.events.registerHandler('actModelChangedEvent', actModelChangedEventHandler);
 	
 	return returnObj;
 }

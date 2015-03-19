@@ -1,5 +1,8 @@
 ACS.menuView = function(modelList) { // ACS.modelList
-	// private variables
+
+// ***********************************************************************************************************************
+// ************************************************** private variables **************************************************
+// ***********************************************************************************************************************
 	var menuPanel = ACS.tabPanel(ACS.vConst.MENUVIEW_MENUMOTHERPANEL, 'tab', 'panel');
 	var activeLevel1Timer = null;
 	var activeLevel2Timer = null;
@@ -7,7 +10,11 @@ ACS.menuView = function(modelList) { // ACS.modelList
 	var activeButtonList = '';
 	var quickselectForm = document.getElementById('quickselectForm');
 	
-	// private methods
+// ***********************************************************************************************************************
+// ************************************************** private methods ****************************************************
+// ***********************************************************************************************************************
+
+	// ********************************************** private helper methods *********************************************
 	var subtypeIsThere = function(element, subtype) {
 		for (var i = 0; i < element.childNodes.length; i++) {
 			if (element.childNodes[i].textContent.indexOf(subtype) === 0) return true;
@@ -54,9 +61,14 @@ ACS.menuView = function(modelList) { // ACS.modelList
 		comp.setAttribute('tabindex', 0);
 		var compText = document.createTextNode(actCompName);
 		comp.appendChild(compText);
-		comp.addEventListener('click', function() {	modelList.getActModel().addComponentByName(actCompName);
-													hideAllComponentMenus();
-												  });
+		comp.addEventListener('click', function() {
+			var compObject = modelList.getActModel().initiateComponentByName(actCompName);
+			if (compObject) {
+				var remAct = ACS.addComponentAction(modelList.getActModel(), compObject);
+				remAct.execute();
+			}
+			hideAllComponentMenus();
+		});
 		document.getElementById(type + subtypeNoSpace + 'List').appendChild(comp);
 		// set the component in the datalist of the quickselect-field:
 		var opt = document.createElement('option');
@@ -71,63 +83,6 @@ ACS.menuView = function(modelList) { // ACS.modelList
 		return -1;
 	}
 	
-	// Menu-Button-Handlers - System-Menu
-	var handleConnectARE = function(e) {
-		log.info('connectAREBtn has been clicked');
-		// TODO: properly implement
-	}
-	document.getElementById('connectAREBtn').addEventListener('click', handleConnectARE);
-	
-	var handleNewModel = function(e) {
-		modelList.addNewModel();
-	}
-	document.getElementById("newModelBtn").addEventListener('click', handleNewModel);
-
-	var fileSelector = document.createElement('input'); // create "hidden" input element for choosing file
-	fileSelector.setAttribute('type', 'file');
-	fileSelector.setAttribute('class', 'hidden'); // must be added to DOM in order for the click event to work in IE
-	document.getElementById('mainMenuPanel').appendChild(fileSelector);
-	var handleSelectedFile = function(e) {
-		if (fileSelector.files[0]) {
-			var loadFile = fileSelector.files[0];
-			var indexOfModelInList = getIndexInModelList(loadFile);
-			if (indexOfModelInList > -1){ // if model already loaded, select it
-				modelList.setActModel(indexOfModelInList)
-			} else { // else load it
-				// if active model is not empty, open new model first
-				if (modelList.getActModel().componentList.length > 0) modelList.addNewModel();
-				// load the model
-				modelList.getActModel().loadModel(loadFile);
-			}
-		}
-	}
-	fileSelector.addEventListener('change', handleSelectedFile);
-	
-	var handleOpenModel = function(e) {
-		// Check for the various File API support
-		if (window.File && window.FileReader && window.FileList && window.Blob) {
-			fileSelector.click();
-		} else {
-			log.warn('file APIs not supported by browser');
-		}
-	}
-	document.getElementById('openModelBtn').addEventListener('click', handleOpenModel);
-	
-	var handleCloseModel = function(e) {
-		var m = modelList.getActModel();
-		if ((m.hasBeenChanged) && (confirm('Save changes to ' + m.getFilename() + ' before closing?'))) {
-			m.saveModel();
-		}
-		modelList.removeModel();
-	}
-	document.getElementById('closeModelBtn').addEventListener('click', handleCloseModel);
-	
-	var handleSaveModel = function(e) {
-		modelList.getActModel().saveModel();
-	}
-	document.getElementById('saveModelBtn').addEventListener('click', handleSaveModel);
-	
-	// Menu-Button-Handlers - Components-Menu
 	var stopLevel1Timer = function() {
 		if (activeLevel1Timer) {
 			window.clearTimeout(activeLevel1Timer);
@@ -152,7 +107,76 @@ ACS.menuView = function(modelList) { // ACS.modelList
 															cameFromElement = null;
 														}, 100);
     }
+
+	var setComponentsMenuHandlers = function(elementId, menuId) {
+		document.getElementById(elementId).addEventListener('mouseenter', function(e) {handleCompMenu(elementId, menuId, e);});
+		document.getElementById(elementId).addEventListener('focus', function(e) {handleCompMenu(elementId, menuId, e);});
+		document.getElementById(elementId).addEventListener('mouseleave', function(e) {handleCompMenu(elementId, menuId, e);});
+		document.getElementById(elementId).addEventListener('blur', function(e) {handleCompMenu(elementId, menuId, e);});
+	}	
 	
+	// ********************************************** handlers ***********************************************************
+	var modelChangedEventHandler = function() {
+		log.info('The model has been changed!');
+	}
+	
+	var componentCollectionChangedEventHandler = function() {
+		log.info('The componentCollection has been changed!');
+		returnObj.setComponentMenu();
+	}
+	
+	var actModelChangedEventHandler = function() {
+		log.info('A different model has been set to active');
+		returnObj.setComponentMenu();
+	}
+	
+	// Menu-Button-Handlers - System-Menu
+	var handleConnectARE = function(e) {
+		log.info('connectAREBtn has been clicked');
+		// TODO: properly implement
+	}
+	
+	var handleNewModel = function(e) {
+		modelList.addNewModel();
+	}
+
+	var handleSelectedFile = function(e) {
+		if (fileSelector.files[0]) {
+			var loadFile = fileSelector.files[0];
+			var indexOfModelInList = getIndexInModelList(loadFile);
+			if (indexOfModelInList > -1){ // if model already loaded, select it
+				modelList.setActModel(indexOfModelInList)
+			} else { // else load it
+				// if active model is not empty, open new model first
+				if (modelList.getActModel().componentList.length > 0) modelList.addNewModel();
+				// load the model
+				modelList.getActModel().loadModel(loadFile);
+			}
+		}
+	}
+	
+	var handleOpenModel = function(e) {
+		// Check for the various File API support
+		if (window.File && window.FileReader && window.FileList && window.Blob) {
+			fileSelector.click();
+		} else {
+			log.warn('file APIs not supported by browser');
+		}
+	}
+	
+	var handleCloseModel = function(e) {
+		var m = modelList.getActModel();
+		if ((m.hasBeenChanged) && (confirm('Save changes to ' + m.getFilename() + ' before closing?'))) {
+			m.saveModel();
+		}
+		modelList.removeModel();
+	}
+	
+	var handleSaveModel = function(e) {
+		modelList.getActModel().saveModel();
+	}
+	
+	// Menu-Button-Handlers - Components-Menu
 	var handleCompMenu = function(elementId, menuId, e) {
 		if ((e.type === 'mouseenter') || (e.type === 'focus')) {
 			if (e.currentTarget.className === 'menuButton') { // entering a menu-button
@@ -189,20 +213,25 @@ ACS.menuView = function(modelList) { // ACS.modelList
 		}
 	}
 	
-	var setComponentsMenuHandlers = function(elementId, menuId) {
-		document.getElementById(elementId).addEventListener('mouseenter', function(e) {handleCompMenu(elementId, menuId, e);});
-		document.getElementById(elementId).addEventListener('focus', function(e) {handleCompMenu(elementId, menuId, e);});
-		document.getElementById(elementId).addEventListener('mouseleave', function(e) {handleCompMenu(elementId, menuId, e);});
-		document.getElementById(elementId).addEventListener('blur', function(e) {handleCompMenu(elementId, menuId, e);});
+	// Menu-Button-Handlers - Edit-Menu
+	var handleDeleteSelection = function(e) {
+		returnObj.events.fireEvent('deleteBtnPressedEvent');
 	}
 	
-	setComponentsMenuHandlers('sensorsBtn', 'sensorsBtnList');
-	setComponentsMenuHandlers('processorsBtn', 'processorsBtnList');
-	setComponentsMenuHandlers('actuatorsBtn', 'actuatorsBtnList');
-	setComponentsMenuHandlers('savedGroupsBtn', 'savedGroupsBtnList');
+	var handleUndo = function(e) {
+		modelList.getActModel().undoStack.pop().undo();
+	}
+	
+	var handleRedo = function(e) {
+		modelList.getActModel().redoStack.pop().execute();
+	}
 		
-	// public stuff
+// ***********************************************************************************************************************
+// ************************************************** public stuff *******************************************************
+// ***********************************************************************************************************************
 	var returnObj = {};
+	
+	returnObj.events = ACS.eventManager();
 	
 	returnObj.setComponentMenu = function() {
 		// first empty the menu...
@@ -261,30 +290,49 @@ ACS.menuView = function(modelList) { // ACS.modelList
 		}
 	}
 	
-	// constructor code
-	// handlers for the quickselect field and the corresponding insert-button
-	document.getElementById('quickselect').addEventListener('change', function() {	modelList.getActModel().addComponentByName(this.value);
-																					this.value = '';
-																				 });
-	document.getElementById('insertButton').addEventListener('click', function() {	modelList.getActModel().addComponentByName(document.getElementById('quickselect').value);
-																					document.getElementById('quickselect').value = '';
-																				 });																			 
-	// model changed handler
-	modelList.getActModel().events.registerHandler('modelChangedEvent', function() {
-		log.info('The model has been changed!');
-	});
+// ***********************************************************************************************************************
+// ************************************************** constructor code ***************************************************
+// ***********************************************************************************************************************
+	var fileSelector = document.createElement('input'); // create "hidden" input element for choosing file
+	fileSelector.setAttribute('type', 'file');
+	fileSelector.setAttribute('class', 'hidden'); // must be added to DOM in order for the click event to work in IE
+	document.getElementById('mainMenuPanel').appendChild(fileSelector);	
 	
-	// componentCollection changed handler
-	modelList.getActModel().events.registerHandler('componentCollectionChangedEvent', function() {
-		log.info('The componentCollection has been changed!');
-		returnObj.setComponentMenu();
-	});
+	// register handlers
+	modelList.getActModel().events.registerHandler('modelChangedEvent', modelChangedEventHandler);
+	modelList.getActModel().events.registerHandler('componentCollectionChangedEvent', componentCollectionChangedEventHandler);
+	modelList.events.registerHandler('actModelChangedEvent', actModelChangedEventHandler);
+	fileSelector.addEventListener('change', handleSelectedFile);
+	document.getElementById('connectAREBtn').addEventListener('click', handleConnectARE);
+	document.getElementById("newModelBtn").addEventListener('click', handleNewModel);
+	document.getElementById('openModelBtn').addEventListener('click', handleOpenModel);
+	document.getElementById('closeModelBtn').addEventListener('click', handleCloseModel);
+	document.getElementById('saveModelBtn').addEventListener('click', handleSaveModel);
+	setComponentsMenuHandlers('sensorsBtn', 'sensorsBtnList');
+	setComponentsMenuHandlers('processorsBtn', 'processorsBtnList');
+	setComponentsMenuHandlers('actuatorsBtn', 'actuatorsBtnList');
+	setComponentsMenuHandlers('savedGroupsBtn', 'savedGroupsBtnList');
+	document.getElementById('deleteSelectionBtn').addEventListener('click', handleDeleteSelection);
+	document.getElementById('undoBtn').addEventListener('click', handleUndo);
+	document.getElementById('redoBtn').addEventListener('click', handleRedo);
 	
-	// actModel changed handler
-	modelList.events.registerHandler('actModelChangedEvent', function() {
-		log.info('A different model has been set to active');
-		returnObj.setComponentMenu();
+	// ********************************************** handlers *********************************************************** for the quickselect field and the corresponding insert-button
+	document.getElementById('quickselect').addEventListener('change', function() {	
+		var compObject = modelList.getActModel().initiateComponentByName(this.value);
+		if (compObject) {
+			var remAct = ACS.addComponentAction(modelList.getActModel(), compObject);
+			remAct.execute();
+		}
+		this.value = '';
 	});
+	document.getElementById('insertButton').addEventListener('click', function() {	
+		var compObject = modelList.getActModel().initiateComponentByName(document.getElementById('quickselect').value);
+		if (compObject) {
+			var remAct = ACS.addComponentAction(modelList.getActModel(), compObject);
+			remAct.execute();
+		}
+		document.getElementById('quickselect').value = '';
+	});	
 	
 	// window closing handler
 	window.onbeforeunload = function() {

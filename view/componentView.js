@@ -3,7 +3,10 @@ ACS.componentView = function(	component, // ACS.component
 								modelView, // ACS.modelView
 								modelLayer, // Kinetic.Layer
 								guiLayer) { // Kinetic.Layer
-	// private variables
+								
+// ***********************************************************************************************************************
+// ************************************************** private variables **************************************************
+// ***********************************************************************************************************************
 	var visible = true;
 	var view = null;
 	var elementHeight = ACS.vConst.COMPONENTVIEW_ELEMENTHEIGHT;
@@ -13,7 +16,9 @@ ACS.componentView = function(	component, // ACS.component
 	var eventInPortView = null;
 	var selectedRect = null;
 
-	// private methods
+// ***********************************************************************************************************************
+// ************************************************** private methods ****************************************************
+// ***********************************************************************************************************************
 	var channelExists = function(inPort) {
 		for (var i = 0; i < model.dataChannelList.length; i++) {
 			if (model.dataChannelList[i].getInputPort() === inPort) return true;
@@ -152,7 +157,8 @@ ACS.componentView = function(	component, // ACS.component
 						evt.cancelBubble = true;
 						var ch = ACS.dataChannel('tempId'); // TODO: generate a proper ID or drop ID for channels
 						ch.setOutputPort(outPort);
-						model.addDataChannel(ch);
+						var addAct = ACS.addDataChannelAction(model, ch);
+						addAct.execute();
 					}
 				}
 			}(component.outputPortList[i]));
@@ -365,7 +371,28 @@ ACS.componentView = function(	component, // ACS.component
 		}
 	}
 	
-	// public stuff
+	// ********************************************** handlers ***********************************************************
+	var selectedEventHandler = function() {
+		selectedRect.show();
+		view.setAttr('draggable', false);
+		modelView.selectedComponentsGroup.add(view);
+		view.x(view.getX() - modelView.selectedComponentsGroup.getX());
+		view.y(view.getY() - modelView.selectedComponentsGroup.getY());
+		modelLayer.draw();
+	}
+	
+	var deSelectedEventHandler = function() {
+		selectedRect.hide();
+		view.setAttr('draggable', true);
+		view.remove(); // view is in selectedComponentsGroup AND modelLayer, the remove-function only exists for removing from all parents, thus we need to remove and then add to the modelLayer again
+		modelLayer.add(view);
+		setViewPosition();
+		modelLayer.draw();
+	}
+	
+// ***********************************************************************************************************************
+// ************************************************** public stuff *******************************************************
+// ***********************************************************************************************************************
 	var returnObj = {};
 
 	returnObj.setVisible = function(vis) {
@@ -389,32 +416,28 @@ ACS.componentView = function(	component, // ACS.component
 	}	
 	
 	returnObj.destroy = function() {
+		// first unregister all handlers
+		component.events.removeHandler('selectedEvent', selectedEventHandler);
+		component.events.removeHandler('deSelectedEvent', deSelectedEventHandler);
+		// de-select the component
+		if (component.getIsSelected()) {
+			model.removeItemFromSelection(component);
+		}
+		// destroy the view
 		if (view) view.destroy();
 	}
 	
 	returnObj.getView = function() {
 		return view;
 	}
-	
-	// constructor code
+
+// ***********************************************************************************************************************
+// ************************************************** constructor code ***************************************************
+// ***********************************************************************************************************************
 	buildView();
 	// register event handlers
-	component.events.registerHandler('selectedEvent', function() {
-		selectedRect.show();
-		view.setAttr('draggable', false);
-		modelView.selectedComponentsGroup.add(view);
-		view.x(view.getX() - modelView.selectedComponentsGroup.getX());
-		view.y(view.getY() - modelView.selectedComponentsGroup.getY());
-		modelLayer.draw();
-	});
-	component.events.registerHandler('deSelectedEvent', function() {
-		selectedRect.hide();
-		view.setAttr('draggable', true);
-		view.remove(); // view is in selectedComponentsGroup AND modelLayer, the remove-function only exists for removing from all parents, thus we need to remove and then add to the modelLayer again
-		modelLayer.add(view);
-		setViewPosition();
-		modelLayer.draw();
-	});
+	component.events.registerHandler('selectedEvent', selectedEventHandler);
+	component.events.registerHandler('deSelectedEvent', deSelectedEventHandler);
 
 	return returnObj;
 }
