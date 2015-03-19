@@ -22,7 +22,7 @@ ACS.view = function(modelList) { // ACS.modelList
 	var handleKeydown = function(e) {
 		// catch Del to delete selected items
 		if (e.keyCode === 46) { // Del can't be caught by keyPress for not all browsers act consistently (see: http://unixpapa.com/js/key.html)
-			deleteSelection();
+			deleteSelectionHandler();
 			stopEvent(e);
 			return false;		
 		}
@@ -98,19 +98,27 @@ ACS.view = function(modelList) { // ACS.modelList
 				break;
 			case 122: // Ctrl-z for undo
 				if (e.ctrlKey) {
-					modelList.getActModel().undoStack.pop().undo();
+					undoHandler();
 				}
 			case 121: // Ctrl-y for redo
 				if (e.ctrlKey) {
-					modelList.getActModel().redoStack.pop().execute();
+					redoHandler();
 				}
 		}			
 	}
 	
-	var deleteSelection = function() {
+	var deleteSelectionHandler = function() {
 		log.debug('deleteBtnPressed');
 		var remAct = ACS.removeItemListAction(modelList.getActModel());
 		remAct.execute();
+	}
+	
+	var undoHandler = function() {
+		if (modelList.getActModel().undoStack.length > 0) modelList.getActModel().undoStack.pop().undo();
+	}
+	
+	var redoHandler = function() {
+		if (modelList.getActModel().redoStack.length > 0) modelList.getActModel().redoStack.pop().execute();
 	}
 	
 // ***********************************************************************************************************************
@@ -126,7 +134,9 @@ ACS.view = function(modelList) { // ACS.modelList
 	document.addEventListener('keydown', handleKeydown);
 	document.addEventListener('keypress', handleKeypress);
 	// register handlers for button-presses in menu
-	menu.events.registerHandler('deleteBtnPressedEvent', deleteSelection);
+	menu.events.registerHandler('deleteBtnPressedEvent', deleteSelectionHandler);
+	menu.events.registerHandler('undoBtnPressedEvent', undoHandler);
+	menu.events.registerHandler('redoBtnPressedEvent', redoHandler);
 		
 	return returnObj;
 }

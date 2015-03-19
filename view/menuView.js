@@ -219,13 +219,13 @@ ACS.menuView = function(modelList) { // ACS.modelList
 	}
 	
 	var handleUndo = function(e) {
-		modelList.getActModel().undoStack.pop().undo();
+		returnObj.events.fireEvent('undoBtnPressedEvent');
 	}
 	
 	var handleRedo = function(e) {
-		modelList.getActModel().redoStack.pop().execute();
+		returnObj.events.fireEvent('redoBtnPressedEvent');
 	}
-		
+
 // ***********************************************************************************************************************
 // ************************************************** public stuff *******************************************************
 // ***********************************************************************************************************************
