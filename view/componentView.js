@@ -110,6 +110,12 @@ ACS.componentView = function(	component, // ACS.component
 					}
 				}
 			}(component.inputPortList[i]));
+			// catch mousedown event on port (prevents component from being selected, when only the port is clicked, e.g. when channel is drawn)
+			inputPortViewList[i]['port'].on('mousedown', function(inPort) {
+				return function(evt) {
+					evt.cancelBubble = true;
+				}
+			}(component.inputPortList[i]));						
 			// highlight port when mouse is over hitGraph
 			inputPortViewList[i]['port'].on('mouseover', function(inPort) {
 				return function(e) {
@@ -162,6 +168,12 @@ ACS.componentView = function(	component, // ACS.component
 					}
 				}
 			}(component.outputPortList[i]));
+			// catch mousedown event on port (prevents component from being selected, when only the port is clicked, e.g. when channel is drawn)
+			outputPortViewList[i]['port'].on('mousedown', function(outPort) {
+				return function(evt) {
+					evt.cancelBubble = true;
+				}
+			}(component.outputPortList[i]));			
 			// highlight port when mouse is over hitGraph
 			outputPortViewList[i]['port'].on('mouseover', function(outPort) {
 				return function(e) {
@@ -207,6 +219,10 @@ ACS.componentView = function(	component, // ACS.component
 					}
 				}
 			});
+			// catch mousedown event on port (prevents component from being selected, when only the port is clicked, e.g. when channel is drawn)
+			eventInPortView.on('mousedown', function(evt) {
+				evt.cancelBubble = true;
+			});
 			// highlight port when mouse is over hitGraph
 			eventInPortView.on('mouseover', function(e) {
 				eventInPortView.strokeWidth(3);
@@ -246,6 +262,10 @@ ACS.componentView = function(	component, // ACS.component
 					modelView.addEventChannelView(ACS.eventChannelView(null, component, model, modelLayer));
 				}
 			});
+			// catch mousedown event on port (prevents component from being selected, when only the port is clicked, e.g. when channel is drawn)
+			eventOutPortView.on('mousedown', function(evt) {
+				evt.cancelBubble = true;
+			});			
 			// highlight port when mouse is over hitGraph
 			eventOutPortView.on('mouseover', function(e) {
 				eventOutPortView.strokeWidth(3);
@@ -307,12 +327,12 @@ ACS.componentView = function(	component, // ACS.component
 			errorRect.show();
 		}
 		view.on('mousedown', function(e) {
-			this.moveToTop(); // set this component to highest z-value of all on the layer
 			if (!e.evt.ctrlKey && !component.getIsSelected()) {
 				// select only this component
 				model.deSelectAll();
 				model.addItemToSelection(component);
 			}
+			modelView.selectedComponentsGroup.moveToTop();
 			if (!component.getIsSelected()) {
 				e.cancelBubble = true;
 			}

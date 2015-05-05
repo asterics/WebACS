@@ -61,7 +61,7 @@ ACS.dataChannelView = function(	dc, // ACS.dataChannel
 	
 	returnObj.destroy = function() {
 		// first remove all event handlers
-		inputPort.getParentComponent().events.removeHandler('componentPositionChangedEvent', componentPositionChangedEventHandlerInPort);
+		if (inputPort) inputPort.getParentComponent().events.removeHandler('componentPositionChangedEvent', componentPositionChangedEventHandlerInPort);
 		outputPort.getParentComponent().events.removeHandler('componentPositionChangedEvent', componentPositionChangedEventHandlerOutPort);
 		dc.events.removeHandler('dataChannelCompletedEvent', dataChannelCompletedEventHandler);
 		dc.events.removeHandler('selectedEvent', selectedEventHandler);

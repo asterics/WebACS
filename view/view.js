@@ -108,9 +108,9 @@ ACS.view = function(modelList) { // ACS.modelList
 					stopEvent(e);
 					return false;					
 				}
-		}			
+		}
 	}
-	
+
 	var deleteSelectionHandler = function() {
 		log.debug('deleteBtnPressed');
 		var remAct = ACS.removeItemListAction(modelList.getActModel());
@@ -131,7 +131,7 @@ ACS.view = function(modelList) { // ACS.modelList
 	var returnObj = {};
 
 // ***********************************************************************************************************************
-// ************************************************** constructor code ***************************************************
+// *********************************************** constructor code ***************************************************
 // ***********************************************************************************************************************
 	menu.setComponentMenu();
 	// catch keyboard shortcuts
