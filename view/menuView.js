@@ -214,6 +214,18 @@ ACS.menuView = function(modelList) { // ACS.modelList
 	}
 	
 	// Menu-Button-Handlers - Edit-Menu
+	var handleCut = function(e) {
+		returnObj.events.fireEvent('cutBtnPressedEvent');
+	}
+	
+	var handleCopy = function(e) {
+		returnObj.events.fireEvent('copyBtnPressedEvent');
+	}
+
+	var handlePaste = function(e) {
+		returnObj.events.fireEvent('pasteBtnPressedEvent');
+	}	
+	
 	var handleDeleteSelection = function(e) {
 		returnObj.events.fireEvent('deleteBtnPressedEvent');
 	}
@@ -312,11 +324,14 @@ ACS.menuView = function(modelList) { // ACS.modelList
 	setComponentsMenuHandlers('processorsBtn', 'processorsBtnList');
 	setComponentsMenuHandlers('actuatorsBtn', 'actuatorsBtnList');
 	setComponentsMenuHandlers('savedGroupsBtn', 'savedGroupsBtnList');
+	document.getElementById('cutBtn').addEventListener('click', handleCut);
+	document.getElementById('copyBtn').addEventListener('click', handleCopy);
+	document.getElementById('pasteBtn').addEventListener('click', handlePaste);
 	document.getElementById('deleteSelectionBtn').addEventListener('click', handleDeleteSelection);
 	document.getElementById('undoBtn').addEventListener('click', handleUndo);
 	document.getElementById('redoBtn').addEventListener('click', handleRedo);
 	
-	// ********************************************** handlers *********************************************************** for the quickselect field and the corresponding insert-button
+	// handlers for the quickselect field and the corresponding insert-button
 	document.getElementById('quickselect').addEventListener('change', function() {	
 		var compObject = modelList.getActModel().initiateComponentByName(this.value);
 		if (compObject) {

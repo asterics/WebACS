@@ -21,26 +21,6 @@ ACS.model = function(filename) { // String
 		return xmlObj; 
 	}
 	
-	var getDataType = function(dataTypeAsString) {
-		switch (dataTypeAsString) {
-			case 'boolean':	return ACS.dataType.BOOLEAN;
-			case 'byte':	return ACS.dataType.BYTE;
-			case 'char':	return ACS.dataType.CHAR;
-			case 'integer':	return ACS.dataType.INTEGER;
-			case 'double':	return ACS.dataType.DOUBLE;
-			case 'string':	return ACS.dataType.STRING;
-		}
-		return 0;
-	}
-	
-	var findComponentInCollection = function(compTypeId) {
-		var allComponents = componentCollection.getElementsByTagName('componentType');
-		for (var j = 0; j < allComponents.length; j++) {
-			if (allComponents.item(j).attributes.getNamedItem('id').textContent === compTypeId) return allComponents.item(j);
-		}
-		return null;
-	}
-	
 	var loadComponentList = function(modelXML) {
 		var componentList = [];
 		var components_section = modelXML.getElementsByTagName('components').item(0); // needed so that the component-tags of the channels-sections are not confused with the components of the model
@@ -53,7 +33,7 @@ ACS.model = function(filename) { // String
 				var description = null;
 				if (components.item(i).getElementsByTagName('description')) description = components.item(i).getElementsByTagName('description').item(0).textContent;
 				// seek the component in the componentCollection, since not all information is saved in the model
-				var fullComponent = findComponentInCollection(compTypeId);
+				var fullComponent = returnObj.findComponentInCollection(compTypeId);
 				if (fullComponent === null) { // i.e. component was not found in componentCollection
 					componentList[i] = ACS.component(	components.item(i).attributes.getNamedItem('id').textContent,
 														compTypeId,
@@ -94,7 +74,7 @@ ACS.model = function(filename) { // String
 					if (numInPorts < inputPortsModel.length) numInPorts = inputPortsModel.length; // in case the amount of ports has been reduced by developer in component collection
 					for (var j = 0; j < numInPorts; j++) {
 						if (inputPortsFull[j]) {
-							var portDataType = getDataType(inputPortsFull.item(j).getElementsByTagName('dataType').item(0).textContent);
+							var portDataType = returnObj.getDataType(inputPortsFull.item(j).getElementsByTagName('dataType').item(0).textContent);
 							var portTypeId = '';
 							if (inputPortsModel.item(j)) {
 								portTypeId = inputPortsModel.item(j).attributes.getNamedItem('portTypeID').textContent;
@@ -124,7 +104,7 @@ ACS.model = function(filename) { // String
 					if (numOutPorts < outputPortsModel.length) numOutPorts = outputPortsModel.length; // in case the amount of ports has been reduced by developer in component collection
 					for (var j = 0; j < numOutPorts; j++) {
 						if (outputPortsFull[j]) {
-							var portDataType = getDataType(outputPortsFull.item(j).getElementsByTagName('dataType').item(0).textContent);
+							var portDataType = returnObj.getDataType(outputPortsFull.item(j).getElementsByTagName('dataType').item(0).textContent);
 							var portTypeId = '';
 							if (outputPortsModel.item(j)) {
 								portTypeId = outputPortsModel.item(j).attributes.getNamedItem('portTypeID').textContent;
@@ -178,7 +158,7 @@ ACS.model = function(filename) { // String
 								componentList[i].matchesComponentCollection = false;
 							}
 							componentList[i].propertyList.push(ACS.property(propertiesFull.item(j).attributes.getNamedItem('name').textContent, 
-																			getDataType(propertiesFull.item(j).attributes.getNamedItem('type').textContent), 
+																			returnObj.getDataType(propertiesFull.item(j).attributes.getNamedItem('type').textContent), 
 																			propertyValue));
 							if (propertiesFull.item(j).attributes.getNamedItem('description'))
 								componentList[i].propertyList[componentList[i].propertyList.length - 1].description = propertiesFull.item(j).attributes.getNamedItem('description').textContent;
@@ -367,15 +347,6 @@ ACS.model = function(filename) { // String
 		return false;
 	}
 	
-	var getFreePosition = function() {
-		var pos = [10, 10];
-		while (positionTaken(pos)) {
-			pos[0] += 10;
-			pos[1] += 10;
-		}
-		return pos;
-	}
-	
 	var generateModelName = function() {
 		var time = new Date();
 		var d = time.getDay();
@@ -417,6 +388,34 @@ ACS.model = function(filename) { // String
 		filename = newName;
 		this.events.fireEvent('filenameBeingChangedEvent');
 	}
+	
+	returnObj.findComponentInCollection = function(compTypeId) {
+		var allComponents = componentCollection.getElementsByTagName('componentType');
+		for (var j = 0; j < allComponents.length; j++) {
+			if (allComponents.item(j).attributes.getNamedItem('id').textContent === compTypeId) return allComponents.item(j);
+		}
+		return null;
+	}
+	
+	returnObj.getDataType = function(dataTypeAsString) {
+		switch (dataTypeAsString) {
+			case 'boolean':	return ACS.dataType.BOOLEAN;
+			case 'byte':	return ACS.dataType.BYTE;
+			case 'char':	return ACS.dataType.CHAR;
+			case 'integer':	return ACS.dataType.INTEGER;
+			case 'double':	return ACS.dataType.DOUBLE;
+			case 'string':	return ACS.dataType.STRING;
+		}
+		return 0;
+	}
+	
+	returnObj.getFreePosition = function(pos) {
+		while (positionTaken(pos)) {
+			pos[0] += 10;
+			pos[1] += 10;
+		}
+		return pos;
+	}	
 
 	returnObj.loadModel = function(loadFile) {
 		if (loadFile) {
@@ -593,7 +592,7 @@ ACS.model = function(filename) { // String
 		} else {
 			compTypeId = 'asterics.' + compName;
 		}
-		var compXml = findComponentInCollection(compTypeId);
+		var compXml = returnObj.findComponentInCollection(compTypeId);
 		if (compXml) {
 			// find out the component's type:
 			var compType = 0;
@@ -606,7 +605,7 @@ ACS.model = function(filename) { // String
 									break;					
 			}
 			// find a free position for the new component
-			var pos = getFreePosition();
+			var pos = returnObj.getFreePosition([10, 10]);
 			// build the component-object:
 			var newComp = ACS.component(compName + '.' + nextCompNameNumber(compName),
 										compTypeId,
@@ -620,7 +619,7 @@ ACS.model = function(filename) { // String
 			// build inputPortList:
 			var inputPorts = compXml.getElementsByTagName('inputPort');
 			for (var j = 0; j < inputPorts.length; j++) {
-				var portDataType = getDataType(inputPorts.item(j).getElementsByTagName('dataType').item(0).textContent);
+				var portDataType = returnObj.getDataType(inputPorts.item(j).getElementsByTagName('dataType').item(0).textContent);
 				// build the port object:
 				newComp.inputPortList[j] = ACS.port(inputPorts.item(j).attributes.getNamedItem('id').textContent,
 													newComp,
@@ -633,7 +632,7 @@ ACS.model = function(filename) { // String
 			// build outputPortList:
 			var outputPorts = compXml.getElementsByTagName('outputPort');
 			for (var j = 0; j < outputPorts.length; j++) {
-				var portDataType = getDataType(outputPorts.item(j).getElementsByTagName('dataType').item(0).textContent);
+				var portDataType = returnObj.getDataType(outputPorts.item(j).getElementsByTagName('dataType').item(0).textContent);
 				// build the port object:
 				newComp.outputPortList[j] = ACS.port(	outputPorts.item(j).attributes.getNamedItem('id').textContent,
 														newComp,
@@ -661,7 +660,7 @@ ACS.model = function(filename) { // String
 			var properties = compXml.getElementsByTagName('property');
 			for (j = 0; j < properties.length; j++) {
 				newComp.propertyList.push(ACS.property(properties.item(j).attributes.getNamedItem('name').textContent, 
-													   getDataType(properties.item(j).attributes.getNamedItem('type').textContent), 
+													   returnObj.getDataType(properties.item(j).attributes.getNamedItem('type').textContent), 
 													   properties.item(j).attributes.getNamedItem('value').textContent));
 				if (properties.item(j).attributes.getNamedItem('description'))
 					newComp.propertyList[newComp.propertyList.length - 1].description = properties.item(j).attributes.getNamedItem('description').textContent;
@@ -689,36 +688,42 @@ ACS.model = function(filename) { // String
 	
 	returnObj.addComponent = function(comp) { // ACS.component
 		returnObj.componentList.push(comp);
+		if (comp.getIsSelected()) returnObj.selectedItemsList.push(comp);
 		this.events.fireEvent('componentAddedEvent');
 		returnObj.hasBeenChanged = true;
 	}	
 	
 	returnObj.removeComponent = function(comp) { // ACS.component
-		returnObj.componentList.splice(returnObj.componentList.indexOf(comp), 1);
+		if (returnObj.componentList.indexOf(comp) > -1) returnObj.componentList.splice(returnObj.componentList.indexOf(comp), 1);
+		if (returnObj.selectedItemsList.indexOf(comp) > -1) returnObj.selectedItemsList.splice(returnObj.selectedItemsList.indexOf(comp), 1);
 		returnObj.hasBeenChanged = true;
 		this.events.fireEvent('componentRemovedEvent');
 	}
 	
 	returnObj.addDataChannel = function(ch) { // ACS.channel
 		returnObj.dataChannelList.push(ch);
+		if (ch.getIsSelected()) returnObj.selectedItemsList.push(ch);
 		returnObj.hasBeenChanged = true;
 		this.events.fireEvent('dataChannelAddedEvent');
 	}
 	
 	returnObj.removeDataChannel = function(ch) { // ACS.channel
 		if (returnObj.dataChannelList.indexOf(ch) > -1) returnObj.dataChannelList.splice(returnObj.dataChannelList.indexOf(ch), 1);
+		if (returnObj.selectedItemsList.indexOf(ch) > -1) returnObj.selectedItemsList.splice(returnObj.selectedItemsList.indexOf(ch), 1);
 		returnObj.hasBeenChanged = true;
 		this.events.fireEvent('dataChannelRemovedEvent');
 	}	
 
 	returnObj.addEventChannel = function(ch) { // ACS.channel
 		returnObj.eventChannelList.push(ch);
+		if (ch.getIsSelected()) returnObj.selectedItemsList.push(ch);
 		returnObj.hasBeenChanged = true;
 		this.events.fireEvent('eventChannelAddedEvent');
 	}
 	
 	returnObj.removeEventChannel = function(ch) { // ACS.channel
 		if (returnObj.eventChannelList.indexOf(ch) > -1) returnObj.eventChannelList.splice(returnObj.eventChannelList.indexOf(ch), 1);
+		if (returnObj.selectedItemsList.indexOf(ch) > -1) returnObj.selectedItemsList.splice(returnObj.selectedItemsList.indexOf(ch), 1);
 		returnObj.hasBeenChanged = true;
 		this.events.fireEvent('eventChannelRemovedEvent');
 	}		

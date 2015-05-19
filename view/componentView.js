@@ -332,7 +332,6 @@ ACS.componentView = function(	component, // ACS.component
 				model.deSelectAll();
 				model.addItemToSelection(component);
 			}
-			modelView.selectedComponentsGroup.moveToTop();
 			if (!component.getIsSelected()) {
 				e.cancelBubble = true;
 			}
@@ -396,6 +395,7 @@ ACS.componentView = function(	component, // ACS.component
 		selectedRect.show();
 		view.setAttr('draggable', false);
 		modelView.selectedComponentsGroup.add(view);
+		modelView.selectedComponentsGroup.moveToTop();
 		view.x(view.getX() - modelView.selectedComponentsGroup.getX());
 		view.y(view.getY() - modelView.selectedComponentsGroup.getY());
 		modelLayer.draw();
@@ -436,13 +436,9 @@ ACS.componentView = function(	component, // ACS.component
 	}	
 	
 	returnObj.destroy = function() {
-		// first unregister all handlers
+		// unregister all handlers
 		component.events.removeHandler('selectedEvent', selectedEventHandler);
 		component.events.removeHandler('deSelectedEvent', deSelectedEventHandler);
-		// de-select the component
-		if (component.getIsSelected()) {
-			model.removeItemFromSelection(component);
-		}
 		// destroy the view
 		if (view) view.destroy();
 	}
@@ -455,6 +451,8 @@ ACS.componentView = function(	component, // ACS.component
 // ************************************************** constructor code ***************************************************
 // ***********************************************************************************************************************
 	buildView();
+	// check if component is already selected on insert
+	if (component.getIsSelected()) selectedEventHandler();
 	// register event handlers
 	component.events.registerHandler('selectedEvent', selectedEventHandler);
 	component.events.registerHandler('deSelectedEvent', deSelectedEventHandler);

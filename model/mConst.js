@@ -15,5 +15,7 @@ ACS.mConst = {
 	MODELGUI_AREGUIWINDOW_Y: 0,
 	MODELGUI_AREGUIWINDOW_WIDTH: 1920,
 	MODELGUI_AREGUIWINDOW_HEIGHT: 1080,
-	MODELGUI_ACSVERSION: 'webACS_v0.1_to_be_replaced_by_proper_version_number'
+	MODELGUI_ACSVERSION: 'webACS_v0.1_to_be_replaced_by_proper_version_number',
+	// clipBoard
+	IDEXTENSION: '_c'
 }

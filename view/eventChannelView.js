@@ -42,7 +42,6 @@ ACS.eventChannelView = function(ec, // ACS.eventChannel
 	
 	var selectedEventHandler = function() {
 		// make sure selection is only done once, if several channels are connected
-		var test = returnObj.line.dashEnabled();
 		if (!returnObj.line.dashEnabled()) {
 			returnObj.line.stroke(ACS.vConst.EVENTCHANNELVIEW_SELECTEDSTROKECOLOR);
 			returnObj.line.dashEnabled(true);
@@ -93,18 +92,14 @@ ACS.eventChannelView = function(ec, // ACS.eventChannel
 	}
 	
 	returnObj.destroy = function() {
-		// first remove all event handlers
+		// remove all event handlers
 		startComponent.events.removeHandler('componentPositionChangedEvent', componentPositionChangedEventHandlerTrigger);
 		endComponent.events.removeHandler('componentPositionChangedEvent', componentPositionChangedEventHandlerListener);
 		for (var i = 0; i < returnObj.ecList.length; i++) {
 			returnObj.ecList[i].events.removeHandler('selectedEvent', selectedEventHandler);
 			returnObj.ecList[i].events.removeHandler('deSelectedEvent', deSelectedEventHandler);
-			// de-select the channels
-			if (returnObj.ecList[i].getIsSelected()) {
-				model.removeItemFromSelection(returnObj.ecList[i]);
-			}			
 		}
-		// then destroy the line
+		// destroy the line
 		if (returnObj.line) returnObj.line.destroy();
 	}
 
@@ -123,6 +118,8 @@ ACS.eventChannelView = function(ec, // ACS.eventChannel
 								endComponent.getY() + getComponentHeight(endComponent) + ACS.vConst.EVENTCHANNELVIEW_LISTENERBELOWCOMPONENT]);
 		startComponent.events.registerHandler('componentPositionChangedEvent', componentPositionChangedEventHandlerTrigger);
 		endComponent.events.registerHandler('componentPositionChangedEvent', componentPositionChangedEventHandlerListener);
+		// check if channel is already selected on insert
+		if (ec.getIsSelected()) selectedEventHandler();
 	} else if (startComponent) {
 		// if there is no complete channel yet (i.e. it is being drawn), draw a line with length == 0 - target coordinates will be set on mouse move
 		returnObj.line.points([	startComponent.getX() + ACS.vConst.EVENTCHANNELVIEW_TRIGGERPOSX,

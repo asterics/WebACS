@@ -60,16 +60,12 @@ ACS.dataChannelView = function(	dc, // ACS.dataChannel
 	}
 	
 	returnObj.destroy = function() {
-		// first remove all event handlers
+		// remove all event handlers
 		if (inputPort) inputPort.getParentComponent().events.removeHandler('componentPositionChangedEvent', componentPositionChangedEventHandlerInPort);
 		outputPort.getParentComponent().events.removeHandler('componentPositionChangedEvent', componentPositionChangedEventHandlerOutPort);
 		dc.events.removeHandler('dataChannelCompletedEvent', dataChannelCompletedEventHandler);
 		dc.events.removeHandler('selectedEvent', selectedEventHandler);
 		dc.events.removeHandler('deSelectedEvent', deSelectedEventHandler);
-		// de-select the channel
-		if (dc.getIsSelected()) {
-			model.removeItemFromSelection(dc);
-		}
 		// destroy the line
 		if (returnObj.line) returnObj.line.destroy();
 	}	
@@ -77,12 +73,14 @@ ACS.dataChannelView = function(	dc, // ACS.dataChannel
 // ***********************************************************************************************************************
 // ************************************************** constructor code ***************************************************
 // ***********************************************************************************************************************
-	if (inputPort) {
+	if (inputPort) { // i.e. channel is already complete
 		returnObj.line.points([	outputPort.getParentComponent().getX() + ACS.vConst.DATACHANNELVIEW_OUTPUTPORTPOSITIONX, 
 								outputPort.getParentComponent().getY() + ACS.vConst.DATACHANNELVIEW_FIRSTOUTPUTPORTDOCKINGPOINTY + ACS.vConst.COMPONENTVIEW_PORTHEIGHTPLUSGAP * outputPort.getPosition(),
 								inputPort.getParentComponent().getX() - ACS.vConst.DATACHANNELVIEW_INPUTPORTLEFTOFCOMPONENT,
 								inputPort.getParentComponent().getY() + ACS.vConst.DATACHANNELVIEW_FIRSTINPUTPORTDOCKINGPOINTY + ACS.vConst.COMPONENTVIEW_PORTHEIGHTPLUSGAP * inputPort.getPosition()]);
 		inputPort.getParentComponent().events.registerHandler('componentPositionChangedEvent', componentPositionChangedEventHandlerInPort);
+		// check if channel is already selected on insert
+		if (dc.getIsSelected()) selectedEventHandler();	
 	} else {
 		// draw a line with length == 0 - target coordinates will be set on mouse move
 		returnObj.line.points([	outputPort.getParentComponent().getX() + ACS.vConst.DATACHANNELVIEW_OUTPUTPORTPOSITIONX, 

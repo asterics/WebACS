@@ -1,4 +1,5 @@
-ACS.view = function(modelList) { // ACS.modelList
+ACS.view = function(modelList, // ACS.modelList
+					clipBoard) { // ACS.clipBoard
 
 // ***********************************************************************************************************************
 // ************************************************** private variables **************************************************
@@ -96,6 +97,24 @@ ACS.view = function(modelList) { // ACS.modelList
 					return false;
 				}
 				break;
+			case 120: // Ctrl-x for cut
+				if (e.ctrlKey) {
+					cutHandler();
+					stopEvent(e);
+					return false;					
+				}		
+			case 99: // Ctrl-c for copy
+				if (e.ctrlKey) {
+					copyHandler();
+					stopEvent(e);
+					return false;					
+				}
+			case 118: // Ctrl-v for paste
+				if (e.ctrlKey) {
+					pasteHandler();
+					stopEvent(e);
+					return false;					
+				}				
 			case 122: // Ctrl-z for undo
 				if (e.ctrlKey) {
 					undoHandler();
@@ -110,6 +129,18 @@ ACS.view = function(modelList) { // ACS.modelList
 				}
 		}
 	}
+	
+	var cutHandler = function() {
+		clipBoard.cut(modelList.getActModel());
+	}
+	
+	var copyHandler = function() {
+		clipBoard.copy(modelList.getActModel());
+	}
+	
+	var pasteHandler = function() {
+		clipBoard.paste(modelList.getActModel());
+	}	
 
 	var deleteSelectionHandler = function() {
 		log.debug('deleteBtnPressed');
@@ -138,6 +169,9 @@ ACS.view = function(modelList) { // ACS.modelList
 	document.addEventListener('keydown', handleKeydown);
 	document.addEventListener('keypress', handleKeypress);
 	// register handlers for button-presses in menu
+	menu.events.registerHandler('cutBtnPressedEvent', cutHandler);
+	menu.events.registerHandler('copyBtnPressedEvent', copyHandler);
+	menu.events.registerHandler('pasteBtnPressedEvent', pasteHandler);
 	menu.events.registerHandler('deleteBtnPressedEvent', deleteSelectionHandler);
 	menu.events.registerHandler('undoBtnPressedEvent', undoHandler);
 	menu.events.registerHandler('redoBtnPressedEvent', redoHandler);
