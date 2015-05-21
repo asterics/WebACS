@@ -70,6 +70,8 @@ ACS.vConst = {
 	MODELVIEW_GUIDESIGNERSIZEY: 1300,
 	MODELVIEW_FOCUSRECTCOLOR: 'rgba(213, 241, 239, 0.3)',
 	MODELVIEW_FOCUSRECTSTROKECOLOR: 'rgb(17, 234, 196)',
+	MODELVIEW_ALERTSTRINGREMOVEDCOMPONENTS: 'The definition of the following components was not found in the component\ncollection - they have therefore been removed from the model:\n\n',
+	MODELVIEW_ALERTSTRINGCHANGEDCOMPONENTS: 'The definition of the following components did not match the component\ncollection - undefined properties or ports have been reset to default values:\n\n',
 	// property editor
 	PROPERTYEDITOR_MOTHERPANEL: 'propertyEditorMotherPanel',
 	PROPERTYEDITOR_TABLIST: 'propertyEditorTabList'

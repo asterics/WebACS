@@ -390,14 +390,18 @@ ACS.componentView = function(	component, // ACS.component
 		}
 	}
 	
-	// ********************************************** handlers ***********************************************************
-	var selectedEventHandler = function() {
+	var selectView = function() {
 		selectedRect.show();
 		view.setAttr('draggable', false);
 		modelView.selectedComponentsGroup.add(view);
 		modelView.selectedComponentsGroup.moveToTop();
 		view.x(view.getX() - modelView.selectedComponentsGroup.getX());
 		view.y(view.getY() - modelView.selectedComponentsGroup.getY());
+	}
+	
+	// ********************************************** handlers ***********************************************************
+	var selectedEventHandler = function() {
+		selectView();
 		modelLayer.draw();
 	}
 	
@@ -452,7 +456,7 @@ ACS.componentView = function(	component, // ACS.component
 // ***********************************************************************************************************************
 	buildView();
 	// check if component is already selected on insert
-	if (component.getIsSelected()) selectedEventHandler();
+	if (component.getIsSelected()) selectView();
 	// register event handlers
 	component.events.registerHandler('selectedEvent', selectedEventHandler);
 	component.events.registerHandler('deSelectedEvent', deSelectedEventHandler);

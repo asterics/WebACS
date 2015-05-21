@@ -2,6 +2,10 @@
 ACS.mConst = {
 	// model
 	MODEL_DEFAULTCOMPONENTCOLLECTION: 'defaultComponentCollection.abd',
+	MODEL_COMPONENTPOSITIONOFFSETX: 10, // if the position of a component is already taken, the new one is inserted this much off to the right
+	MODEL_COMPONENTPOSITIONOFFSETY: 10, // if the position of a component is already taken, the new one is inserted this much off to the bottom
+	MODEL_NEWCOMPONENTPOSITIONX: 15,
+	MODEL_NEWCOMPONENTPOSITIONY: 15,
 	// visualAreaMarker
 	VISUALAREAMARKER_BGCOLOR: 'rgba(0, 0, 255, 0.9)',
 	VISUALAREAMARKER_BORDERCOLOR: 'rgba(0, 0, 255, 0)',

@@ -6,8 +6,10 @@ ACS.clipBoard = function() {
 	var components = []; // Array<ACS.component>
 	var dataChannels = []; // Array<ACS.dataChannel>
 	var eventChannels = []; // Array<ACS.eventChannel>
+	var removedComponentsList = []; // list of all components that were not found in the componentCollection
+	var changedComponentsList = []; // list of all components that did not match the componentCollection	
 	var portList = []; // array of all copied ports
-	var eventList = []; // array of all copied events	
+	var eventList = []; // array of all copied events
 
 // ***********************************************************************************************************************
 // ************************************************** private methods ****************************************************
@@ -230,8 +232,13 @@ ACS.clipBoard = function() {
 			var pasteDataChannels = deepCopyDataChannels(dataChannels, false);
 			var pasteEventChannels = deepCopyEventChannels(eventChannels, false);
 			
-			// components
-			for (var i = 0; i < pasteComponents.length; i++) {
+			// reset removed- and mismatch-lists
+			removedComponentsList = [];
+			changedComponentsList = [];
+			
+			// check components
+			var i = 0;
+			while (i < pasteComponents.length) {
 				var fullComponent = model.findComponentInCollection(pasteComponents[i].getComponentTypeId());
 				if (fullComponent) {
 					// mark the component as existent
@@ -341,10 +348,18 @@ ACS.clipBoard = function() {
 								pasteComponents[i].propertyList[pasteComponents[i].propertyList.length - 1].getStringList = propertiesFull.item(j).attributes.getNamedItem('getStringList').textContent;					
 						}
 						pasteComponents[i].matchesComponentCollection = false;
-					}	
+					}
+					i++;
+				} else {
+					removedComponentsList.push(pasteComponents[i]);
+					pasteComponents.splice(i, 1);
+				}
+				if ((pasteComponents[i]) && (!pasteComponents[i].matchesComponentCollection)) {
+					changedComponentsList.push(pasteComponents[i]);
 				}
 			}
-			// dataChannels
+
+			// check dataChannels
 			var i = 0;
 			while (i < pasteDataChannels.length) {
 				if (!pasteDataChannels[i].getInputPort().getParentComponent().foundInComponentCollection || !pasteDataChannels[i].getOutputPort().getParentComponent().foundInComponentCollection) {
@@ -354,7 +369,7 @@ ACS.clipBoard = function() {
 				}
 			}		
 			
-			// eventChannels
+			// check eventChannels
 			var i = 0;
 			while (i < pasteEventChannels.length) {
 				if (!pasteEventChannels[i].listener.getParentComponent().foundInComponentCollection || !pasteEventChannels[i].trigger.getParentComponent().foundInComponentCollection) {
@@ -366,9 +381,17 @@ ACS.clipBoard = function() {
 			
 			var addAct = ACS.addItemsAction(model, pasteComponents, pasteDataChannels, pasteEventChannels);
 			addAct.execute();
-			model.events.fireEvent('modelChangedEvent'); // needed in case the pasted parts do not match the component collection (does a redraw and alerts the user)
+			model.events.fireEvent('alertUserOfComponentCollectionMismatchEvent'); // needed in case the pasted parts do not match the component collection (alerts the user)
 		}
-	}	
+	}
+
+	returnObj.getRemovedComponentsList = function() {
+		return removedComponentsList;
+	}
+	
+	returnObj.getChangedComponentsList = function() {
+		return changedComponentsList;
+	}
 	
 // ***********************************************************************************************************************
 // ************************************************** constructor code ***************************************************

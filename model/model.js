@@ -411,8 +411,8 @@ ACS.model = function(filename) { // String
 	
 	returnObj.getFreePosition = function(pos) {
 		while (positionTaken(pos)) {
-			pos[0] += 10;
-			pos[1] += 10;
+			pos[0] += ACS.mConst.MODEL_COMPONENTPOSITIONOFFSETX;
+			pos[1] += ACS.mConst.MODEL_COMPONENTPOSITIONOFFSETY;
 		}
 		return pos;
 	}	
@@ -605,7 +605,7 @@ ACS.model = function(filename) { // String
 									break;					
 			}
 			// find a free position for the new component
-			var pos = returnObj.getFreePosition([10, 10]);
+			var pos = returnObj.getFreePosition([ACS.mConst.MODEL_NEWCOMPONENTPOSITIONX, ACS.mConst.MODEL_NEWCOMPONENTPOSITIONX]);
 			// build the component-object:
 			var newComp = ACS.component(compName + '.' + nextCompNameNumber(compName),
 										compTypeId,

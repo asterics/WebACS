@@ -1,5 +1,6 @@
 ACS.modelView = function(	modelContainerId, // String
-							model) { // ACS.model
+							model, // ACS.modelList
+							clipBoard) { // ACS.clipBoard
 							
 // ***********************************************************************************************************************
 // ************************************************** private variables **************************************************
@@ -42,25 +43,11 @@ ACS.modelView = function(	modelContainerId, // String
 				removedComponents.push(model.componentList[i]);
 			}
 		}
+		
 		// alert the user in case some components were not found in the component collection and therefore removed from the model
-		if (removedComponents.length > 0) {
-			var alertString = 'The definition of the following components was not found in the component\ncollection - they have therefore been removed from the model:\n\n';
-			for (j = 0; j < removedComponents.length; j++) {
-				model.removeComponent(removedComponents[j]);
-				var compTypeId = removedComponents[j].getComponentTypeId();
-				alertString = alertString + removedComponents[j].getId() + ' ('	+ compTypeId.substring(9, compTypeId.length) + ')\n';
-			}
-			alert(alertString);
-		}
+		alertUserOfRemovedComponents(removedComponents, true);
 		// alert the user in case some components do not match the component collection, in which case ports and properties would be reset to default values
-		if (changedComponents.length > 0) {
-			var alertString = 'The definition of the following components did not match the component\ncollection - undefined properties or ports have been reset to default values:\n\n';
-			for (j = 0; j < changedComponents.length; j++) {
-				var compTypeId = changedComponents[j].getComponentTypeId();
-				alertString = alertString + changedComponents[j].getId() + ' ('	+ compTypeId.substring(9, compTypeId.length) + ')\n';
-			}
-			alert(alertString);
-		}
+		alertUserOfChangedComponents(changedComponents);
 		
 		for (i = 0; i < model.dataChannelList.length; i++) {
 			dataChannelViewList[i] = ACS.dataChannelView(model.dataChannelList[i], model, modelLayer);
@@ -201,6 +188,29 @@ ACS.modelView = function(	modelContainerId, // String
 		return false;
 	}
 	
+	var alertUserOfRemovedComponents = function(removedComponents, removeFromModel) {
+		if (removedComponents.length > 0) {
+			var alertString = ACS.vConst.MODELVIEW_ALERTSTRINGREMOVEDCOMPONENTS;
+			for (j = 0; j < removedComponents.length; j++) {
+				if (removeFromModel) model.removeComponent(removedComponents[j]);
+				var compTypeId = removedComponents[j].getComponentTypeId();
+				alertString = alertString + removedComponents[j].getId() + ' ('	+ compTypeId.substring(9, compTypeId.length) + ')\n';
+			}
+			alert(alertString);
+		}
+	}
+	
+	var alertUserOfChangedComponents = function(changedComponents) {
+		if (changedComponents.length > 0) {
+			var alertString = ACS.vConst.MODELVIEW_ALERTSTRINGCHANGEDCOMPONENTS;
+			for (j = 0; j < changedComponents.length; j++) {
+				var compTypeId = changedComponents[j].getComponentTypeId();
+				alertString = alertString + changedComponents[j].getId() + ' ('	+ compTypeId.substring(9, compTypeId.length) + ')\n';
+			}
+			alert(alertString);
+		}
+	}
+	
 	// ********************************************** handlers ***********************************************************
 	var modelChangedEventHandler = function() {
 		drawCompleteModel();
@@ -285,6 +295,11 @@ ACS.modelView = function(	modelContainerId, // String
 			}
 		}
 		modelLayer.draw();
+	}
+	
+	var alertUserOfComponentCollectionMismatchEventHandler = function() {
+		alertUserOfRemovedComponents(clipBoard.getRemovedComponentsList(), false);
+		alertUserOfChangedComponents(clipBoard.getChangedComponentsList());
 	}
 	
 // ***********************************************************************************************************************
@@ -417,6 +432,7 @@ ACS.modelView = function(	modelContainerId, // String
 	model.events.registerHandler('eventChannelAddedEvent', eventChannelAddedEventHandler);
 	model.events.registerHandler('eventChannelRemovedEvent', eventChannelRemovedEventHandler);
 	model.events.registerHandler('eventChannelViewMightNeedRemovingEvent', eventChannelViewMightNeedRemovingEventHandler);
+	model.events.registerHandler('alertUserOfComponentCollectionMismatchEvent', alertUserOfComponentCollectionMismatchEventHandler);
 	
 	// register mouse-event handlers
 	modelLayer.on('mousemove', function() {

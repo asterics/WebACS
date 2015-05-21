@@ -11,6 +11,10 @@ ACS.dataChannelView = function(	dc, // ACS.dataChannel
 // ***********************************************************************************************************************
 // ************************************************** private methods ****************************************************
 // ***********************************************************************************************************************
+	var selectLine = function() {
+		returnObj.line.stroke(ACS.vConst.DATACHANNELVIEW_SELECTEDSTROKECOLOR);
+		returnObj.line.dashEnabled(true);
+	}
 	
 	// ********************************************** handlers ***********************************************************
 	var componentPositionChangedEventHandlerInPort = function() {
@@ -39,8 +43,7 @@ ACS.dataChannelView = function(	dc, // ACS.dataChannel
 	}
 
 	var selectedEventHandler = function() {
-		returnObj.line.stroke(ACS.vConst.DATACHANNELVIEW_SELECTEDSTROKECOLOR);
-		returnObj.line.dashEnabled(true);
+		selectLine();
 		modelLayer.draw();
 	}
 	
@@ -80,7 +83,7 @@ ACS.dataChannelView = function(	dc, // ACS.dataChannel
 								inputPort.getParentComponent().getY() + ACS.vConst.DATACHANNELVIEW_FIRSTINPUTPORTDOCKINGPOINTY + ACS.vConst.COMPONENTVIEW_PORTHEIGHTPLUSGAP * inputPort.getPosition()]);
 		inputPort.getParentComponent().events.registerHandler('componentPositionChangedEvent', componentPositionChangedEventHandlerInPort);
 		// check if channel is already selected on insert
-		if (dc.getIsSelected()) selectedEventHandler();	
+		if (dc.getIsSelected()) selectLine();	
 	} else {
 		// draw a line with length == 0 - target coordinates will be set on mouse move
 		returnObj.line.points([	outputPort.getParentComponent().getX() + ACS.vConst.DATACHANNELVIEW_OUTPUTPORTPOSITIONX, 

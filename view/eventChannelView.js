@@ -25,6 +25,11 @@ ACS.eventChannelView = function(ec, // ACS.eventChannel
 		return elementHeight;
 	}
 	
+	var selectLine = function() {
+		returnObj.line.stroke(ACS.vConst.EVENTCHANNELVIEW_SELECTEDSTROKECOLOR);
+		returnObj.line.dashEnabled(true);
+	}
+	
 	// ********************************************** handlers ***********************************************************
 	var componentPositionChangedEventHandlerListener = function() {
 			returnObj.line.points([	returnObj.line.points()[0], 
@@ -43,8 +48,7 @@ ACS.eventChannelView = function(ec, // ACS.eventChannel
 	var selectedEventHandler = function() {
 		// make sure selection is only done once, if several channels are connected
 		if (!returnObj.line.dashEnabled()) {
-			returnObj.line.stroke(ACS.vConst.EVENTCHANNELVIEW_SELECTEDSTROKECOLOR);
-			returnObj.line.dashEnabled(true);
+			selectLine();
 			modelLayer.draw();
 		}
 	}
@@ -119,7 +123,7 @@ ACS.eventChannelView = function(ec, // ACS.eventChannel
 		startComponent.events.registerHandler('componentPositionChangedEvent', componentPositionChangedEventHandlerTrigger);
 		endComponent.events.registerHandler('componentPositionChangedEvent', componentPositionChangedEventHandlerListener);
 		// check if channel is already selected on insert
-		if (ec.getIsSelected()) selectedEventHandler();
+		if (ec.getIsSelected()) selectLine();
 	} else if (startComponent) {
 		// if there is no complete channel yet (i.e. it is being drawn), draw a line with length == 0 - target coordinates will be set on mouse move
 		returnObj.line.points([	startComponent.getX() + ACS.vConst.EVENTCHANNELVIEW_TRIGGERPOSX,
