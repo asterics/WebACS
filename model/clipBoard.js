@@ -267,9 +267,23 @@ ACS.clipBoard = function() {
 							j++;
 						}
 					}
-					// check if the component's position in the model graph is free
+					// check if the component's position in the model-graph is free
 					var newPos = model.getFreePosition([pasteComponents[i].getX(), pasteComponents[i].getY()]);
 					pasteComponents[i].setNewPosition(newPos[0], newPos[1]);
+					// avoid pasting several components at the same position
+					var j = 0;
+					while (j < pasteComponents.length) {
+						if (j !== i) { // avoid comparing with self
+							if ((pasteComponents[i].getX() === pasteComponents[j].getX()) && (pasteComponents[i].getY() === pasteComponents[j].getY())) {
+								pasteComponents[i].setNewPosition(pasteComponents[i].getX() + ACS.mConst.MODEL_COMPONENTPOSITIONOFFSETX, pasteComponents[i].getY() + ACS.mConst.MODEL_COMPONENTPOSITIONOFFSETY);
+								j = 0; // must start checking from the beginning, since the position has changed and all components have to be checked for the new position
+							} else {
+								j++;
+							}
+						} else {
+							j++;
+						}
+					}
 					// check if the input ports match the component collection
 					var inputPortsFull = fullComponent.getElementsByTagName('inputPort');
 					if (inputPortsFull.length < pasteComponents[i].inputPortList.length) {
