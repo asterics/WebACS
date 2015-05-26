@@ -79,7 +79,6 @@ ACS.channelView = function(model, // ACS.model
 	});
 	
 	modelLayer.add(returnObj.line);
-	returnObj.line.moveToBottom();
 	
 	return returnObj;
 }
