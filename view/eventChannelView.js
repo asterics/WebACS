@@ -89,6 +89,15 @@ ACS.eventChannelView = function(ec, // ACS.eventChannel
 								endComponent.getX() + ACS.vConst.EVENTCHANNELVIEW_LISTENERPOSX,
 								endComponent.getY() + getComponentHeight(endComponent) + ACS.vConst.EVENTCHANNELVIEW_LISTENERBELOWCOMPONENT]);
 		endComponent.events.registerHandler('componentPositionChangedEvent', componentPositionChangedEventHandlerListener);
+		// if there is no eventChannel connected yet (i.e. the channel has just been drawn), add a dummy-eventChannel object
+		if (returnObj.ecList.length === 0) {
+			returnObj.ecList.push(ACS.eventChannel('_dummy_'));
+			returnObj.ecList[0].trigger = ACS.event('_dummy_', '', startComponent);
+			returnObj.ecList[0].listener = ACS.event('_dummy_', '', endComponent);
+			model.addEventChannel(returnObj.ecList[0]);
+			returnObj.ecList[0].events.registerHandler('selectedEvent', selectedEventHandler);
+			returnObj.ecList[0].events.registerHandler('deSelectedEvent', deSelectedEventHandler);		
+		}
 	}
 	
 	returnObj.getEndComponent = function(c) {
@@ -130,7 +139,7 @@ ACS.eventChannelView = function(ec, // ACS.eventChannel
 								startComponent.getY() + getComponentHeight(startComponent) + ACS.vConst.EVENTCHANNELVIEW_TRIGGERBELOWCOMPONENT,
 								startComponent.getX() + ACS.vConst.EVENTCHANNELVIEW_TRIGGERPOSX,
 								startComponent.getY() + getComponentHeight(startComponent) + ACS.vConst.EVENTCHANNELVIEW_TRIGGERBELOWCOMPONENT]);
-		startComponent.events.registerHandler('componentPositionChangedEvent', componentPositionChangedEventHandlerTrigger);	
+		startComponent.events.registerHandler('componentPositionChangedEvent', componentPositionChangedEventHandlerTrigger);
 	}
 	// highlight channel when mouse is over hitGraph
 	returnObj.line.on('mouseover', function(e) {

@@ -531,26 +531,28 @@ ACS.model = function(filename) { // String
 		if (returnObj.eventChannelList.length > 0) {
 			saveString += '\t<eventChannels>\r';
 			for (var i = 0; i < returnObj.eventChannelList.length; i++) {
-				saveString += '\t\t<eventChannel id="' + returnObj.eventChannelList[i].getId() + '">\r';
-				if (returnObj.eventChannelList[i].description !== '') saveString += '\t\t\t<description>' + returnObj.eventChannelList[i].description + '</description>\r';
-				saveString += '\t\t\t<sources>\r';
-				saveString += '\t\t\t\t<source>\r';
-				saveString += '\t\t\t\t\t<component id="' + returnObj.eventChannelList[i].trigger.getParentComponent().getId() + '" />\r';
-				saveString += '\t\t\t\t\t<eventPort id="' + returnObj.eventChannelList[i].trigger.getId() + '" />\r';
-				saveString += '\t\t\t\t</source>\r';
-				saveString += '\t\t\t</sources>\r';
-				saveString += '\t\t\t<targets>\r';
-				saveString += '\t\t\t\t<target>\r';
-				saveString += '\t\t\t\t\t<component id="' + returnObj.eventChannelList[i].listener.getParentComponent().getId() + '" />\r';
-				saveString += '\t\t\t\t\t<eventPort id="' + returnObj.eventChannelList[i].listener.getId() + '" />\r';
-				saveString += '\t\t\t\t</target>\r';				
-				saveString += '\t\t\t</targets>\r';
-				saveString += '\t\t</eventChannel>\r';
+				if (returnObj.eventChannelList[i].getId() !== '_dummy_') { // do not save dummy-eventChannels (the ones only connected visually)
+					saveString += '\t\t<eventChannel id="' + returnObj.eventChannelList[i].getId() + '">\r';
+					if (returnObj.eventChannelList[i].description !== '') saveString += '\t\t\t<description>' + returnObj.eventChannelList[i].description + '</description>\r';
+					saveString += '\t\t\t<sources>\r';
+					saveString += '\t\t\t\t<source>\r';
+					saveString += '\t\t\t\t\t<component id="' + returnObj.eventChannelList[i].trigger.getParentComponent().getId() + '" />\r';
+					saveString += '\t\t\t\t\t<eventPort id="' + returnObj.eventChannelList[i].trigger.getId() + '" />\r';
+					saveString += '\t\t\t\t</source>\r';
+					saveString += '\t\t\t</sources>\r';
+					saveString += '\t\t\t<targets>\r';
+					saveString += '\t\t\t\t<target>\r';
+					saveString += '\t\t\t\t\t<component id="' + returnObj.eventChannelList[i].listener.getParentComponent().getId() + '" />\r';
+					saveString += '\t\t\t\t\t<eventPort id="' + returnObj.eventChannelList[i].listener.getId() + '" />\r';
+					saveString += '\t\t\t\t</target>\r';				
+					saveString += '\t\t\t</targets>\r';
+					saveString += '\t\t</eventChannel>\r';
+				}
 			}
 			saveString += '\t</eventChannels>\r';
 		}
 		// TODO: save groups
-		// save the modeGUI
+		// save the modelGUI
 		saveString += '\t<modelGUI>\r';
 		saveString += '\t\t<Decoration>' + returnObj.modelGui.getDecoration() + '</Decoration>\r';
 		saveString += '\t\t<Fullscreen>' + returnObj.modelGui.getFullScreen() + '</Fullscreen>\r';

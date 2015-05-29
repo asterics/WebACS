@@ -19,10 +19,6 @@ ACS.event = function(id, // String; can be changed, but must be unique
 		return id;
 	}
 	
-	returnObj.getName = function() {
-		return name;
-	}
-	
 	returnObj.getDescription = function() {
 		return description;
 	}

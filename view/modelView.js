@@ -260,11 +260,13 @@ ACS.modelView = function(	modelContainerId, // String
 	var eventChannelAddedEventHandler = function() {
 		var ecv = getEventChannelView(model.eventChannelList[model.eventChannelList.length -1].trigger.getParentComponent(), model.eventChannelList[model.eventChannelList.length -1].listener.getParentComponent());
 		if (ecv) {
-			ecv.ecList.push(model.eventChannelList[model.eventChannelList.length -1]);
+			if ((ecv.ecList.length > 1) || (ecv.ecList[0] !== model.eventChannelList[model.eventChannelList.length -1])) { // avoids adding dummy-object twice, when new channel is drawn
+				ecv.ecList.push(model.eventChannelList[model.eventChannelList.length -1]);
+			}
 		} else {
 			eventChannelViewList.push(ACS.eventChannelView(model.eventChannelList[model.eventChannelList.length -1], null, model, modelLayer));
 			modelLayer.draw();
-		}	
+		}
 	}
 	
 	var eventChannelRemovedEventHandler = function() {
