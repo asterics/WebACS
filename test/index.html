@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>WebACS QUnit Tests</title>
+	<link rel="stylesheet" href="./css/qunit-1.17.1.css">
+	<!-- external libraries: -->
+    <script type="text/javascript" language="javascript" src="../lib/jquery-1.11.1.min.js"></script>
+	<script type="text/javascript" language="javascript" src="../lib/loglevel.min.js"></script>
+	<script type="text/javascript" language="javascript" src="../lib/kinetic-v5.1.0.min.js"></script>
+	<script type="text/javascript" language="javascript" src="../lib/FileSaver/FileSaver.min.js"></script>
+	<script type="text/javascript" language="javascript" src="../lib/Blob/Blob.js"></script>
+	<!-- namespace: -->
+	<script type="text/javascript" language="javascript" src="../acsNamespace.js"></script>
+	<!-- misc: -->
+	<script type="text/javascript" language="javascript" src="../eventManager.js"></script>
+	<!-- model:   -->
+	<script type="text/javascript" language="javascript" src="../model/mConst.js"></script>
+	<script type="text/javascript" language="javascript" src="../model/action.js"></script>
+	<script type="text/javascript" language="javascript" src="../model/addChannelAction.js"></script>
+	<script type="text/javascript" language="javascript" src="../model/addComponentAction.js"></script>
+	<script type="text/javascript" language="javascript" src="../model/removeChannelAction.js"></script>
+	<script type="text/javascript" language="javascript" src="../model/removeComponentAction.js"></script>
+	<script type="text/javascript" language="javascript" src="../model/property.js"></script>
+	<script type="text/javascript" language="javascript" src="../model/channel.js"></script>
+	<script type="text/javascript" language="javascript" src="../model/dataChannel.js"></script>
+	<script type="text/javascript" language="javascript" src="../model/eventChannel.js"></script>
+	<script type="text/javascript" language="javascript" src="../model/port.js"></script>
+	<script type="text/javascript" language="javascript" src="../model/event.js"></script>
+	<script type="text/javascript" language="javascript" src="../model/gui.js"></script>
+	<script type="text/javascript" language="javascript" src="../model/modelGui.js"></script>
+	<script type="text/javascript" language="javascript" src="../model/metaData.js"></script>
+	<script type="text/javascript" language="javascript" src="../model/visualAreaMarker.js"></script>
+	<script type="text/javascript" language="javascript" src="../model/component.js"></script>
+	<script type="text/javascript" language="javascript" src="../model/groupComponent.js"></script>
+	<script type="text/javascript" language="javascript" src="../model/model.js"></script>
+	<script type="text/javascript" language="javascript" src="../model/modelList.js"></script>
+</head>
+<body>
+	<div id="qunit"></div>
+	<div id="qunit-fixture"></div>
+	<script src="./js/qunit-1.17.1.js"></script>
+	<script type="text/javascript">
+		QUnit.module( "Model" );
+	</script>
+	<script src="model/component.js"></script>
+	<script src="model/model.js"></script>
+</body>
+</html>
