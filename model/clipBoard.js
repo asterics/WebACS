@@ -213,12 +213,13 @@ ACS.clipBoard = function() {
 					tempEventChannelList.push(model.selectedItemsList[i]);
 				}
 			}
-			if (tempCompList.length > 0) { // if at least one component is to be copied (channels cannot be copied without corresponding components)
-				// deep-copy them to the clipboard
-				components = deepCopyComponentList(tempCompList, true);
-				dataChannels = deepCopyDataChannels(tempDataChannelList, true);
-				eventChannels = deepCopyEventChannels(tempEventChannelList, true);
-			}
+		
+		}
+		if (tempCompList.length > 0) { // if at least one component is to be copied (channels cannot be copied without corresponding components)
+			// deep-copy them to the clipboard
+			components = deepCopyComponentList(tempCompList, true);
+			dataChannels = deepCopyDataChannels(tempDataChannelList, true);
+			eventChannels = deepCopyEventChannels(tempEventChannelList, true);
 		}
 	}
 

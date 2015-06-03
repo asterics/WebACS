@@ -94,7 +94,8 @@ ACS.eventChannelView = function(ec, // ACS.eventChannel
 			returnObj.ecList.push(ACS.eventChannel('_dummy_'));
 			returnObj.ecList[0].trigger = ACS.event('_dummy_', '', startComponent);
 			returnObj.ecList[0].listener = ACS.event('_dummy_', '', endComponent);
-			model.addEventChannel(returnObj.ecList[0]);
+			var action = ACS.addEventChannelAction(model, returnObj.ecList[0]);
+			action.execute();
 			returnObj.ecList[0].events.registerHandler('selectedEvent', selectedEventHandler);
 			returnObj.ecList[0].events.registerHandler('deSelectedEvent', deSelectedEventHandler);		
 		}

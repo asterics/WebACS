@@ -1,5 +1,5 @@
 ACS.addEventChannelAction = function(parentModel, // ACS.model
-									 ec) { // ACS.dataChannel
+									 ec) { // ACS.eventChannel
 
 // ***********************************************************************************************************************
 // ************************************************** private variables **************************************************
@@ -21,6 +21,7 @@ ACS.addEventChannelAction = function(parentModel, // ACS.model
 	
 	returnObj.undo = function() {
 		parentModel.removeEventChannel(ec);
+		parentModel.events.fireEvent('eventChannelViewMightNeedRemovingEvent');
 		parentModel.redoStack.push(returnObj);
 	}
 	
