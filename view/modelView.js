@@ -81,12 +81,7 @@
 			dataChannelViewList[i] = ACS.dataChannelView(model.dataChannelList[i], model, modelLayer);
 		}
 		for (i = 0; i < model.eventChannelList.length; i++) {
-			var ecv = getEventChannelView(model.eventChannelList[i].trigger.getParentComponent(), model.eventChannelList[i].listener.getParentComponent());
-			if (ecv) {
-				ecv.ecList.push(model.eventChannelList[i]);
-			} else {
-				eventChannelViewList.push(ACS.eventChannelView(model.eventChannelList[i], null, model, modelLayer));
-			}
+			eventChannelViewList[i] = ACS.eventChannelView(model.eventChannelList[i], model, modelLayer);
 		}
 		for (i = 0; i < model.visualAreaMarkerList.length; i++) {
 			visualAreaMarkerViewList[i] = ACS.visualAreaMarkerView(model.visualAreaMarkerList[i], modelLayer);
@@ -155,9 +150,7 @@
 				}
 			}
 			if (intersectionFound) {
-				for (var j = 0; j < eventChannelViewList[i].ecList.length; j++) {
-					model.addItemToSelection(eventChannelViewList[i].ecList[j]);
-				}
+				model.addItemToSelection(eventChannelViewList[i].getChannel());
 				log.debug('eventChannel selected');
 			}
 		}
@@ -169,15 +162,6 @@
 			if (model.eventChannelList[i] === ec) return true;
 		}
 		return false;
-	}
-	
-	var getEventChannelView = function(startC, endC) {
-		for (var i = 0; i < eventChannelViewList.length; i++) {
-			if ((eventChannelViewList[i].getStartComponent() === startC) && (eventChannelViewList[i].getEndComponent() === endC)) {
-				return eventChannelViewList[i];
-			}
-		}
-		return null;
 	}
 	
 	var sortCorners = function(shape) { // returns an Object defining the corners of the given Kinetic.Shape: tl: top-left, tr: top-right, br: bottom-right, bl: bottom-left	
@@ -286,45 +270,22 @@
 	}
 	
 	var eventChannelAddedEventHandler = function() {
-		var ecv = getEventChannelView(model.eventChannelList[model.eventChannelList.length -1].trigger.getParentComponent(), model.eventChannelList[model.eventChannelList.length -1].listener.getParentComponent());
-		if (ecv) {
-			if ((ecv.ecList.length > 1) || (ecv.ecList[0] !== model.eventChannelList[model.eventChannelList.length -1])) { // avoids adding dummy-object twice, when new channel is drawn
-				ecv.ecList.push(model.eventChannelList[model.eventChannelList.length -1]);
-			}
-		} else {
-			eventChannelViewList.push(ACS.eventChannelView(model.eventChannelList[model.eventChannelList.length -1], null, model, modelLayer));
-			modelLayer.draw();
-		}
+		eventChannelViewList.push(ACS.eventChannelView(model.eventChannelList[model.eventChannelList.length -1], model, modelLayer));
+		modelLayer.draw();
 	}
 	
 	var eventChannelRemovedEventHandler = function() {
 		var found = false;
 		var i = 0;
 		while (!found && (i < eventChannelViewList.length)) {
-			var j = 0;
-			while (!found && (j < eventChannelViewList[i].ecList.length)) {
-				if (!eventChannelExists(eventChannelViewList[i].ecList[j])) {
-					eventChannelViewList[i].ecList.splice(j, 1);
-					found = true;
-				}
-				j++;
+			if (!eventChannelExists(eventChannelViewList[i].getChannel())) {
+				eventChannelViewList[i].destroy();
+				eventChannelViewList.splice(i, 1);
+				modelLayer.draw();
+				found = true;
 			}
 			i++;
 		}
-	}
-	
-	var eventChannelViewMightNeedRemovingEventHandler = function() {
-		// this event gets fired, when some items have been selected and deleted
-		var i = 0;
-		while (i < eventChannelViewList.length) {
-			if (eventChannelViewList[i].ecList.length === 0) {
-				eventChannelViewList[i].destroy();
-				eventChannelViewList.splice(i, 1);
-			} else {
-				i++;
-			}
-		}
-		modelLayer.draw();
 	}
 	
 	var alertUserOfComponentCollectionMismatchEventHandler = function() {
@@ -345,29 +306,6 @@
 	
 	returnObj.getModelContainerId = function() {
 		return modelContainerId;
-	}
-	
-	returnObj.addEventChannelView = function(ecv) {
-		eventChannelViewList.push(ecv);
-	}
-	
-	returnObj.removeEventChannelView = function(ecv) {
-		for (var i = 0; i < eventChannelViewList.length; i++) {
-			if (eventChannelViewList[i] === ecv) {
-				for (var j = 0; j < eventChannelViewList[i].ecList.length; j++) {
-					model.removeEventChannel(eventChannelViewList[i].ecList[j]);
-				}
-				eventChannelViewList[i].destroy();
-				eventChannelViewList.splice(i, 1);
-				modelLayer.draw();
-				return true;
-			}
-		}
-		return false;
-	}
-	
-	returnObj.getEventChannelViewList = function() {
-		return eventChannelViewList;
 	}
 	
 // ***********************************************************************************************************************
@@ -461,7 +399,6 @@
 	model.events.registerHandler('dataChannelRemovedEvent', dataChannelRemovedEventHandler);
 	model.events.registerHandler('eventChannelAddedEvent', eventChannelAddedEventHandler);
 	model.events.registerHandler('eventChannelRemovedEvent', eventChannelRemovedEventHandler);
-	model.events.registerHandler('eventChannelViewMightNeedRemovingEvent', eventChannelViewMightNeedRemovingEventHandler);
 	model.events.registerHandler('alertUserOfComponentCollectionMismatchEvent', alertUserOfComponentCollectionMismatchEventHandler);
 	
 	// register mouse-event handlers
@@ -470,7 +407,7 @@
 		if ((model.dataChannelList.length > 0) && (!model.dataChannelList[model.dataChannelList.length - 1].getInputPort())) {
 			dataChannelViewList[dataChannelViewList.length - 1].setEndPoint(mousePos.x, mousePos.y);
 			this.draw();
-		} else if ((eventChannelViewList.length > 0) && (!eventChannelViewList[eventChannelViewList.length - 1].getEndComponent())) {
+		} else if ((eventChannelViewList.length > 0) && (!eventChannelViewList[eventChannelViewList.length - 1].getChannel().endComponent)) {
 			eventChannelViewList[eventChannelViewList.length - 1].setEndPoint(mousePos.x, mousePos.y)
 			this.draw();
 		} else if (focusRect) {
@@ -481,15 +418,11 @@
 	});
 	
 	modelLayer.on('click', function(e) {
-		if ((model.dataChannelList.length > 0) && (!model.dataChannelList[model.dataChannelList.length - 1].getInputPort())) {
-			// started channel is dropped, because click was not on an inputPort
+		// started channels of any kind are dropped, because click was not on an inputPort
+		if (((model.dataChannelList.length > 0) && (!model.dataChannelList[model.dataChannelList.length - 1].getInputPort())) || // unfinished dataChannel to be dropped
+		   ((eventChannelViewList.length > 0) && (!eventChannelViewList[eventChannelViewList.length - 1].getChannel().endComponent))) { // unfinished eventChannel to be dropped
 			var ch = model.undoStack.pop();
 			ch.undo();
-		} else if ((eventChannelViewList.length > 0) && (!eventChannelViewList[eventChannelViewList.length - 1].getEndComponent())) {
-			eventChannelViewList[eventChannelViewList.length - 1].destroy();
-			eventChannelViewList.pop();
-			this.draw();
-			log.debug('eventChannel dropped');
 		}
 	});
 	

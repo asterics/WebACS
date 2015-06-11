@@ -43,6 +43,8 @@
 // ***********************************************************************************************************************
 	var returnObj = ACS.channel(id);
 	
+	returnObj.description = '';
+	
 	returnObj.getInputPort = function() {
 		return inputPort;
 	}

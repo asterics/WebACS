@@ -1,3 +1,31 @@
+/*
+ * AsTeRICS - Assistive Technology Rapid Integration and Construction Set (http://www.asterics.org)
+ * 
+ * 
+ * Y88b                     d88P      888               d8888  .d8888b.   .d8888b. 
+ *  Y88b                   d88P       888              d88888 d88P  Y88b d88P  Y88b
+ *   Y88b                 d88P        888             d88P888 888    888 Y88b.
+ *    Y88b     d888b     d88P .d88b.  8888888b.      d88P 888 888         "Y888b.  
+ *     Y88b   d88888b   d88P d8P  Y8b 888   Y88b    d88P  888 888            "Y88b.
+ *      Y88b d88P Y88b d88P  88888888 888    888   d88P   888 888    888       "888
+ *       Y88888P   Y88888P   Y8b.     888   d88P  d8888888888 Y88b  d88P Y88b  d88P
+ *        Y888P     Y888P     "Y8888  8888888P"  d88P     888  "Y8888P"   "Y8888P"
+ * 
+ * Copyright 2015 Kompetenznetzwerk KI-I (http://ki-i.at)
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+ 
 ACS.clipBoard = function() {
 
 // ***********************************************************************************************************************
@@ -92,6 +120,23 @@ ACS.clipBoard = function() {
 		
 		return newEvent;
 	}
+
+	var findComponent = function(compList, oldComp, extendId) {
+		var newComp = null; // will remain null, if not found in list
+		var i = 0;
+		while (!newComp && (i < compList.length)) {
+			var ext = '';
+			if (extendId) {
+				ext = ACS.mConst.IDEXTENSION;
+			}
+			if (compList[i].getId() === oldComp.getId() + ext) {
+				newComp = compList[i];
+			}
+			i++;
+		}
+		
+		return newComp;
+	}
 	
 	var deepCopyComponentList = function(oldList, extendId) {
 		var newList = [];
@@ -166,19 +211,21 @@ ACS.clipBoard = function() {
 		return newList;
 	}
 	
-	var deepCopyEventChannels = function(oldList, extendId) {
+	var deepCopyEventChannels = function(compList, oldList, extendId) {
 		var newList = [];
 		var ext = '';
 		if (extendId) {
 			ext = ACS.mConst.IDEXTENSION;
-		}		
+		}	
 		for (var i = 0; i < oldList.length; i++) {
 			var channel = ACS.eventChannel(oldList[i].getId().valueOf() + ext);
 			channel.setIsSelected(true); // elements shall be selected, when pasted
-			channel.description = oldList[i].description.valueOf();
-			channel.listener = findEvent(oldList[i].listener, extendId);
-			channel.trigger = findEvent(oldList[i].trigger, extendId);
-			if ((channel.listener !== null) && (channel.trigger !== null)) { // only keep the channel, if it has a source and a target within the copied components
+			channel.startComponent = findComponent(compList, oldList[i].startComponent,extendId);
+			channel.endComponent = findComponent(compList, oldList[i].endComponent,extendId);
+			for (var j = 0; j < oldList[i].eventConnections.length; j++) {
+				channel.eventConnections[j] = {trigger: findEvent(oldList[i].eventConnections[j].trigger, extendId), listener: findEvent(oldList[i].eventConnections[j].listener, extendId), description: oldList[i].eventConnections[j].description.valueOf()};
+			}
+			if ((channel.startComponent !== null) && (channel.endComponent !== null)) { // only keep the channel, if it has a source and a target within the copied components
 				newList.push(channel);
 			}
 		}
@@ -207,7 +254,7 @@ ACS.clipBoard = function() {
 			if (typeof model.selectedItemsList[i].getComponentTypeId === 'function') { // must be a component
 				tempCompList.push(model.selectedItemsList[i]);
 			} else {
-				if (typeof model.selectedItemsList[i].listener === 'undefined') { // must be a dataChannel
+				if (typeof model.selectedItemsList[i].startComponent === 'undefined') { // must be a dataChannel
 					tempDataChannelList.push(model.selectedItemsList[i]);
 				} else { // must be an eventChannel
 					tempEventChannelList.push(model.selectedItemsList[i]);
@@ -219,7 +266,7 @@ ACS.clipBoard = function() {
 			// deep-copy them to the clipboard
 			components = deepCopyComponentList(tempCompList, true);
 			dataChannels = deepCopyDataChannels(tempDataChannelList, true);
-			eventChannels = deepCopyEventChannels(tempEventChannelList, true);
+			eventChannels = deepCopyEventChannels(components, tempEventChannelList, true);
 		}
 	}
 
@@ -231,7 +278,7 @@ ACS.clipBoard = function() {
 			// deep-copy all elements
 			var pasteComponents = deepCopyComponentList(components, false);
 			var pasteDataChannels = deepCopyDataChannels(dataChannels, false);
-			var pasteEventChannels = deepCopyEventChannels(eventChannels, false);
+			var pasteEventChannels = deepCopyEventChannels(pasteComponents, eventChannels, false);
 			
 			// reset removed- and mismatch-lists
 			removedComponentsList = [];
@@ -387,7 +434,7 @@ ACS.clipBoard = function() {
 			// check eventChannels
 			var i = 0;
 			while (i < pasteEventChannels.length) {
-				if (!pasteEventChannels[i].listener.getParentComponent().foundInComponentCollection || !pasteEventChannels[i].trigger.getParentComponent().foundInComponentCollection) {
+				if (!pasteEventChannels[i].startComponent.foundInComponentCollection || !pasteEventChannels[i].endComponent.foundInComponentCollection) {
 					pasteEventChannels.splice(i, 1); // delete channel if either end-component is not in component collection of current model
 				} else {
 					i++;

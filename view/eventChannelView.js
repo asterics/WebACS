@@ -27,14 +27,12 @@
  */
  
  ACS.eventChannelView = function(ec, // ACS.eventChannel
-								startComponent, // ACS.component
 								model, // ACS.model
 								modelLayer) { // Kinetic.Layer
 								
 // ***********************************************************************************************************************
 // ************************************************** private variables **************************************************
 // ***********************************************************************************************************************
-	var endComponent = null;
 	
 // ***********************************************************************************************************************
 // ************************************************** private methods ****************************************************
@@ -59,35 +57,39 @@
 	}
 	
 	// ********************************************** handlers ***********************************************************
-	var componentPositionChangedEventHandlerListener = function() {
-			returnObj.line.points([	returnObj.line.points()[0], 
-									returnObj.line.points()[1], 
-									endComponent.getX() + ACS.vConst.EVENTCHANNELVIEW_LISTENERPOSX,
-									endComponent.getY() + getComponentHeight(endComponent) + ACS.vConst.EVENTCHANNELVIEW_LISTENERBELOWCOMPONENT]);
-	}
-	
-	var componentPositionChangedEventHandlerTrigger = function() {
-			returnObj.line.points([	startComponent.getX() + ACS.vConst.EVENTCHANNELVIEW_TRIGGERPOSX,
-									startComponent.getY() + getComponentHeight(startComponent) + ACS.vConst.EVENTCHANNELVIEW_TRIGGERBELOWCOMPONENT, 
+	var componentPositionChangedEventHandlerStartComponent = function() {
+			returnObj.line.points([	ec.startComponent.getX() + ACS.vConst.EVENTCHANNELVIEW_TRIGGERPOSX,
+									ec.startComponent.getY() + getComponentHeight(ec.startComponent) + ACS.vConst.EVENTCHANNELVIEW_TRIGGERBELOWCOMPONENT, 
 									returnObj.line.points()[2], 
 									returnObj.line.points()[3]]);
 	}
+
+	var componentPositionChangedEventHandlerEndComponent = function() {
+			returnObj.line.points([	returnObj.line.points()[0], 
+									returnObj.line.points()[1], 
+									ec.endComponent.getX() + ACS.vConst.EVENTCHANNELVIEW_LISTENERPOSX,
+									ec.endComponent.getY() + getComponentHeight(ec.endComponent) + ACS.vConst.EVENTCHANNELVIEW_LISTENERBELOWCOMPONENT]);
+	}
+	
+	var eventChannelCompletedEventHandler = function() {
+		// set endpoint and and handler for endComponent and redraw
+		returnObj.line.points([	returnObj.line.points()[0], 
+								returnObj.line.points()[1], 
+								ec.endComponent.getX() + ACS.vConst.EVENTCHANNELVIEW_LISTENERPOSX,
+								ec.endComponent.getY() + getComponentHeight(ec.endComponent) + ACS.vConst.EVENTCHANNELVIEW_LISTENERBELOWCOMPONENT]);
+		ec.endComponent.events.registerHandler('componentPositionChangedEvent', componentPositionChangedEventHandlerEndComponent);
+		modelLayer.draw();
+	}
 	
 	var selectedEventHandler = function() {
-		// make sure selection is only done once, if several channels are connected
-		if (!returnObj.line.dashEnabled()) {
-			selectLine();
-			modelLayer.draw();
-		}
+		selectLine();
+		modelLayer.draw();
 	}
 
 	var deSelectedEventHandler = function() {
-		// make sure deSelection is only done once, if several channels are connected
-		if (returnObj.line.dashEnabled()) {
-			returnObj.line.stroke(ACS.vConst.EVENTCHANNELVIEW_STROKECOLOR);
-			returnObj.line.dashEnabled(false);
-			modelLayer.draw();
-		}
+		returnObj.line.stroke(ACS.vConst.EVENTCHANNELVIEW_STROKECOLOR);
+		returnObj.line.dashEnabled(false);
+		modelLayer.draw();
 	}
 
 // ***********************************************************************************************************************
@@ -95,52 +97,17 @@
 // ***********************************************************************************************************************
 	var returnObj = ACS.channelView(model, modelLayer);
 	
-	returnObj.ecList = [];
+	returnObj.getChannel = function() {
+		return ec;
+	}
 
-	returnObj.setStartComponent = function(c) {
-		startComponent = c;
-		returnObj.line.points([	startComponent.getX() + ACS.vConst.EVENTCHANNELVIEW_TRIGGERPOSX,
-								startComponent.getY() + getComponentHeight(startComponent) + ACS.vConst.EVENTCHANNELVIEW_TRIGGERBELOWCOMPONENT,
-								returnObj.line.points()[2], 
-								returnObj.line.points()[3]]);
-		startComponent.events.registerHandler('componentPositionChangedEvent', componentPositionChangedEventHandlerTrigger);
-	}
-	
-	returnObj.getStartComponent = function(c) {
-		return startComponent;
-	}	
-	
-	returnObj.setEndComponent = function(c) {
-		endComponent = c;
-		returnObj.line.points([	returnObj.line.points()[0],
-								returnObj.line.points()[1],
-								endComponent.getX() + ACS.vConst.EVENTCHANNELVIEW_LISTENERPOSX,
-								endComponent.getY() + getComponentHeight(endComponent) + ACS.vConst.EVENTCHANNELVIEW_LISTENERBELOWCOMPONENT]);
-		endComponent.events.registerHandler('componentPositionChangedEvent', componentPositionChangedEventHandlerListener);
-		// if there is no eventChannel connected yet (i.e. the channel has just been drawn), add a dummy-eventChannel object
-		if (returnObj.ecList.length === 0) {
-			returnObj.ecList.push(ACS.eventChannel('_dummy_'));
-			returnObj.ecList[0].trigger = ACS.event('_dummy_', '', startComponent);
-			returnObj.ecList[0].listener = ACS.event('_dummy_', '', endComponent);
-			var action = ACS.addEventChannelAction(model, returnObj.ecList[0]);
-			action.execute();
-			returnObj.ecList[0].events.registerHandler('selectedEvent', selectedEventHandler);
-			returnObj.ecList[0].events.registerHandler('deSelectedEvent', deSelectedEventHandler);		
-		}
-	}
-	
-	returnObj.getEndComponent = function(c) {
-		return endComponent;
-	}
-	
 	returnObj.destroy = function() {
 		// remove all event handlers
-		startComponent.events.removeHandler('componentPositionChangedEvent', componentPositionChangedEventHandlerTrigger);
-		endComponent.events.removeHandler('componentPositionChangedEvent', componentPositionChangedEventHandlerListener);
-		for (var i = 0; i < returnObj.ecList.length; i++) {
-			returnObj.ecList[i].events.removeHandler('selectedEvent', selectedEventHandler);
-			returnObj.ecList[i].events.removeHandler('deSelectedEvent', deSelectedEventHandler);
-		}
+		ec.startComponent.events.removeHandler('componentPositionChangedEvent', componentPositionChangedEventHandlerStartComponent);
+		if (ec.endComponent) ec.endComponent.events.removeHandler('componentPositionChangedEvent', componentPositionChangedEventHandlerEndComponent);
+		ec.events.removeHandler('eventChannelCompletedEvent', eventChannelCompletedEventHandler);
+		ec.events.removeHandler('selectedEvent', selectedEventHandler);
+		ec.events.removeHandler('deSelectedEvent', deSelectedEventHandler);
 		// destroy the line
 		if (returnObj.line) returnObj.line.destroy();
 	}
@@ -149,27 +116,22 @@
 // ************************************************** constructor code ***************************************************
 // ***********************************************************************************************************************
 	returnObj.line.stroke(ACS.vConst.EVENTCHANNELVIEW_STROKECOLOR);
-	if (ec && (ec !== {})) {
-		// set start- and endComponent according to the eventChannel passed in the constructor
-		returnObj.ecList.push(ec);
-		startComponent = ec.trigger.getParentComponent();
-		endComponent = ec.listener.getParentComponent();
-		returnObj.line.points([	startComponent.getX() + ACS.vConst.EVENTCHANNELVIEW_TRIGGERPOSX,
-								startComponent.getY() + getComponentHeight(startComponent) + ACS.vConst.EVENTCHANNELVIEW_TRIGGERBELOWCOMPONENT,
-								endComponent.getX() + ACS.vConst.EVENTCHANNELVIEW_LISTENERPOSX,
-								endComponent.getY() + getComponentHeight(endComponent) + ACS.vConst.EVENTCHANNELVIEW_LISTENERBELOWCOMPONENT]);
-		startComponent.events.registerHandler('componentPositionChangedEvent', componentPositionChangedEventHandlerTrigger);
-		endComponent.events.registerHandler('componentPositionChangedEvent', componentPositionChangedEventHandlerListener);
+	if (ec.endComponent) { // i.e. channel is already complete
+		returnObj.line.points([	ec.startComponent.getX() + ACS.vConst.EVENTCHANNELVIEW_TRIGGERPOSX,
+								ec.startComponent.getY() + getComponentHeight(ec.startComponent) + ACS.vConst.EVENTCHANNELVIEW_TRIGGERBELOWCOMPONENT,
+								ec.endComponent.getX() + ACS.vConst.EVENTCHANNELVIEW_LISTENERPOSX,
+								ec.endComponent.getY() + getComponentHeight(ec.endComponent) + ACS.vConst.EVENTCHANNELVIEW_LISTENERBELOWCOMPONENT]);
+		ec.endComponent.events.registerHandler('componentPositionChangedEvent', componentPositionChangedEventHandlerEndComponent);
 		// check if channel is already selected on insert
 		if (ec.getIsSelected()) selectLine();
-	} else if (startComponent) {
-		// if there is no complete channel yet (i.e. it is being drawn), draw a line with length == 0 - target coordinates will be set on mouse move
-		returnObj.line.points([	startComponent.getX() + ACS.vConst.EVENTCHANNELVIEW_TRIGGERPOSX,
-								startComponent.getY() + getComponentHeight(startComponent) + ACS.vConst.EVENTCHANNELVIEW_TRIGGERBELOWCOMPONENT,
-								startComponent.getX() + ACS.vConst.EVENTCHANNELVIEW_TRIGGERPOSX,
-								startComponent.getY() + getComponentHeight(startComponent) + ACS.vConst.EVENTCHANNELVIEW_TRIGGERBELOWCOMPONENT]);
-		startComponent.events.registerHandler('componentPositionChangedEvent', componentPositionChangedEventHandlerTrigger);
+	} else {
+		// draw a line with length == 0 - target coordinates will be set on mouse move
+		returnObj.line.points([	ec.startComponent.getX() + ACS.vConst.EVENTCHANNELVIEW_TRIGGERPOSX,
+								ec.startComponent.getY() + getComponentHeight(ec.startComponent) + ACS.vConst.EVENTCHANNELVIEW_TRIGGERBELOWCOMPONENT,
+								ec.startComponent.getX() + ACS.vConst.EVENTCHANNELVIEW_TRIGGERPOSX,
+								ec.startComponent.getY() + getComponentHeight(ec.startComponent) + ACS.vConst.EVENTCHANNELVIEW_TRIGGERBELOWCOMPONENT]);
 	}
+	
 	// highlight channel when mouse is over hitGraph
 	returnObj.line.on('mouseover', function(e) {
 		returnObj.line.strokeWidth(ACS.vConst.CHANNELVIEW_STROKEWIDTH+2);
@@ -179,33 +141,30 @@
 		returnObj.line.strokeWidth(ACS.vConst.CHANNELVIEW_STROKEWIDTH);
 		modelLayer.draw();
 	});	
+	
 	// do the selecting
 	returnObj.line.on('click', function(e) {
 		if (e.evt.ctrlKey) {
 			// invert selection status
-			var newStatus = !returnObj.ecList[0].getIsSelected();
-			for (var i = 0; i < returnObj.ecList.length; i++) {
-				returnObj.ecList[i].setIsSelected(newStatus);
-				if (newStatus) {
-					model.addItemToSelection(returnObj.ecList[i]);
-				} else {
-					model.removeItemFromSelection(returnObj.ecList[i]);
-				}			
+			var newStatus = !ec.getIsSelected();
+			if (newStatus) {
+				model.addItemToSelection(ec);
+			} else {
+				model.removeItemFromSelection(ec);
 			}
 		} else {
 			// select only this channel
 			model.deSelectAll();
-			for (var i = 0; i < returnObj.ecList.length; i++) {
-				model.addItemToSelection(returnObj.ecList[i]);
-			}
+			model.addItemToSelection(ec);
 		}
 		e.cancelBubble = true;
 	});
-	// register event handlers for selecting
-	for (var i = 0; i < returnObj.ecList.length; i++) {
-		returnObj.ecList[i].events.registerHandler('selectedEvent', selectedEventHandler);
-		returnObj.ecList[i].events.registerHandler('deSelectedEvent', deSelectedEventHandler);
-	}
+	
+	// register event handlers
+	ec.startComponent.events.registerHandler('componentPositionChangedEvent', componentPositionChangedEventHandlerStartComponent);
+	ec.events.registerHandler('eventChannelCompletedEvent', eventChannelCompletedEventHandler);
+	ec.events.registerHandler('selectedEvent', selectedEventHandler);
+	ec.events.registerHandler('deSelectedEvent', deSelectedEventHandler);
 
 	return returnObj;
 }

@@ -41,8 +41,11 @@
 // ***********************************************************************************************************************
 	var returnObj = ACS.channel(id);
 	
-	returnObj.listener = {};
-	returnObj.trigger = {};
+	returnObj.startComponent = null;
+	returnObj.endComponent = null;
+	returnObj.eventConnections = [];	// 	{trigger: ACS.event,
+										//	listener: ACS.event,
+										//	description: String}
 
 // ***********************************************************************************************************************
 // ************************************************** constructor code ***************************************************

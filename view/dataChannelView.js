@@ -26,7 +26,7 @@
  * limitations under the License.
  */
  
- ACS.dataChannelView = function(	dc, // ACS.dataChannel
+ ACS.dataChannelView = function(dc, // ACS.dataChannel
 								model, // ACS.model
 								modelLayer) { // Kinetic.Layer
 								

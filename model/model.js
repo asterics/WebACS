@@ -295,24 +295,36 @@
 		return null;
 	}
 	
+	var seekChannelInList = function(channelList, channelId) {
+		for (var i = 0; i < channelList.length; i++) {
+			if (channelList[i].getId() === channelId) return channelList[i];
+		}
+		return null;
+	}
+	
 	var loadEventChannelList = function(modelXML, componentList) {
 		var eventChannelList = [];
 		var eventChannels_section = modelXML.getElementsByTagName('eventChannels').item(0);
 		if (eventChannels_section) {
 			var eventChannels = eventChannels_section.getElementsByTagName('eventChannel');
 			for (var i = 0; i < eventChannels.length; i++) {
-				eventChannelList[i] = ACS.eventChannel(eventChannels.item(i).attributes.getNamedItem('id').textContent);
-				if (eventChannels.item(i).getElementsByTagName('description').item(0)) eventChannelList[i].description = eventChannels.item(i).getElementsByTagName('description').item(0).textContent;
-				// get the listener:
-				var triggerCompId = eventChannels.item(i).getElementsByTagName('source').item(0).getElementsByTagName('component').item(0).attributes.getNamedItem('id').textContent;
+				var startCompId = eventChannels.item(i).getElementsByTagName('source').item(0).getElementsByTagName('component').item(0).attributes.getNamedItem('id').textContent;
+				var endCompId = eventChannels.item(i).getElementsByTagName('target').item(0).getElementsByTagName('component').item(0).attributes.getNamedItem('id').textContent;
+				var channelId = startCompId + '_' + endCompId;
+				var actChannel = seekChannelInList(eventChannelList, channelId);
+				if (!actChannel) {
+					eventChannelList[i] = ACS.eventChannel(channelId);
+					eventChannelList[i].startComponent = findComponentById(componentList, startCompId);
+					eventChannelList[i].endComponent = findComponentById(componentList, endCompId);
+					actChannel = eventChannelList[i];
+				}
 				var triggerEventId = eventChannels.item(i).getElementsByTagName('source').item(0).getElementsByTagName('eventPort').item(0).attributes.getNamedItem('id').textContent;
-				var triggerComponent = findComponentById(componentList, triggerCompId);
-				eventChannelList[i].trigger = findEventById(triggerComponent, triggerEventId, false);
-				// get the trigger:
-				var listenerCompId = eventChannels.item(i).getElementsByTagName('target').item(0).getElementsByTagName('component').item(0).attributes.getNamedItem('id').textContent;
 				var listenerEventId = eventChannels.item(i).getElementsByTagName('target').item(0).getElementsByTagName('eventPort').item(0).attributes.getNamedItem('id').textContent;
-				var listenerComponent = findComponentById(componentList, listenerCompId);
-				eventChannelList[i].listener = findEventById(listenerComponent, listenerEventId, true);
+				var desc = '';
+				if (eventChannels.item(i).getElementsByTagName('description').item(0)) desc = eventChannels.item(i).getElementsByTagName('description').item(0).textContent;
+				actChannel.eventConnections.push({	trigger: findEventById(actChannel.startComponent, triggerEventId, false),
+													listener: findEventById(actChannel.endComponent, listenerEventId, true),
+													description: desc});
 			}
 		}
 		return eventChannelList;
@@ -559,21 +571,23 @@
 		if (returnObj.eventChannelList.length > 0) {
 			saveString += '\t<eventChannels>\r';
 			for (var i = 0; i < returnObj.eventChannelList.length; i++) {
-				saveString += '\t\t<eventChannel id="' + returnObj.eventChannelList[i].getId() + '">\r';
-				if (returnObj.eventChannelList[i].description !== '') saveString += '\t\t\t<description>' + returnObj.eventChannelList[i].description + '</description>\r';
-				saveString += '\t\t\t<sources>\r';
-				saveString += '\t\t\t\t<source>\r';
-				saveString += '\t\t\t\t\t<component id="' + returnObj.eventChannelList[i].trigger.getParentComponent().getId() + '" />\r';
-				saveString += '\t\t\t\t\t<eventPort id="' + returnObj.eventChannelList[i].trigger.getId() + '" />\r';
-				saveString += '\t\t\t\t</source>\r';
-				saveString += '\t\t\t</sources>\r';
-				saveString += '\t\t\t<targets>\r';
-				saveString += '\t\t\t\t<target>\r';
-				saveString += '\t\t\t\t\t<component id="' + returnObj.eventChannelList[i].listener.getParentComponent().getId() + '" />\r';
-				saveString += '\t\t\t\t\t<eventPort id="' + returnObj.eventChannelList[i].listener.getId() + '" />\r';
-				saveString += '\t\t\t\t</target>\r';				
-				saveString += '\t\t\t</targets>\r';
-				saveString += '\t\t</eventChannel>\r';
+				for (var j = 0; j < returnObj.eventChannelList[i].eventConnections.length; j++) {
+					saveString += '\t\t<eventChannel id="' + returnObj.eventChannelList[i].eventConnections[j].trigger.getId() + '_' + returnObj.eventChannelList[i].eventConnections[j].listener.getId() + '">\r';
+					if (returnObj.eventChannelList[i].eventConnections[j].description !== '') saveString += '\t\t\t<description>' + returnObj.eventChannelList[i].eventConnections[j].description + '</description>\r';
+					saveString += '\t\t\t<sources>\r';
+					saveString += '\t\t\t\t<source>\r';
+					saveString += '\t\t\t\t\t<component id="' + returnObj.eventChannelList[i].startComponent.getId() + '" />\r';
+					saveString += '\t\t\t\t\t<eventPort id="' + returnObj.eventChannelList[i].eventConnections[j].trigger.getId() + '" />\r';
+					saveString += '\t\t\t\t</source>\r';
+					saveString += '\t\t\t</sources>\r';
+					saveString += '\t\t\t<targets>\r';
+					saveString += '\t\t\t\t<target>\r';
+					saveString += '\t\t\t\t\t<component id="' + returnObj.eventChannelList[i].endComponent.getId() + '" />\r';
+					saveString += '\t\t\t\t\t<eventPort id="' + returnObj.eventChannelList[i].eventConnections[j].listener.getId() + '" />\r';
+					saveString += '\t\t\t\t</target>\r';				
+					saveString += '\t\t\t</targets>\r';
+					saveString += '\t\t</eventChannel>\r';
+				}
 			}
 			saveString += '\t</eventChannels>\r';
 		}
@@ -728,28 +742,28 @@
 		this.events.fireEvent('componentRemovedEvent');
 	}
 	
-	returnObj.addDataChannel = function(ch) { // ACS.channel
+	returnObj.addDataChannel = function(ch) { // ACS.dataChannel
 		returnObj.dataChannelList.push(ch);
 		if (ch.getIsSelected()) returnObj.selectedItemsList.push(ch);
 		returnObj.hasBeenChanged = true;
 		this.events.fireEvent('dataChannelAddedEvent');
 	}
 	
-	returnObj.removeDataChannel = function(ch) { // ACS.channel
+	returnObj.removeDataChannel = function(ch) { // ACS.dataChannel
 		if (returnObj.dataChannelList.indexOf(ch) > -1) returnObj.dataChannelList.splice(returnObj.dataChannelList.indexOf(ch), 1);
 		if (returnObj.selectedItemsList.indexOf(ch) > -1) returnObj.selectedItemsList.splice(returnObj.selectedItemsList.indexOf(ch), 1);
 		returnObj.hasBeenChanged = true;
 		this.events.fireEvent('dataChannelRemovedEvent');
 	}	
 
-	returnObj.addEventChannel = function(ch) { // ACS.channel
+	returnObj.addEventChannel = function(ch) { // ACS.eventChannel
 		returnObj.eventChannelList.push(ch);
 		if (ch.getIsSelected()) returnObj.selectedItemsList.push(ch);
 		returnObj.hasBeenChanged = true;
 		this.events.fireEvent('eventChannelAddedEvent');
 	}
 	
-	returnObj.removeEventChannel = function(ch) { // ACS.channel
+	returnObj.removeEventChannel = function(ch) { // ACS.eventChannel
 		if (returnObj.eventChannelList.indexOf(ch) > -1) returnObj.eventChannelList.splice(returnObj.eventChannelList.indexOf(ch), 1);
 		if (returnObj.selectedItemsList.indexOf(ch) > -1) returnObj.selectedItemsList.splice(returnObj.selectedItemsList.indexOf(ch), 1);
 		returnObj.hasBeenChanged = true;

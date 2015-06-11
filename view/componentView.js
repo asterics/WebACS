@@ -54,14 +54,6 @@
 		return false;
 	}
 	
-	var eventChannelViewExists = function(startComp, endComp) {
-		var ecvl = modelView.getEventChannelViewList();
-		for (var i = 0; i < ecvl.length; i++) {
-			if ((ecvl[i].getStartComponent() === startComp) && (ecvl[i].getEndComponent() === endComp)) return true;
-		}
-		return false;
-	}
-	
 	var buildView = function() {
 		// determine height of the element, depending on the amount of input- and/or output-ports
 		if ((component.outputPortList.length > 3) || (component.inputPortList.length > 3)) {
@@ -238,13 +230,13 @@
 				listening: true
 			});	
 			eventInPortView.on('click', function(evt) {
-				var ecvl = modelView.getEventChannelViewList();
-				if ((ecvl.length > 0) && (!ecvl[ecvl.length - 1].getEndComponent())) {
-					if (!eventChannelViewExists(ecvl[ecvl.length - 1].getStartComponent(), component)) {
-						evt.cancelBubble = true;
-						ecvl[ecvl.length - 1].setEndComponent(component);
-						modelLayer.draw();
-					}
+				log.debug('clicked eventInputPort');
+				if ((model.eventChannelList.length > 0) && (!model.eventChannelList[model.eventChannelList.length - 1].endComponent)) {
+					evt.cancelBubble = true;
+					model.eventChannelList[model.eventChannelList.length - 1].setId(model.eventChannelList[model.eventChannelList.length - 1].getId() + component.getId()); // this ID currently involves start- and end-component - therefore it must be finalised here, on completion of channel
+					model.eventChannelList[model.eventChannelList.length - 1].endComponent = component;
+					model.eventChannelList[model.eventChannelList.length - 1].events.fireEvent('eventChannelCompletedEvent');
+					modelLayer.draw();
 				}
 			});
 			// catch mousedown event on port (prevents component from being selected, when only the port is clicked, e.g. when channel is drawn)
@@ -284,16 +276,18 @@
 			// listen for click event on port
 			eventOutPortView.on('click', function(evt) {
 				log.debug('clicked eventOutputPort');
-				var ecvl = modelView.getEventChannelViewList();
-				if (!((ecvl.length > 0) && (!ecvl[ecvl.length - 1].getEndComponent()))) {
+				if (!((model.eventChannelList.length > 0) && (!model.eventChannelList[model.eventChannelList.length - 1].endComponent))) {
 					evt.cancelBubble = true;
-					modelView.addEventChannelView(ACS.eventChannelView(null, component, model, modelLayer));
+					var ch = ACS.eventChannel(component.getId() + '_'); // second half of ID is added, when channel is completed
+					ch.startComponent = component;
+					var addAct = ACS.addEventChannelAction(model, ch);
+					addAct.execute();
 				}
 			});
 			// catch mousedown event on port (prevents component from being selected, when only the port is clicked, e.g. when channel is drawn)
 			eventOutPortView.on('mousedown', function(evt) {
 				evt.cancelBubble = true;
-			});			
+			});		
 			// highlight port when mouse is over hitGraph
 			eventOutPortView.on('mouseover', function(e) {
 				eventOutPortView.strokeWidth(3);
