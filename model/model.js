@@ -1,4 +1,5 @@
 /*
+/*
  * AsTeRICS - Assistive Technology Rapid Integration and Construction Set (http://www.asterics.org)
  * 
  * 
@@ -333,11 +334,11 @@
 	var loadModelGui = function(modelXML) {
 		if (modelXML.getElementsByTagName('modelGUI')) {
 			var modelGui = modelXML.getElementsByTagName('modelGUI').item(0);
-			returnObj.modelGui.setDecoration(modelGui.getElementsByTagName('Decoration').item(0).textContent);
-			returnObj.modelGui.setDecoration(modelGui.getElementsByTagName('Fullscreen').item(0).textContent);
-			returnObj.modelGui.setDecoration(modelGui.getElementsByTagName('AlwaysOnTop').item(0).textContent);
-			returnObj.modelGui.setDecoration(modelGui.getElementsByTagName('ToSystemTray').item(0).textContent);
-			returnObj.modelGui.setDecoration(modelGui.getElementsByTagName('ShopControlPanel').item(0).textContent); // TODO: change to "ShowControlPanel", when changed in XML
+			returnObj.modelGui.setDecoration(modelGui.getElementsByTagName('Decoration').item(0).textContent === 'true');
+			returnObj.modelGui.setDecoration(modelGui.getElementsByTagName('Fullscreen').item(0).textContent === 'true');
+			returnObj.modelGui.setDecoration(modelGui.getElementsByTagName('AlwaysOnTop').item(0).textContent === 'true');
+			returnObj.modelGui.setDecoration(modelGui.getElementsByTagName('ToSystemTray').item(0).textContent === 'true');
+			returnObj.modelGui.setDecoration(modelGui.getElementsByTagName('ShopControlPanel').item(0).textContent === 'true'); // TODO: change to "ShowControlPanel", when changed in XML
 			var guiWindow = modelGui.getElementsByTagName('AREGUIWindow').item(0);
 			returnObj.modelGui.areGuiWindow.x = guiWindow.getElementsByTagName('posX').item(0).textContent;
 			returnObj.modelGui.areGuiWindow.y = guiWindow.getElementsByTagName('posY').item(0).textContent;
@@ -482,131 +483,7 @@
 	}
 	
 	returnObj.saveModel = function() {
-		var saveString = '<?xml version="1.0"?>\r<model xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" modelName="' + returnObj.modelName + '" version="' + returnObj.acsVersion + '">\r';
-		saveString += '\t<modelDescription>\r';
-		for (var i = 0; i < returnObj.metaDataList.length; i++) {
-			saveString += '\t\t<' + returnObj.metaDataList[i].getKey() + '>' + returnObj.metaDataList[i].value + '<\\' + returnObj.metaDataList[i].getKey() + '>\r';
-		}
-		saveString += '\t</modelDescription>\r';
-		// save the components
-		saveString += '\t<components>\r';
-		for (var i = 0; i < returnObj.componentList.length; i++) {
-			saveString += '\t\t<component id="' + returnObj.componentList[i].getId() + '" type_id="' + returnObj.componentList[i].getComponentTypeId() + '">\r';
-			if (returnObj.componentList[i].getDescription()) saveString += '\t\t\t<description>' + returnObj.componentList[i].getDescription() + '</description>\r';
-			// save the ports
-			if ((returnObj.componentList[i].inputPortList.length > 0) || (returnObj.componentList[i].outputPortList.length > 0)) {
-				saveString += '\t\t\t<ports>\r';
-				// save the inputPorts
-				for (var j = 0; j < returnObj.componentList[i].inputPortList.length; j++) {
-					saveString += '\t\t\t\t<inputPort portTypeID="' + returnObj.componentList[i].inputPortList[j].getId() + '" sync="' + returnObj.componentList[i].inputPortList[j].sync + '">\r';
-					if (returnObj.componentList[i].inputPortList[j].propertyList.length > 0) {
-						saveString += '\t\t\t\t\t<properties>\r';
-						for (var k = 0; k < returnObj.componentList[i].inputPortList[j].propertyList.length; k++) {
-							saveString += '\t\t\t\t\t\t<property name="' + returnObj.componentList[i].inputPortList[j].propertyList[k].getKey() + '" value="' + returnObj.componentList[i].inputPortList[j].propertyList[k].value + '" />\r';
-						}
-						saveString += '\t\t\t\t\t</properties>\r';
-					}
-					saveString += '\t\t\t\t</inputPort>\r';
-				}
-				// save the outputPorts
-				for (var j = 0; j < returnObj.componentList[i].outputPortList.length; j++) {
-					saveString += '\t\t\t\t<outputPort portTypeID="' + returnObj.componentList[i].outputPortList[j].getId() + '">\r';
-					if (returnObj.componentList[i].outputPortList[j].propertyList.length > 0) {
-						saveString += '\t\t\t\t\t<properties>\r';
-						for (var k = 0; k < returnObj.componentList[i].outputPortList[j].propertyList.length; k++) {
-							saveString += '\t\t\t\t\t\t<property name="' + returnObj.componentList[i].outputPortList[j].propertyList[k].getKey() + '" value="' + returnObj.componentList[i].outputPortList[j].propertyList[k].value + '" />\r';
-						}
-						saveString += '\t\t\t\t\t</properties>\r';
-					}
-					saveString += '\t\t\t\t</outputPort>\r';
-				}				
-				saveString += '\t\t\t</ports>\r';
-			}
-			// save the properties
-			if (returnObj.componentList[i].propertyList.length > 0) {
-				saveString += '\t\t\t<properties>\r';
-				for (var j = 0; j < returnObj.componentList[i].propertyList.length; j++) {
-					saveString += '\t\t\t\t<property name="' + returnObj.componentList[i].propertyList[j].getKey() + '" value="' + returnObj.componentList[i].propertyList[j].value + '" />\r';
-				}
-				saveString += '\t\t\t</properties>\r';
-			}
-			// save the layout
-			saveString += '\t\t\t<layout>\r';
-			saveString += '\t\t\t\t<posX>' + returnObj.componentList[i].getX() + '</posX>\r';
-			saveString += '\t\t\t\t<posY>' + returnObj.componentList[i].getY() + '</posY>\r';
-			saveString += '\t\t\t</layout>\r';
-			// save the GUI
-			if (returnObj.componentList[i].gui) {
-				saveString += '\t\t\t<gui>\r';
-				saveString += '\t\t\t\t<posX>' + returnObj.componentList[i].gui.x + '</posX>\r';
-				saveString += '\t\t\t\t<posY>' + returnObj.componentList[i].gui.y + '</posY>\r';
-				saveString += '\t\t\t\t<width>' + returnObj.componentList[i].gui.width + '</width>\r';
-				saveString += '\t\t\t\t<height>' + returnObj.componentList[i].gui.height + '</height>\r';
-				saveString += '\t\t\t</gui>\r';
-			}
-			saveString += '\t\t</component>\r';
-		}
-		saveString += '\t</components>\r';
-		// save the channels
-		if (returnObj.dataChannelList.length > 0) {
-			saveString += '\t<channels>\r';
-			for (var i = 0; i < returnObj.dataChannelList.length; i++) {
-				if (returnObj.dataChannelList[i].getInputPort()) { // avoids saving unfinished channels
-					saveString += '\t\t<channel id="' + returnObj.dataChannelList[i].getId() + '">\r';
-					if (returnObj.dataChannelList[i].description !== '') saveString += '\t\t\t<description>' + returnObj.dataChannelList[i].description + '</description>\r';
-					saveString += '\t\t\t<source>\r';
-					saveString += '\t\t\t\t<component id="' + returnObj.dataChannelList[i].getOutputPort().getParentComponent().getId() + '" />\r';
-					saveString += '\t\t\t\t<port id="' + returnObj.dataChannelList[i].getOutputPort().getId() + '" />\r';
-					saveString += '\t\t\t</source>\r';
-					saveString += '\t\t\t<target>\r';
-					saveString += '\t\t\t\t<component id="' + returnObj.dataChannelList[i].getInputPort().getParentComponent().getId() + '" />\r';
-					saveString += '\t\t\t\t<port id="' + returnObj.dataChannelList[i].getInputPort().getId() + '" />\r';
-					saveString += '\t\t\t</target>\r';
-					saveString += '\t\t</channel>\r';
-				}
-			}
-			saveString += '\t</channels>\r';
-		}
-		// save the eventChannels
-		if (returnObj.eventChannelList.length > 0) {
-			saveString += '\t<eventChannels>\r';
-			for (var i = 0; i < returnObj.eventChannelList.length; i++) {
-				for (var j = 0; j < returnObj.eventChannelList[i].eventConnections.length; j++) {
-					saveString += '\t\t<eventChannel id="' + returnObj.eventChannelList[i].eventConnections[j].trigger.getId() + '_' + returnObj.eventChannelList[i].eventConnections[j].listener.getId() + '">\r';
-					if (returnObj.eventChannelList[i].eventConnections[j].description !== '') saveString += '\t\t\t<description>' + returnObj.eventChannelList[i].eventConnections[j].description + '</description>\r';
-					saveString += '\t\t\t<sources>\r';
-					saveString += '\t\t\t\t<source>\r';
-					saveString += '\t\t\t\t\t<component id="' + returnObj.eventChannelList[i].startComponent.getId() + '" />\r';
-					saveString += '\t\t\t\t\t<eventPort id="' + returnObj.eventChannelList[i].eventConnections[j].trigger.getId() + '" />\r';
-					saveString += '\t\t\t\t</source>\r';
-					saveString += '\t\t\t</sources>\r';
-					saveString += '\t\t\t<targets>\r';
-					saveString += '\t\t\t\t<target>\r';
-					saveString += '\t\t\t\t\t<component id="' + returnObj.eventChannelList[i].endComponent.getId() + '" />\r';
-					saveString += '\t\t\t\t\t<eventPort id="' + returnObj.eventChannelList[i].eventConnections[j].listener.getId() + '" />\r';
-					saveString += '\t\t\t\t</target>\r';				
-					saveString += '\t\t\t</targets>\r';
-					saveString += '\t\t</eventChannel>\r';
-				}
-			}
-			saveString += '\t</eventChannels>\r';
-		}
-		// TODO: save groups
-		// save the modelGUI
-		saveString += '\t<modelGUI>\r';
-		saveString += '\t\t<Decoration>' + returnObj.modelGui.getDecoration() + '</Decoration>\r';
-		saveString += '\t\t<Fullscreen>' + returnObj.modelGui.getFullScreen() + '</Fullscreen>\r';
-		saveString += '\t\t<AlwaysOnTop>' + returnObj.modelGui.getAlwaysOnTop() + '</AlwaysOnTop>\r';
-		saveString += '\t\t<ToSystemTray>' + returnObj.modelGui.getToSystemTray() + '</ToSystemTray>\r';
-		saveString += '\t\t<ShopControlPanel>' + returnObj.modelGui.getShowControlPanel() + '</ShopControlPanel>\r'; // TODO: correct to "ShowcontrolPanel", when corrected in XML
-		saveString += '\t\t<AREGUIWindow>\r';
-		saveString += '\t\t\t<posX>' + returnObj.modelGui.areGuiWindow.x + '</posX>\r';
-		saveString += '\t\t\t<posY>' + returnObj.modelGui.areGuiWindow.y + '</posY>\r';
-		saveString += '\t\t\t<width>' + returnObj.modelGui.areGuiWindow.width + '</width>\r';
-		saveString += '\t\t\t<height>' + returnObj.modelGui.areGuiWindow.height + '</height>\r';
-		saveString += '\t\t</AREGUIWindow>\r';
-		saveString += '\t</modelGUI>\r';
-		saveString += '</model>';
+		var saveString = returnObj.getModelXMLString();
 		// actually save the string
 		var blob = new Blob([saveString], {type: 'text/plain;charset=utf-8'});
 		var saveName;
@@ -623,6 +500,132 @@
 	}
 	
 	returnObj.getModelXMLString = function() {
+		var xmlString = '<?xml version="1.0"?>\r<model xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" modelName="' + returnObj.modelName + '" version="' + returnObj.acsVersion + '">\r';
+		xmlString += '\t<modelDescription>\r';
+		for (var i = 0; i < returnObj.metaDataList.length; i++) {
+			xmlString += '\t\t<' + returnObj.metaDataList[i].getKey() + '>' + returnObj.metaDataList[i].value + '</' + returnObj.metaDataList[i].getKey() + '>\r';
+		}
+		xmlString += '\t</modelDescription>\r';
+		// add the components
+		xmlString += '\t<components>\r';
+		for (var i = 0; i < returnObj.componentList.length; i++) {
+			xmlString += '\t\t<component id="' + returnObj.componentList[i].getId() + '" type_id="' + returnObj.componentList[i].getComponentTypeId() + '">\r';
+			if (returnObj.componentList[i].getDescription()) xmlString += '\t\t\t<description>' + returnObj.componentList[i].getDescription() + '</description>\r';
+			// add the ports
+			if ((returnObj.componentList[i].inputPortList.length > 0) || (returnObj.componentList[i].outputPortList.length > 0)) {
+				xmlString += '\t\t\t<ports>\r';
+				// add the inputPorts
+				for (var j = 0; j < returnObj.componentList[i].inputPortList.length; j++) {
+					xmlString += '\t\t\t\t<inputPort portTypeID="' + returnObj.componentList[i].inputPortList[j].getId() + '" sync="' + returnObj.componentList[i].inputPortList[j].sync + '">\r';
+					if (returnObj.componentList[i].inputPortList[j].propertyList.length > 0) {
+						xmlString += '\t\t\t\t\t<properties>\r';
+						for (var k = 0; k < returnObj.componentList[i].inputPortList[j].propertyList.length; k++) {
+							xmlString += '\t\t\t\t\t\t<property name="' + returnObj.componentList[i].inputPortList[j].propertyList[k].getKey() + '" value="' + returnObj.componentList[i].inputPortList[j].propertyList[k].value + '" />\r';
+						}
+						xmlString += '\t\t\t\t\t</properties>\r';
+					}
+					xmlString += '\t\t\t\t</inputPort>\r';
+				}
+				// add the outputPorts
+				for (var j = 0; j < returnObj.componentList[i].outputPortList.length; j++) {
+					xmlString += '\t\t\t\t<outputPort portTypeID="' + returnObj.componentList[i].outputPortList[j].getId() + '">\r';
+					if (returnObj.componentList[i].outputPortList[j].propertyList.length > 0) {
+						xmlString += '\t\t\t\t\t<properties>\r';
+						for (var k = 0; k < returnObj.componentList[i].outputPortList[j].propertyList.length; k++) {
+							xmlString += '\t\t\t\t\t\t<property name="' + returnObj.componentList[i].outputPortList[j].propertyList[k].getKey() + '" value="' + returnObj.componentList[i].outputPortList[j].propertyList[k].value + '" />\r';
+						}
+						xmlString += '\t\t\t\t\t</properties>\r';
+					}
+					xmlString += '\t\t\t\t</outputPort>\r';
+				}				
+				xmlString += '\t\t\t</ports>\r';
+			}
+			// add the properties
+			if (returnObj.componentList[i].propertyList.length > 0) {
+				xmlString += '\t\t\t<properties>\r';
+				for (var j = 0; j < returnObj.componentList[i].propertyList.length; j++) {
+					xmlString += '\t\t\t\t<property name="' + returnObj.componentList[i].propertyList[j].getKey() + '" value="' + returnObj.componentList[i].propertyList[j].value + '" />\r';
+				}
+				xmlString += '\t\t\t</properties>\r';
+			}
+			// add the layout
+			xmlString += '\t\t\t<layout>\r';
+			xmlString += '\t\t\t\t<posX>' + returnObj.componentList[i].getX() + '</posX>\r';
+			xmlString += '\t\t\t\t<posY>' + returnObj.componentList[i].getY() + '</posY>\r';
+			xmlString += '\t\t\t</layout>\r';
+			// add the GUI
+			if (returnObj.componentList[i].gui) {
+				xmlString += '\t\t\t<gui>\r';
+				xmlString += '\t\t\t\t<posX>' + returnObj.componentList[i].gui.x + '</posX>\r';
+				xmlString += '\t\t\t\t<posY>' + returnObj.componentList[i].gui.y + '</posY>\r';
+				xmlString += '\t\t\t\t<width>' + returnObj.componentList[i].gui.width + '</width>\r';
+				xmlString += '\t\t\t\t<height>' + returnObj.componentList[i].gui.height + '</height>\r';
+				xmlString += '\t\t\t</gui>\r';
+			}
+			xmlString += '\t\t</component>\r';
+		}
+		xmlString += '\t</components>\r';
+		// add the channels
+		if (returnObj.dataChannelList.length > 0) {
+			xmlString += '\t<channels>\r';
+			for (var i = 0; i < returnObj.dataChannelList.length; i++) {
+				if (returnObj.dataChannelList[i].getInputPort()) { // avoids adding unfinished channels
+					xmlString += '\t\t<channel id="' + returnObj.dataChannelList[i].getId() + '">\r';
+					if (returnObj.dataChannelList[i].description !== '') xmlString += '\t\t\t<description>' + returnObj.dataChannelList[i].description + '</description>\r';
+					xmlString += '\t\t\t<source>\r';
+					xmlString += '\t\t\t\t<component id="' + returnObj.dataChannelList[i].getOutputPort().getParentComponent().getId() + '" />\r';
+					xmlString += '\t\t\t\t<port id="' + returnObj.dataChannelList[i].getOutputPort().getId() + '" />\r';
+					xmlString += '\t\t\t</source>\r';
+					xmlString += '\t\t\t<target>\r';
+					xmlString += '\t\t\t\t<component id="' + returnObj.dataChannelList[i].getInputPort().getParentComponent().getId() + '" />\r';
+					xmlString += '\t\t\t\t<port id="' + returnObj.dataChannelList[i].getInputPort().getId() + '" />\r';
+					xmlString += '\t\t\t</target>\r';
+					xmlString += '\t\t</channel>\r';
+				}
+			}
+			xmlString += '\t</channels>\r';
+		}
+		// add the eventChannels
+		if (returnObj.eventChannelList.length > 0) {
+			xmlString += '\t<eventChannels>\r';
+			for (var i = 0; i < returnObj.eventChannelList.length; i++) {
+				for (var j = 0; j < returnObj.eventChannelList[i].eventConnections.length; j++) {
+					xmlString += '\t\t<eventChannel id="' + returnObj.eventChannelList[i].eventConnections[j].trigger.getId() + '_' + returnObj.eventChannelList[i].eventConnections[j].listener.getId() + '">\r';
+					if (returnObj.eventChannelList[i].eventConnections[j].description !== '') xmlString += '\t\t\t<description>' + returnObj.eventChannelList[i].eventConnections[j].description + '</description>\r';
+					xmlString += '\t\t\t<sources>\r';
+					xmlString += '\t\t\t\t<source>\r';
+					xmlString += '\t\t\t\t\t<component id="' + returnObj.eventChannelList[i].startComponent.getId() + '" />\r';
+					xmlString += '\t\t\t\t\t<eventPort id="' + returnObj.eventChannelList[i].eventConnections[j].trigger.getId() + '" />\r';
+					xmlString += '\t\t\t\t</source>\r';
+					xmlString += '\t\t\t</sources>\r';
+					xmlString += '\t\t\t<targets>\r';
+					xmlString += '\t\t\t\t<target>\r';
+					xmlString += '\t\t\t\t\t<component id="' + returnObj.eventChannelList[i].endComponent.getId() + '" />\r';
+					xmlString += '\t\t\t\t\t<eventPort id="' + returnObj.eventChannelList[i].eventConnections[j].listener.getId() + '" />\r';
+					xmlString += '\t\t\t\t</target>\r';				
+					xmlString += '\t\t\t</targets>\r';
+					xmlString += '\t\t</eventChannel>\r';
+				}
+			}
+			xmlString += '\t</eventChannels>\r';
+		}
+		// TODO: add groups
+		// add the modelGUI
+		xmlString += '\t<modelGUI>\r';
+		xmlString += '\t\t<Decoration>' + returnObj.modelGui.getDecoration() + '</Decoration>\r';
+		xmlString += '\t\t<Fullscreen>' + returnObj.modelGui.getFullScreen() + '</Fullscreen>\r';
+		xmlString += '\t\t<AlwaysOnTop>' + returnObj.modelGui.getAlwaysOnTop() + '</AlwaysOnTop>\r';
+		xmlString += '\t\t<ToSystemTray>' + returnObj.modelGui.getToSystemTray() + '</ToSystemTray>\r';
+		xmlString += '\t\t<ShopControlPanel>' + returnObj.modelGui.getShowControlPanel() + '</ShopControlPanel>\r'; // TODO: correct to "ShowcontrolPanel", when corrected in XML
+		xmlString += '\t\t<AREGUIWindow>\r';
+		xmlString += '\t\t\t<posX>' + returnObj.modelGui.areGuiWindow.x + '</posX>\r';
+		xmlString += '\t\t\t<posY>' + returnObj.modelGui.areGuiWindow.y + '</posY>\r';
+		xmlString += '\t\t\t<width>' + returnObj.modelGui.areGuiWindow.width + '</width>\r';
+		xmlString += '\t\t\t<height>' + returnObj.modelGui.areGuiWindow.height + '</height>\r';
+		xmlString += '\t\t</AREGUIWindow>\r';
+		xmlString += '\t</modelGUI>\r';
+		xmlString += '</model>';
+		
 		return xmlString;
 	}
 	
@@ -652,7 +655,7 @@
 			var newComp = ACS.component(compName + '.' + nextCompNameNumber(compName),
 										compTypeId,
 										compXml.getElementsByTagName('description').item(0).textContent,
-										compXml.getElementsByTagName('singleton').item(0).textContent,
+										compXml.getElementsByTagName('singleton')[0].textContent === 'true',
 										pos[0],
 										pos[1],
 										compType,
@@ -782,14 +785,6 @@
 		return componentCollection; // (XML document)
 	}
 	
-	returnObj.deSelectAll = function() {
-		var actItem;
-		while (returnObj.selectedItemsList.length > 0) {
-			actItem = returnObj.selectedItemsList.pop();
-			actItem.setIsSelected(false);
-		}
-	}
-	
 	returnObj.addItemToSelection = function(item) {
 		item.setIsSelected(true);
 		returnObj.selectedItemsList.push(item);
@@ -805,6 +800,14 @@
 			return false;
 		}
 	}
+	
+	returnObj.deSelectAll = function() {
+		var actItem;
+		while (returnObj.selectedItemsList.length > 0) {
+			actItem = returnObj.selectedItemsList.pop();
+			actItem.setIsSelected(false);
+		}
+	}	
 	
 // ***********************************************************************************************************************
 // ************************************************** constructor code ***************************************************

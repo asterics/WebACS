@@ -336,7 +336,7 @@
 	var fileSelector = document.createElement('input'); // create "hidden" input element for choosing file
 	fileSelector.setAttribute('type', 'file');
 	fileSelector.setAttribute('class', 'hidden'); // must be added to DOM in order for the click event to work in IE
-	document.getElementById('mainMenuPanel').appendChild(fileSelector);	
+	document.getElementById('mainMenuPanel').appendChild(fileSelector);
 	
 	// register handlers
 	modelList.getActModel().events.registerHandler('modelChangedEvent', modelChangedEventHandler);

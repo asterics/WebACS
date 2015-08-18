@@ -240,7 +240,7 @@ ACS.clipBoard = function() {
 
 	returnObj.cut = function(model) {
 		returnObj.copy(model);
-		var remAct = ACS.removeItemListAction(model);
+		var remAct = ACS.removeItemListAction(model, model.selectedItemsList);
 		remAct.execute();
 	}
 
@@ -361,7 +361,7 @@ ACS.clipBoard = function() {
 																				ACS.portType.OUTPUT,
 																				model.getDataType(outputPortsFull.item(j).getElementsByTagName('dataType').item(0).textContent),
 																				j,
-																				outputPortsFull.item(j).getElementsByTagName('mustBeConnected').item(0).textContent));
+																				false));
 							// TODO: add the port's properties
 						}
 						pasteComponents[i].matchesComponentCollection = false;
@@ -411,13 +411,13 @@ ACS.clipBoard = function() {
 						}
 						pasteComponents[i].matchesComponentCollection = false;
 					}
+					if ((pasteComponents[i]) && (!pasteComponents[i].matchesComponentCollection)) {
+						changedComponentsList.push(pasteComponents[i]);
+					}					
 					i++;
 				} else {
 					removedComponentsList.push(pasteComponents[i]);
 					pasteComponents.splice(i, 1);
-				}
-				if ((pasteComponents[i]) && (!pasteComponents[i].matchesComponentCollection)) {
-					changedComponentsList.push(pasteComponents[i]);
 				}
 			}
 

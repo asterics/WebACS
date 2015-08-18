@@ -26,12 +26,12 @@
  * limitations under the License.
  */
  
- ACS.removeItemListAction = function(parentModel) { // ACS.model
+ ACS.removeItemListAction = function(parentModel, inList) { // ACS.model
 
 // ***********************************************************************************************************************
 // ************************************************** private variables **************************************************
 // ***********************************************************************************************************************
-	var itemList = parentModel.selectedItemsList.slice(); // copy the original array to be independent from changes in the original array
+	var itemList = inList.slice(); // copy the original array to be independent from changes in the original array
 	
 // ***********************************************************************************************************************
 // ************************************************** private methods ****************************************************
@@ -41,7 +41,8 @@
 		for (var i = 0; i < itemList.length; i++) {
 			if (typeof itemList[i].matchesComponentCollection !== 'undefined') { // only components have a parameter "matchesComponentCollection" and it is defined in every component-object
 				for (var j = 0; j < parentModel.dataChannelList.length; j++) {
-					if ((parentModel.dataChannelList[j].getInputPort().getParentComponent() === itemList[i]) || (parentModel.dataChannelList[j].getOutputPort().getParentComponent() === itemList[i])) {
+					if (((parentModel.dataChannelList[j].getInputPort()) && (parentModel.dataChannelList[j].getOutputPort())) 
+						&& ((parentModel.dataChannelList[j].getInputPort().getParentComponent() === itemList[i]) || (parentModel.dataChannelList[j].getOutputPort().getParentComponent() === itemList[i]))) {
 						if (itemList.indexOf(parentModel.dataChannelList[j]) === -1) itemList.push(parentModel.dataChannelList[j]);
 					}
 				}

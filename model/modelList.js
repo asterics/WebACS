@@ -37,6 +37,10 @@
 // ***********************************************************************************************************************
 // ************************************************** private methods ****************************************************
 // ***********************************************************************************************************************
+	removeSubstituteFilename = function() { // is called when actModel is removed or loaded from a file
+		var actNumber = list[returnObj.actIndex].getFilename().slice(7); // removing the 7-letter-word "newfile" leaves the number
+		if ((filenameCounter - 1) + '' === actNumber) filenameCounter--;
+	}
 	
 // ***********************************************************************************************************************
 // ************************************************** public stuff *******************************************************
@@ -46,17 +50,12 @@
 	returnObj.actIndex = 0;
 	returnObj.events = ACS.eventManager();
 	
-	returnObj.removeSubstituteFilename = function() { // is called when actModel is removed or loaded from a file
-		var actNumber = list[returnObj.actIndex].getFilename().slice(7); // removing the 7-letter-word "newfile" leaves the number
-		if ((filenameCounter - 1) + '' === actNumber) filenameCounter--;
-	}	
-	
 	returnObj.addNewModel = function() {
 		this.actIndex = (list.push(ACS.model('newFile' + filenameCounter))) - 1;
 		filenameCounter++;
 		this.events.fireEvent('actModelChangedEvent');
 		this.events.fireEvent('newModelAddedEvent');
-		list[this.actIndex].events.registerHandler('filenameBeingChangedEvent', returnObj.removeSubstituteFilename);
+		list[this.actIndex].events.registerHandler('filenameBeingChangedEvent', removeSubstituteFilename);
 	}
 	
 	returnObj.getActModel = function() {
@@ -79,7 +78,7 @@
 	
 	returnObj.removeModel = function() { // removes the actModel
 		this.events.fireEvent('removingModelEvent');
-		this.removeSubstituteFilename();
+		removeSubstituteFilename();
 		list.splice(this.actIndex, 1);
 		if (this.actIndex > (list.length - 1)) this.actIndex--; // if no more models to the right, go to the left
 		if (this.actIndex === -1) { // if list is empty, add a new empty model again

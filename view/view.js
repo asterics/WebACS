@@ -172,7 +172,7 @@ ACS.view = function(modelList, // ACS.modelList
 
 	var deleteSelectionHandler = function() {
 		log.debug('deleteBtnPressed');
-		var remAct = ACS.removeItemListAction(modelList.getActModel());
+		var remAct = ACS.removeItemListAction(modelList.getActModel(), modelList.getActModel().selectedItemsList);
 		remAct.execute();
 	}
 	
