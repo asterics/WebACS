@@ -1,23 +1,9 @@
 QUnit.module( 'view' );
 
-QUnit.test( 'view handleKeydown', function( assert ) {
-	var modelList = ACS.modelList();
-	var comp = ACS.component("comp1","asterics.FS20Receiver","desc",true,1,2,"actuator",false,true);
-	modelList.getActModel().addComponent(comp);
-	modelList.getActModel().addItemToSelection(comp);
-	var clipBoard = ACS.clipBoard();
-	var v = ACS.view(modelList, clipBoard);
-	assert.strictEqual(modelList.getActModel().componentList.length, 1);
-	var keydownEvt = $.Event('keydown');
-	keydownEvt.ctrlKey = false;
-	keydownEvt.which = 46;
-	$('body').trigger(keydownEvt);
-	assert.strictEqual(modelList.getActModel().componentList.length, 0);
-	// to prevent browser from presenting a popup on unload of the page:
-	modelList.getModelAtIndex(0).hasBeenChanged = false;	
-});
+// handleKeyDown and handleKeyPress require user inputs
 
 QUnit.test( 'view cutBtnPressedHandler_pasteBtnPressedHandler', function( assert ) {
+	resetDocument();
 	var modelList = ACS.modelList();
 	var comp = ACS.component("comp1","asterics.FS20Receiver","desc",true,1,2,"actuator",false,true);
 	var port = ACS.port('outP', comp, 1, 0, 0, false);
@@ -42,6 +28,7 @@ QUnit.test( 'view cutBtnPressedHandler_pasteBtnPressedHandler', function( assert
 });
 
 QUnit.test( 'view copyBtnPressedHandler_pasteBtnPressedHandler', function( assert ) {
+	resetDocument();
 	var modelList = ACS.modelList();
 	var comp = ACS.component("comp1","asterics.FS20Receiver","desc",true,1,2,"actuator",false,true);
 	modelList.getActModel().addComponent(comp);
@@ -63,6 +50,7 @@ QUnit.test( 'view copyBtnPressedHandler_pasteBtnPressedHandler', function( asser
 });
 
 QUnit.test( 'view deleteBtnPressedHandler', function( assert ) {
+	resetDocument();
 	var modelList = ACS.modelList();
 	var comp = ACS.component("comp1","asterics.FS20Receiver","desc",true,1,2,"actuator",false,true);
 	modelList.getActModel().addComponent(comp);
@@ -77,6 +65,7 @@ QUnit.test( 'view deleteBtnPressedHandler', function( assert ) {
 });
 
 QUnit.test( 'view undoBtnPressedHandler', function( assert ) {
+	resetDocument();
 	var modelList = ACS.modelList();
 	var comp = ACS.component("comp1","asterics.FS20Receiver","desc",true,1,2,"actuator",false,true);
 	modelList.getActModel().addComponent(comp);
@@ -92,6 +81,7 @@ QUnit.test( 'view undoBtnPressedHandler', function( assert ) {
 });
 
 QUnit.test( 'view redoBtnPressedHandler', function( assert ) {
+	resetDocument();
 	var modelList = ACS.modelList();
 	var comp = ACS.component("comp1","asterics.FS20Receiver","desc",true,1,2,"actuator",false,true);
 	modelList.getActModel().addComponent(comp);

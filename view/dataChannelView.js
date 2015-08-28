@@ -26,7 +26,7 @@
  * limitations under the License.
  */
  
- ACS.dataChannelView = function(dc, // ACS.dataChannel
+ ACS.dataChannelView = function(dc, // ACS.dataChannel (must have at least the outputPort already set)
 								model, // ACS.model
 								modelLayer) { // Kinetic.Layer
 								
@@ -98,7 +98,10 @@
 		dc.events.removeHandler('selectedEvent', selectedEventHandler);
 		dc.events.removeHandler('deSelectedEvent', deSelectedEventHandler);
 		// destroy the line
-		if (returnObj.line) returnObj.line.destroy();
+		if (returnObj.line) {
+			returnObj.line.destroy();
+			returnObj.line = null;
+		}
 	}	
 	
 // ***********************************************************************************************************************

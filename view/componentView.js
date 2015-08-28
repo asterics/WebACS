@@ -445,7 +445,7 @@
 		visible = vis;
 		if (view) {
 			if (vis === true) {
-				view.unhide();
+				view.show();
 			} else {
 				view.hide();
 			}
@@ -466,7 +466,10 @@
 		component.events.removeHandler('selectedEvent', selectedEventHandler);
 		component.events.removeHandler('deSelectedEvent', deSelectedEventHandler);
 		// destroy the view
-		if (view) view.destroy();
+		if (view) {
+			view.destroy();
+			view = null; // prevents program from terminating in an error, when getView() is called after destruction
+		}
 	}
 	
 	returnObj.getView = function() {

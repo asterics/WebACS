@@ -144,23 +144,19 @@
 	}	
 	
 	// ********************************************** handlers ***********************************************************
-	var modelChangedEventHandler = function() {
-		log.info('The model has been changed!');
-	}
-	
 	var componentCollectionChangedEventHandler = function() {
-		log.info('The componentCollection has been changed!');
+		log.info('menuView: The componentCollection has been changed!');
 		returnObj.setComponentMenu();
 	}
 	
 	var actModelChangedEventHandler = function() {
-		log.info('A different model has been set to active');
+		log.info('menuView: A different model has been set to active');
 		returnObj.setComponentMenu();
 	}
 	
 	// Menu-Button-Handlers - System-Menu
 	var handleConnectARE = function(e) {
-		log.info('connectAREBtn has been clicked');
+		log.info('menuView: connectAREBtn has been clicked');
 		// TODO: properly implement
 	}
 	
@@ -339,7 +335,6 @@
 	document.getElementById('mainMenuPanel').appendChild(fileSelector);
 	
 	// register handlers
-	modelList.getActModel().events.registerHandler('modelChangedEvent', modelChangedEventHandler);
 	modelList.getActModel().events.registerHandler('componentCollectionChangedEvent', componentCollectionChangedEventHandler);
 	modelList.events.registerHandler('actModelChangedEvent', actModelChangedEventHandler);
 	fileSelector.addEventListener('change', handleSelectedFile);

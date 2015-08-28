@@ -61,7 +61,7 @@
 		visible = vis;
 		if (returnObj.line) {
 			if (vis === true) {
-				returnObj.line.unhide();
+				returnObj.line.show();
 			} else {
 				returnObj.line.hide();
 			}

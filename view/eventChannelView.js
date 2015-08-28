@@ -26,7 +26,7 @@
  * limitations under the License.
  */
  
- ACS.eventChannelView = function(ec, // ACS.eventChannel
+ ACS.eventChannelView = function(ec, // ACS.eventChannel (must have at least the startComponent already set)
 								model, // ACS.model
 								modelLayer) { // Kinetic.Layer
 								
@@ -109,7 +109,10 @@
 		ec.events.removeHandler('selectedEvent', selectedEventHandler);
 		ec.events.removeHandler('deSelectedEvent', deSelectedEventHandler);
 		// destroy the line
-		if (returnObj.line) returnObj.line.destroy();
+		if (returnObj.line) {
+			returnObj.line.destroy();
+			returnObj.line = null;
+		}
 	}
 
 // ***********************************************************************************************************************
