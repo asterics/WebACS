@@ -279,3 +279,20 @@ div[aria-hidden='true'] {
   left: -300em;
   top: -300em;
 }
+
+/* ******************** styles for jquery-ui ******************** */
+.ui-widget {
+	font-size: 0.8em !important;
+}
+
+.ui-dialog {
+	width: auto !important;
+}
+
+.ui-dialog-content {
+	min-height: 0 !important;
+}
+
+.loadModelFromStorageDialogButtonPane {
+	margin-top: 1em;
+}

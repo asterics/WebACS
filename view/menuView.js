@@ -156,10 +156,350 @@
 	
 	// Menu-Button-Handlers - System-Menu
 	var handleConnectARE = function(e) {
-		log.info('menuView: connectAREBtn has been clicked');
-		// TODO: properly implement
+		log.debug('menuView: connectAREBtn has been clicked');
+		// set the URI for the ARE
+		setBaseURI(ACS.vConst.MENUVIEW_AREBASEURI);
+		// TODO: register for SSE
 	}
 	
+	var handleDisconnectARE = function(e) {
+		log.debug('menuView: DisconnectAREBtn has been clicked');
+		// TODO: unregister from SSE
+	}
+	
+	var handleUploadModel = function(e) {
+		log.debug('uploading model');
+		var modelInXML = modelList.getActModel().getModelXMLString();
+		uploadModel(UM_successCallback, UM_errorCallback, modelInXML);
+		
+		function UM_successCallback(data, HTTPstatus) {
+			alert('success: ' + data);
+			// TODO: set new ARE-status in status-line, then delete alert
+		}
+		
+		function UM_errorCallback(HTTPstatus, AREerrorMessage) {
+			alert('error: ' + AREerrorMessage + HTTPstatus);
+		}		
+	}
+	
+	var handleDownloadModel = function(e) {
+		log.debug('downloading model');
+		downloadDeployedModel(DDM_successCallback, DDM_errorCallback);
+			
+		function DDM_successCallback(data, HTTPstatus) {
+			var modelXML = $.parseXML(data);
+			// if active model is not empty, open new model first
+			if (modelList.getActModel().componentList.length > 0) modelList.addNewModel();
+			// load the model
+			modelList.getActModel().loadModel(modelXML);
+			// TODO: set ARE status to synchronised
+		}
+		
+		function DDM_errorCallback(HTTPstatus, AREerrorMessage) {
+			alert('error: ' + AREerrorMessage);
+		}
+	}
+	
+	var handleDownloadComponentCollection = function(e) {
+		log.debug('downloading model');
+		downloadComponentCollection(DCC_successCallback, DCC_errorCallback);
+					
+		function DCC_successCallback(data, HTTPstatus) {
+			alert('success: ' + data);
+			// TODO: properly implement when bug in REST is fixed (currently the components of the current model are passed instead of the component collection)
+		}
+		
+		function DCC_errorCallback(HTTPstatus, AREerrorMessage) {
+			alert('error: ' + AREerrorMessage);
+		}
+	}
+	
+	var handleStoreModelOnARE = function(e) {
+		// first get a list of stored models (to check if filename is already in use and prevent the user from overwriting an old file unwillingly)
+		listStoredModels(LSM_successCallback, LSM_errorCallback);
+					
+		function LSM_successCallback(data, HTTPstatus) {
+			var filename = modelList.getActModel().getFilename();
+			var modelInXML = modelList.getActModel().getModelXMLString();
+			var inputField = document.getElementById('storeModelFilename');
+			inputField.value = filename;
+			$('#storeModelOnAREDialog').dialog({autoOpen: true,
+												modal: true,
+												maxWidth: inputField.getAttribute('width'),
+												dialogClass: 'no-close',
+												buttons: [	
+													{
+														text: 'Store Model on ARE',
+														click: function() {
+															var proceedStore = false;
+															if (data.indexOf(inputField.value) > -1) {
+																if (confirm('A file with the given name already exists. Do you want to overwrite this file?')) proceedStore = true;
+															} else {
+																proceedStore = true;
+															}
+															if (proceedStore) {		
+																function STORE_successCallback(data, HTTPstatus) {
+																	alert('success: ' + data);
+																}
+																
+																function STORE_errorCallback(HTTPstatus, AREerrorMessage) {
+																	alert('error: ' + AREerrorMessage);
+																}
+																
+																storeModel(STORE_successCallback, STORE_errorCallback, inputField.value, modelInXML);
+															}
+															$(this).dialog('close');
+														}
+													},
+													{
+														text: 'Cancel',
+														click: function() {
+															$(this).dialog('close');
+														}
+													}
+												]});			
+		}
+		
+		function LSM_errorCallback(HTTPstatus, AREerrorMessage) {
+			alert('error: ' + AREerrorMessage);
+		}				
+	}
+	
+	var handleLoadModelFromARE = function(e) {
+		// first get a list of stored models...
+		listStoredModels(LSM_successCallback, LSM_errorCallback);
+					
+		function LSM_successCallback(data, HTTPstatus) {
+			document.getElementById('loadModelFromStorageSelector').innerHTML = '<option value="none">--- please choose file ---</option>';
+			var selector = document.getElementById('loadModelFromStorageSelector');
+			if (data) {
+				for (var i = 0; i < data.length; i++) {
+					var option = document.createElement('option');
+					option.setAttribute('value', data[i]);
+					var text = document.createTextNode(data[i]);
+					option.appendChild(text);
+					selector.appendChild(option);
+				}
+			}
+			$('#loadModelFromStorageDialog').dialog({	autoOpen: true,
+														modal: true,
+														maxWidth: selector.getAttribute('width'),
+														dialogClass: 'no-close',
+														buttons: [
+															{
+																text: 'Load selected Model',
+																click: function() {
+																	var file = selector.options[selector.selectedIndex].value;
+																	if (file && (file != 'none')) {
+																		downloadModelFromFile(DMF_successCallback, DMF_errorCallback, file);
+																		$(this).dialog('close');
+																	} else {
+																		alert('Please choose a file from the list or cancel.');
+																	}
+
+																	function DMF_successCallback(data, HTTPstatus) {
+																		// if active model is not empty, open new model first
+																		if (modelList.getActModel().componentList.length > 0) modelList.addNewModel();
+																		// load the model received from ARE
+																		modelList.getActModel().loadModel($.parseXML(data));
+																		// set the correct filename
+																		modelList.getActModel().setFilename(file);
+																	}
+																	
+																	function DMF_errorCallback(HTTPstatus, AREerrorMessage) {
+																		alert('error: ' + AREerrorMessage);
+																	}		
+			
+																}
+															},
+															{
+																text: 'Cancel',
+																click: function() {
+																	$(this).dialog('close');
+																}
+															}
+														]});
+		}
+		
+		function LSM_errorCallback(HTTPstatus, AREerrorMessage) {
+			alert('error: ' + AREerrorMessage);
+		}				
+	}
+	
+	var handleActivateStoredModel = function(e) {
+		// first get a list of stored models...
+		listStoredModels(LSM_successCallback, LSM_errorCallback);
+					
+		function LSM_successCallback(data, HTTPstatus) {
+			document.getElementById('activateStoredModelSelector').innerHTML = '<option value="none">--- please choose file ---</option>';
+			var selector = document.getElementById('activateStoredModelSelector');
+			if (data) {
+				for (var i = 0; i < data.length; i++) {
+					var option = document.createElement('option');
+					option.setAttribute('value', data[i]);
+					var text = document.createTextNode(data[i]);
+					option.appendChild(text);
+					selector.appendChild(option);
+				}
+			}
+			$('#activateStoredModelDialog').dialog({autoOpen: true,
+													modal: true,
+													maxWidth: selector.getAttribute('width'),
+													dialogClass: 'no-close',
+													buttons: [
+														{
+															text: 'Activate selected Model',
+															click: function() {
+																var file = selector.options[selector.selectedIndex].value;
+																if (file && (file != 'none')) {
+																	deployModelFromFile(DepMF_successCallback, DepMF_errorCallback, file);
+																	$(this).dialog('close');
+																} else {
+																	alert('Please choose a file from the list or cancel.');
+																}
+
+																function DepMF_successCallback(data, HTTPstatus) {
+																	startModel(START_successCallback, START_errorCallback);
+																				
+																	function START_successCallback(data, HTTPstatus) {
+																		alert('success: ' + data);
+																		// TODO: set ARE status to running (then delete alert)
+																	}
+																	
+																	function START_errorCallback(HTTPstatus, AREerrorMessage) {
+																		alert('error: ' + AREerrorMessage);
+																	}
+																}
+																
+																function DepMF_errorCallback(HTTPstatus, AREerrorMessage) {
+																	alert('error: ' + AREerrorMessage);
+																}		
+			
+																}
+														},
+														{
+															text: 'Cancel',
+															click: function() {
+																$(this).dialog('close');
+															}
+														}
+													]});			
+		}
+		
+		function LSM_errorCallback(HTTPstatus, AREerrorMessage) {
+			alert('error: ' + AREerrorMessage);
+		}		
+	}
+	
+	var handleDeleteStoredModel = function(e) {
+		// first get a list of stored models...
+		listStoredModels(LSM_successCallback, LSM_errorCallback);
+					
+		function LSM_successCallback(data, HTTPstatus) {
+			document.getElementById('deleteStoredModelSelector').innerHTML = '<option value="none">--- please choose file ---</option>';
+			var selector = document.getElementById('deleteStoredModelSelector');
+			if (data) {
+				for (var i = 0; i < data.length; i++) {
+					var option = document.createElement('option');
+					option.setAttribute('value', data[i]);
+					var text = document.createTextNode(data[i]);
+					option.appendChild(text);
+					selector.appendChild(option);
+				}
+			}
+			$('#deleteStoredModelDialog').dialog({	autoOpen: true,
+													modal: true,
+													maxWidth: selector.getAttribute('width'),
+													dialogClass: 'no-close',
+													buttons: [
+														{
+															text: 'Delete selected Model',
+															click: function() {
+																var file = selector.options[selector.selectedIndex].value;
+																if (file && (file != 'none')) {
+																	deleteModelFromFile(DELETE_successCallback, DELETE_errorCallback, file);
+																	$(this).dialog('close');
+																} else {
+																	alert('Please choose a file from the list or cancel.');
+																}
+
+																function DELETE_successCallback(data, HTTPstatus) {
+																	alert('success: ' + data);
+																}
+																
+																function DELETE_errorCallback(HTTPstatus, AREerrorMessage) {
+																	alert('error: ' + AREerrorMessage);
+																}		
+			
+															}
+														},
+														{
+															text: 'Cancel',
+															click: function() {
+																$(this).dialog('close');
+															}
+														}
+													]});
+		}
+		
+		function LSM_errorCallback(HTTPstatus, AREerrorMessage) {
+			alert('error: ' + AREerrorMessage);
+		}		
+	}
+	
+	var handleSetAsAutorun = function(e) {
+		var filename = 'autostart.acs';
+		var modelInXML = modelList.getActModel().getModelXMLString();
+		storeModel(STORE_successCallback, STORE_errorCallback, filename, modelInXML);
+								
+		function STORE_successCallback(data, HTTPstatus) {
+			alert('success: ' + data);
+		}
+		
+		function STORE_errorCallback(HTTPstatus, AREerrorMessage) {
+			alert('error: ' + AREerrorMessage);
+		}				
+	}
+
+	var handleStartModel = function(e) {
+		startModel(START_successCallback, START_errorCallback);
+					
+		function START_successCallback(data, HTTPstatus) {
+			alert('success: ' + data);
+			// TODO: set ARE status to running (then delete alert)
+		}
+		
+		function START_errorCallback(HTTPstatus, AREerrorMessage) {
+			alert('error: ' + AREerrorMessage);
+		}
+	}
+	
+	var handlePauseModel = function(e) {
+		pauseModel(PAUSE_successCallback, PAUSE_errorCallback);
+					
+		function PAUSE_successCallback(data, HTTPstatus) {
+			alert('success: ' + data);
+			// TODO: set ARE status to paused (then delete alert)
+		}
+		
+		function PAUSE_errorCallback(HTTPstatus, AREerrorMessage) {
+			alert('error: ' + AREerrorMessage);
+		}
+	}
+
+	var handleStopModel = function(e) {
+		stopModel(STOP_successCallback, STOP_errorCallback);
+					
+		function STOP_successCallback(data, HTTPstatus) {
+			alert('success: ' + data);
+			// TODO: set ARE status to stopped (then delete alert)
+		}
+		
+		function STOP_errorCallback(HTTPstatus, AREerrorMessage) {
+			alert('error: ' + AREerrorMessage);
+		}		
+	}	
+
 	var handleNewModel = function(e) {
 		modelList.addNewModel();
 	}
@@ -174,7 +514,7 @@
 				// if active model is not empty, open new model first
 				if (modelList.getActModel().componentList.length > 0) modelList.addNewModel();
 				// load the model
-				modelList.getActModel().loadModel(loadFile);
+				modelList.getActModel().loadModelFromFile(loadFile);
 			}
 		}
 	}
@@ -339,6 +679,18 @@
 	modelList.events.registerHandler('actModelChangedEvent', actModelChangedEventHandler);
 	fileSelector.addEventListener('change', handleSelectedFile);
 	document.getElementById('connectAREBtn').addEventListener('click', handleConnectARE);
+	document.getElementById('disconnectAREBtn').addEventListener('click', handleDisconnectARE);
+	document.getElementById('uploadModelBtn').addEventListener('click', handleUploadModel);
+	document.getElementById('downloadModelBtn').addEventListener('click', handleDownloadModel);
+	document.getElementById('downloadCompCollBtn').addEventListener('click', handleDownloadComponentCollection);
+	document.getElementById('storeModelAREBtn').addEventListener('click', handleStoreModelOnARE);
+	document.getElementById('loadModelAREBtn').addEventListener('click', handleLoadModelFromARE);
+	document.getElementById('activateStoredModelBtn').addEventListener('click', handleActivateStoredModel);
+	document.getElementById('deleteStoredModelBtn').addEventListener('click', handleDeleteStoredModel);
+	document.getElementById('setAsAutorunBtn').addEventListener('click', handleSetAsAutorun);
+	document.getElementById('startModelBtn').addEventListener('click', handleStartModel);
+	document.getElementById('pauseModelBtn').addEventListener('click', handlePauseModel);
+	document.getElementById('stopModelBtn').addEventListener('click', handleStopModel);
 	document.getElementById("newModelBtn").addEventListener('click', handleNewModel);
 	document.getElementById('openModelBtn').addEventListener('click', handleOpenModel);
 	document.getElementById('closeModelBtn').addEventListener('click', handleCloseModel);

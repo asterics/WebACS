@@ -9,10 +9,14 @@
 
     <!-- external libraries: -->
     <script type="text/javascript" language="javascript" src="lib/jquery-1.11.1.min.js"></script>
+	<script type="text/javascript" language="javascript" src="lib/jquery-ui-1.11.4.custom/jquery-ui.js"></script>
+	<link type="text/css" rel="stylesheet" href="lib/jquery-ui-1.11.4.custom/jquery-ui.css">
 	<script type="text/javascript" language="javascript" src="lib/loglevel.min.js"></script>
 	<script type="text/javascript" language="javascript" src="lib/kinetic-v5.1.0.min.js"></script>
 	<script type="text/javascript" language="javascript" src="lib/FileSaver/FileSaver.min.js"></script>
 	<script type="text/javascript" language="javascript" src="lib/Blob/Blob.js"></script>
+	<script type="text/javascript" language="javascript" src="lib/rest_library/JSmap.js"></script> 
+	<script type="text/javascript" language="javascript" src="lib/rest_library/areCommunicator.js"></script>
 	<!-- namespace: -->
 	<script type="text/javascript" language="javascript" src="acsNamespace.js"></script>
 	<!-- misc: -->
@@ -57,9 +61,10 @@
 	<script type="text/javascript" language="javascript" src="view/propertyEditor.js"></script>
 	<!-- main script: -->
     <script type="text/javascript" language="javascript" src="webACS.js"></script>	
-	</head>
+  </head>
 
   <body>
+  <!-- ****************************************************** menu panel *********************************************************** -->
     <div id="menuPanel">
 		<h1 class="menu_header">AsTeRICS Configuration Suite</h1>
 		<div id="mainMenuPanel" class="tabpanel" role="menu">
@@ -96,8 +101,8 @@
 				<h2>Model</h2>			
 				<ul class="buttonList">
 					<li><button type="button" class="menuButton" id="startModelBtn"><div class="buttonContents"><img src="view/images/StartModel.png" alt="Start model" />Start<br />Model</div></button></li>
-					<li><button type="button" class="menuButton" id="PauseModelBtn"><div class="buttonContents"><img src="view/images/PauseModel.png" alt="Pause model" />Pause<br />Model</div></button></li>
-					<li><button type="button" class="menuButton" id="StopModelBtn"><div class="buttonContents"><img src="view/images/StopModel.png" alt="Stop model" />Stop<br />Model</div></button></li>
+					<li><button type="button" class="menuButton" id="pauseModelBtn"><div class="buttonContents"><img src="view/images/PauseModel.png" alt="Pause model" />Pause<br />Model</div></button></li>
+					<li><button type="button" class="menuButton" id="stopModelBtn"><div class="buttonContents"><img src="view/images/StopModel.png" alt="Stop model" />Stop<br />Model</div></button></li>
 				</ul>
 			</section>
 			<section class="buttonGroup bg_right">
@@ -178,17 +183,43 @@
 		  </div>
 		</div>    
     </div>
-    
+ 
+<!-- ****************************************************** canvas panel *************************************************************** --> 
 	<div id="canvasMotherPanel" class="tabpanel" role="tabpanel">
 		<ul id="canvasPanelTabList" class="tablist" role="tablist">
 		</ul>
 	</div>
-    
+ 
+<!-- ****************************************************** property editor panel ****************************************************** --> 
     <div id="propertyEditorMotherPanel">
 		<ul id="propertyEditorTabList" class="tablist" role="tablist">
 		</ul>
 	</div>
 
+<!-- ****************************************************** dialog boxes *************************************************************** -->
+	<div id="loadModelFromStorageDialog" title="Load Model from ARE Storage">
+		<select name="files" id="loadModelFromStorageSelector">
+			<option value="none">--- please choose file ---</option>
+		</select>
+	</div>
+	
+	<div id="storeModelOnAREDialog" title="Store Model on ARE">
+		<input type="text" id="storeModelFilename"></input>
+	</div>
+	
+	<div id="activateStoredModelDialog" title="Activate Stored Model">
+		<select name="files" id="activateStoredModelSelector">
+			<option value="none">--- please choose file ---</option>
+		</select>
+	</div>
+
+	<div id="deleteStoredModelDialog" title="Delete Stored Model">
+		<select name="files" id="deleteStoredModelSelector">
+			<option value="none">--- please choose file ---</option>
+		</select>
+	</div>	
+
+<!-- ****************************************************** main script **************************************************************** -->	
 	<script>
 		var theWebACS = ACS.webACS();
 	</script>

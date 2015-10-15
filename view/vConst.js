@@ -89,6 +89,7 @@ ACS.vConst = {
 	// menuView
 	MENUVIEW_MENUMOTHERPANEL: 'mainMenuPanel',
 	MENUVIEW_BEFOREUNLOADMESSAGE: 'At least one model has not been saved. If you leave now, you will loose all unsaved changes!',
+	MENUVIEW_AREBASEURI: 'http://localhost:8081/rest/',
 	// modelView
 	MODELVIEW_MODELDESIGNERHEADER: 'Model Designer',
 	MODELVIEW_GUIDESIGNERHEADER: 'GUI Designer',

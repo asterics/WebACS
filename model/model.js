@@ -120,7 +120,9 @@
 																			j,
 																			inputPortsFull.item(j).getElementsByTagName('mustBeConnected').item(0).textContent);
 							// TODO: add the port's properties
-							if (inputPortsModel.item(j).attributes.getNamedItem('sync')) componentList[i].inputPortList[j].sync = inputPortsModel.item(j).attributes.getNamedItem('sync').textContent;
+							if (inputPortsModel.item(j) && (inputPortsModel.item(j).attributes.getNamedItem('sync'))) {
+								componentList[i].inputPortList[j].sync = inputPortsModel.item(j).attributes.getNamedItem('sync').textContent;
+							}
 						} else { // if the port was deleted by developer
 							componentList[i].matchesComponentCollection = false;
 						}
@@ -314,10 +316,10 @@
 				var channelId = startCompId + '_' + endCompId;
 				var actChannel = seekChannelInList(eventChannelList, channelId);
 				if (!actChannel) {
-					eventChannelList[i] = ACS.eventChannel(channelId);
-					eventChannelList[i].startComponent = findComponentById(componentList, startCompId);
-					eventChannelList[i].endComponent = findComponentById(componentList, endCompId);
-					actChannel = eventChannelList[i];
+					eventChannelList.push(ACS.eventChannel(channelId));
+					eventChannelList[eventChannelList.length-1].startComponent = findComponentById(componentList, startCompId);
+					eventChannelList[eventChannelList.length-1].endComponent = findComponentById(componentList, endCompId);
+					actChannel = eventChannelList[eventChannelList.length-1];
 				}
 				var triggerEventId = eventChannels.item(i).getElementsByTagName('source').item(0).getElementsByTagName('eventPort').item(0).attributes.getNamedItem('id').textContent;
 				var listenerEventId = eventChannels.item(i).getElementsByTagName('target').item(0).getElementsByTagName('eventPort').item(0).attributes.getNamedItem('id').textContent;
@@ -332,7 +334,7 @@
 	}
 	
 	var loadModelGui = function(modelXML) {
-		if (modelXML.getElementsByTagName('modelGUI')) {
+		if (modelXML.getElementsByTagName('modelGUI').item(0)) {
 			var modelGui = modelXML.getElementsByTagName('modelGUI').item(0);
 			returnObj.modelGui.setDecoration(modelGui.getElementsByTagName('Decoration').item(0).textContent === 'true');
 			returnObj.modelGui.setDecoration(modelGui.getElementsByTagName('Fullscreen').item(0).textContent === 'true');
@@ -402,6 +404,13 @@
 		return d + '/' + m + '/' + y + '_' + h + min;
 	}
 	
+	var metaDataIndexOfKey = function(key) {
+		for (var i = 0; i < returnObj.metaDataList.length; i++) {
+			if (returnObj.metaDataList[i].getKey() === key) return i;
+		}
+		return -1;
+	}
+	
 // ***********************************************************************************************************************
 // ************************************************** public stuff *******************************************************
 // ***********************************************************************************************************************
@@ -458,7 +467,22 @@
 		return pos;
 	}	
 
-	returnObj.loadModel = function(loadFile) {
+	returnObj.loadModel = function(modelXML) {
+		returnObj.modelName = modelXML.getElementsByTagName('model').item(0).attributes.getNamedItem('modelName').textContent;
+		if (modelXML.getElementsByTagName('model').item(0).attributes.getNamedItem('version')) {
+			returnObj.acsVersion = modelXML.getElementsByTagName('model').item(0).attributes.getNamedItem('version').textContent;
+		}
+		returnObj.componentList = loadComponentList(modelXML);
+		returnObj.dataChannelList = loadDataChannelList(modelXML, returnObj.componentList);
+		returnObj.eventChannelList = loadEventChannelList(modelXML, returnObj.componentList);
+		loadModelGui(modelXML);
+		//returnObj.visualAreaMarkerList = loadVisualAreaMarkerList(modelXML); // TODO: add visualAreaMarkers to XML first
+		returnObj.metaDataList = loadMetaDataList(modelXML);
+		returnObj.events.fireEvent('modelChangedEvent');
+		returnObj.hasBeenChanged = false;
+	}
+
+	returnObj.loadModelFromFile = function(loadFile) {
 		if (loadFile) {
 			returnObj.setFilename(loadFile.name);
 			var fr = new FileReader();
@@ -467,18 +491,9 @@
 				
 				// TODO: write a function that checks whether the given file is a valid ACS-file and alert the user if not
 				
-				returnObj.modelName = modelXML.getElementsByTagName('model').item(0).attributes.getNamedItem('modelName').textContent;
-				returnObj.acsVersion = modelXML.getElementsByTagName('model').item(0).attributes.getNamedItem('version').textContent;
-				returnObj.componentList = loadComponentList(modelXML);
-				returnObj.dataChannelList = loadDataChannelList(modelXML, returnObj.componentList);
-				returnObj.eventChannelList = loadEventChannelList(modelXML, returnObj.componentList);
-				loadModelGui(modelXML);
-				//returnObj.visualAreaMarkerList = loadVisualAreaMarkerList(modelXML); // TODO: add visualAreaMarkers to XML first
-				returnObj.metaDataList = loadMetaDataList(modelXML);
-				returnObj.events.fireEvent('modelChangedEvent');
+				returnObj.loadModel(modelXML);
 			};
 			fr.readAsText(loadFile);
-			returnObj.hasBeenChanged = false;
 		}
 	}
 	
@@ -500,10 +515,25 @@
 	}
 	
 	returnObj.getModelXMLString = function() {
-		var xmlString = '<?xml version="1.0"?>\r<model xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" modelName="' + returnObj.modelName + '" version="' + returnObj.acsVersion + '">\r';
+		var xmlString = '<?xml version="1.0"?>\r<model xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" modelName="' + returnObj.modelName + '" version="' + returnObj.acsVersion + '">\r';
 		xmlString += '\t<modelDescription>\r';
-		for (var i = 0; i < returnObj.metaDataList.length; i++) {
-			xmlString += '\t\t<' + returnObj.metaDataList[i].getKey() + '>' + returnObj.metaDataList[i].value + '</' + returnObj.metaDataList[i].getKey() + '>\r';
+		var mdi = metaDataIndexOfKey('shortDescription');
+		if (mdi > -1) {
+			xmlString += '\t\t<shortDescription>' + returnObj.metaDataList[mdi].value + '</shortDescription>\r';
+		} else {
+			xmlString += '\t\t<shortDescription></shortDescription>\r';
+		}
+		var mdi = metaDataIndexOfKey('requirements');
+		if (mdi > -1) {
+			xmlString += '\t\t<requirements>' + returnObj.metaDataList[mdi].value + '</requirements>\r';
+		} else {
+			xmlString += '\t\t<requirements></requirements>\r';
+		}
+		var mdi = metaDataIndexOfKey('description');
+		if (mdi > -1) {
+			xmlString += '\t\t<description>' + returnObj.metaDataList[mdi].value + '</description>\r';
+		} else {
+			xmlString += '\t\t<description></description>\r';
 		}
 		xmlString += '\t</modelDescription>\r';
 		// add the components
@@ -523,6 +553,8 @@
 							xmlString += '\t\t\t\t\t\t<property name="' + returnObj.componentList[i].inputPortList[j].propertyList[k].getKey() + '" value="' + returnObj.componentList[i].inputPortList[j].propertyList[k].value + '" />\r';
 						}
 						xmlString += '\t\t\t\t\t</properties>\r';
+					} else {
+						xmlString += '\t\t\t\t\t<properties />\r';
 					}
 					xmlString += '\t\t\t\t</inputPort>\r';
 				}
@@ -535,6 +567,8 @@
 							xmlString += '\t\t\t\t\t\t<property name="' + returnObj.componentList[i].outputPortList[j].propertyList[k].getKey() + '" value="' + returnObj.componentList[i].outputPortList[j].propertyList[k].value + '" />\r';
 						}
 						xmlString += '\t\t\t\t\t</properties>\r';
+					} else {
+						xmlString += '\t\t\t\t\t<properties />\r';
 					}
 					xmlString += '\t\t\t\t</outputPort>\r';
 				}				
