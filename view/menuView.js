@@ -202,14 +202,14 @@
 	
 	var handleDownloadComponentCollection = function(e) {
 		log.debug('downloading model');
-		downloadComponentCollection(DCC_successCallback, DCC_errorCallback);
+		getInstalledComponentsDescriptor(ICD_successCallback, ICD_errorCallback);
 					
-		function DCC_successCallback(data, HTTPstatus) {
+		function ICD_successCallback(data, HTTPstatus) {
 			alert('success: ' + data);
 			// TODO: properly implement when bug in REST is fixed (currently the components of the current model are passed instead of the component collection)
 		}
 		
-		function DCC_errorCallback(HTTPstatus, AREerrorMessage) {
+		function ICD_errorCallback(HTTPstatus, AREerrorMessage) {
 			alert('error: ' + AREerrorMessage);
 		}
 	}
