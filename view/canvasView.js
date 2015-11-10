@@ -66,7 +66,9 @@
 	var tabSwitchedEventHandler = function() {
 		var elements = document.getElementById(ACS.vConst.CANVASVIEW_TABLIST).getElementsByClassName('tab');
 		for (var i = 0; i < elements.length; i++) {
-			if (elements[i].getAttribute('aria-selected') === 'true') modelList.setActModel(i);
+			if (elements[i].getAttribute('aria-selected') === 'true') {
+				modelList.setActModel(i);
+			}
 		}
 	}
 	

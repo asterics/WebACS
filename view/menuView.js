@@ -26,7 +26,8 @@
  * limitations under the License.
  */
  
- ACS.menuView = function(modelList) { // ACS.modelList
+ ACS.menuView = function(	modelList, // ACS.modelList
+							areStatus) { // ACS.areStatus
 
 // ***********************************************************************************************************************
 // ************************************************** private variables **************************************************
@@ -154,17 +155,118 @@
 		returnObj.setComponentMenu();
 	}
 	
+	var AREStatusChangedEventHandler = function() {
+		switch (areStatus.getStatus()) {
+			case ACS.statusType.DISCONNECTED: 
+			case ACS.statusType.CONNECTIONLOST:
+				$('#connectAREBtn').removeAttr('disabled');
+				$('#disconnectAREBtn').attr('disabled', '');
+				$('#uploadModelBtn').attr('disabled', '');
+				$('#downloadModelBtn').attr('disabled', '');
+				$('#downloadCompCollBtn').attr('disabled', '');
+				$('#storeModelAREBtn').attr('disabled', '');
+				$('#loadModelAREBtn').attr('disabled', '');
+				$('#activateStoredModelBtn').attr('disabled', '');
+				$('#deleteStoredModelBtn').attr('disabled', '');
+				$('#setAsAutorunBtn').attr('disabled', '');
+				$('#startModelBtn').attr('disabled', '');
+				$('#pauseModelBtn').attr('disabled', '');
+				$('#stopModelBtn').attr('disabled', '');
+				break;
+			case ACS.statusType.CONNECTED:
+				$('#connectAREBtn').attr('disabled', '');
+				$('#disconnectAREBtn').removeAttr('disabled');
+				$('#uploadModelBtn').removeAttr('disabled');
+				$('#downloadModelBtn').removeAttr('disabled');
+				$('#downloadCompCollBtn').removeAttr('disabled');
+				$('#storeModelAREBtn').removeAttr('disabled');
+				$('#loadModelAREBtn').removeAttr('disabled');
+				$('#activateStoredModelBtn').removeAttr('disabled');
+				$('#deleteStoredModelBtn').removeAttr('disabled');
+				$('#setAsAutorunBtn').removeAttr('disabled');
+				$('#startModelBtn').removeAttr('disabled');
+				$('#pauseModelBtn').attr('disabled', '');
+				$('#stopModelBtn').attr('disabled', '');
+				break;
+			case ACS.statusType.STARTED:
+				$('#startModelBtn').attr('disabled', '');
+				$('#pauseModelBtn').removeAttr('disabled');
+				$('#stopModelBtn').removeAttr('disabled');
+				break;
+			case ACS.statusType.PAUSED:
+				$('#startModelBtn').removeAttr('disabled');
+				$('#pauseModelBtn').attr('disabled', '');
+				$('#stopModelBtn').removeAttr('disabled');
+				break;
+			case ACS.statusType.STOPPED:
+				$('#startModelBtn').removeAttr('disabled');
+				$('#pauseModelBtn').attr('disabled', '');
+				$('#stopModelBtn').attr('disabled', '');					
+				break;
+		}
+	}	
+	
 	// Menu-Button-Handlers - System-Menu
 	var handleConnectARE = function(e) {
 		log.debug('menuView: connectAREBtn has been clicked');
-		// set the URI for the ARE
 		setBaseURI(ACS.vConst.MENUVIEW_AREBASEURI);
-		// TODO: register for SSE
+		areStatus.setStatus(ACS.statusType.CONNECTED);
+		areStatus.checkAndSetSynchronisation();
+		// subscribe to changes of the model state and the model itself
+		subscribe(SUBSCRIBE_STATECHANGE_successCallback, SUBSCRIBE_EVENTS_errorCallback, 'ModelStateChanged');
+		subscribe(SUBSCRIBE_MODELCHANGE_successCallback, SUBSCRIBE_EVENTS_errorCallback, 'ModelChanged');
+
+		function SUBSCRIBE_STATECHANGE_successCallback(data, HTTPstatus) {
+			switch (data) {
+				case 'Model started':	
+					areStatus.setStatus(ACS.statusType.STARTED);
+					break;
+				case 'Model paused':	
+					areStatus.setStatus(ACS.statusType.PAUSED);
+					break;
+				case 'Model stopped':	
+					areStatus.setStatus(ACS.statusType.STOPPED);
+					break;
+			}
+		}
+		
+		function SUBSCRIBE_MODELCHANGE_successCallback(data, HTTPstatus) {
+			areStatus.checkAndSetSynchronisation();
+		}		
+		
+		function SUBSCRIBE_EVENTS_errorCallback(HTTPstatus, AREerrorMessage) {
+			if (AREerrorMessage === 'connectionLost') {
+				areStatus.setStatus(ACS.statusType.CONNECTIONLOST);
+			} else {
+				areStatus.setStatus(ACS.statusType.DISCONNECTED);
+			}
+			log.debug(AREerrorMessage);
+		}
+		
+		// check and show current status of ARE
+		getModelState(MS_successCallback, MS_errorCallback);
+		
+		function MS_successCallback(data, HTTPstatus) {
+			switch (data) {
+				case 'started':	
+					areStatus.setStatus(ACS.statusType.STARTED);
+					break;
+				case 'paused':	
+					areStatus.setStatus(ACS.statusType.PAUSED);
+					break;
+			}
+		}
+		
+		function MS_errorCallback(HTTPstatus, AREerrorMessage) {
+			log.debug(AREerrorMessage);
+		}
 	}
 	
 	var handleDisconnectARE = function(e) {
 		log.debug('menuView: DisconnectAREBtn has been clicked');
-		// TODO: unregister from SSE
+		unsubscribe('ModelStateChanged');
+		unsubscribe('ModelChanged');
+		areStatus.setStatus(ACS.statusType.DISCONNECTED);
 	}
 	
 	var handleUploadModel = function(e) {
@@ -173,8 +275,7 @@
 		uploadModel(UM_successCallback, UM_errorCallback, modelInXML);
 		
 		function UM_successCallback(data, HTTPstatus) {
-			alert('success: ' + data);
-			// TODO: set new ARE-status in status-line, then delete alert
+			log.debug('success: ' + data);
 		}
 		
 		function UM_errorCallback(HTTPstatus, AREerrorMessage) {
@@ -192,7 +293,7 @@
 			if (modelList.getActModel().componentList.length > 0) modelList.addNewModel();
 			// load the model
 			modelList.getActModel().loadModel(modelXML);
-			// TODO: set ARE status to synchronised
+			areStatus.setSynchronised(true);
 		}
 		
 		function DDM_errorCallback(HTTPstatus, AREerrorMessage) {
@@ -201,15 +302,14 @@
 	}
 	
 	var handleDownloadComponentCollection = function(e) {
-		log.debug('downloading model');
-		getInstalledComponentsDescriptor(ICD_successCallback, ICD_errorCallback);
+		log.debug('downloading componentCollection');
+		getCreatedComponentsDescriptor(CREATED_COMPONENTS_DSCR_successCallback, CREATED_COMPONENTS_DSCR_errorCallback);
 					
-		function ICD_successCallback(data, HTTPstatus) {
-			alert('success: ' + data);
-			// TODO: properly implement when bug in REST is fixed (currently the components of the current model are passed instead of the component collection)
+		function CREATED_COMPONENTS_DSCR_successCallback(data, HTTPstatus) {
+			modelList.getActModel().setComponentCollection(data);
 		}
 		
-		function ICD_errorCallback(HTTPstatus, AREerrorMessage) {
+		function CREATED_COMPONENTS_DSCR_errorCallback(HTTPstatus, AREerrorMessage) {
 			alert('error: ' + AREerrorMessage);
 		}
 	}
@@ -362,8 +462,7 @@
 																	startModel(START_successCallback, START_errorCallback);
 																				
 																	function START_successCallback(data, HTTPstatus) {
-																		alert('success: ' + data);
-																		// TODO: set ARE status to running (then delete alert)
+																		log.debug('success: ' + data);
 																	}
 																	
 																	function START_errorCallback(HTTPstatus, AREerrorMessage) {
@@ -375,7 +474,7 @@
 																	alert('error: ' + AREerrorMessage);
 																}		
 			
-																}
+															}
 														},
 														{
 															text: 'Cancel',
@@ -465,8 +564,7 @@
 		startModel(START_successCallback, START_errorCallback);
 					
 		function START_successCallback(data, HTTPstatus) {
-			alert('success: ' + data);
-			// TODO: set ARE status to running (then delete alert)
+			log.debug('success: ' + data);
 		}
 		
 		function START_errorCallback(HTTPstatus, AREerrorMessage) {
@@ -478,8 +576,7 @@
 		pauseModel(PAUSE_successCallback, PAUSE_errorCallback);
 					
 		function PAUSE_successCallback(data, HTTPstatus) {
-			alert('success: ' + data);
-			// TODO: set ARE status to paused (then delete alert)
+			log.debug('success: ' + data);
 		}
 		
 		function PAUSE_errorCallback(HTTPstatus, AREerrorMessage) {
@@ -491,8 +588,7 @@
 		stopModel(STOP_successCallback, STOP_errorCallback);
 					
 		function STOP_successCallback(data, HTTPstatus) {
-			alert('success: ' + data);
-			// TODO: set ARE status to stopped (then delete alert)
+			log.debug('success: ' + data);
 		}
 		
 		function STOP_errorCallback(HTTPstatus, AREerrorMessage) {
@@ -677,6 +773,7 @@
 	// register handlers
 	modelList.getActModel().events.registerHandler('componentCollectionChangedEvent', componentCollectionChangedEventHandler);
 	modelList.events.registerHandler('actModelChangedEvent', actModelChangedEventHandler);
+	areStatus.events.registerHandler('AREStatusChangedEvent', AREStatusChangedEventHandler);
 	fileSelector.addEventListener('change', handleSelectedFile);
 	document.getElementById('connectAREBtn').addEventListener('click', handleConnectARE);
 	document.getElementById('disconnectAREBtn').addEventListener('click', handleDisconnectARE);
@@ -691,7 +788,7 @@
 	document.getElementById('startModelBtn').addEventListener('click', handleStartModel);
 	document.getElementById('pauseModelBtn').addEventListener('click', handlePauseModel);
 	document.getElementById('stopModelBtn').addEventListener('click', handleStopModel);
-	document.getElementById("newModelBtn").addEventListener('click', handleNewModel);
+	document.getElementById('newModelBtn').addEventListener('click', handleNewModel);
 	document.getElementById('openModelBtn').addEventListener('click', handleOpenModel);
 	document.getElementById('closeModelBtn').addEventListener('click', handleCloseModel);
 	document.getElementById('saveModelBtn').addEventListener('click', handleSaveModel);

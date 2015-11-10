@@ -47,3 +47,12 @@ ACS.componentType = {
 	PROCESSOR: 2,
 	ACTUATOR: 3
 };
+
+ACS.statusType = {
+	DISCONNECTED: 1,
+	CONNECTED: 2,
+	STARTED: 3,
+	PAUSED: 4,
+	STOPPED: 5,
+	CONNECTIONLOST: 6
+};

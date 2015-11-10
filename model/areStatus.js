@@ -26,29 +26,78 @@
  * limitations under the License.
  */
  
- ACS.webACS = function() {
+ ACS.areStatus = function(modelList) { // ACS.modelList
 
 // ***********************************************************************************************************************
 // ************************************************** private variables **************************************************
 // ***********************************************************************************************************************
-	var modelList = ACS.modelList();
-	var clipBoard = ACS.clipBoard();
-	var areStatus = ACS.areStatus(modelList);
-	var view = ACS.view(modelList, clipBoard, areStatus);
+	var status = ACS.statusType.DISCONNECTED;
+	var synchronised = false;
 
 // ***********************************************************************************************************************
 // ************************************************** private methods ****************************************************
 // ***********************************************************************************************************************
+	var actModelChangedEventHandler = function() {
+		returnObj.checkAndSetSynchronisation();
+	}
 	
 // ***********************************************************************************************************************
 // ************************************************** public stuff *******************************************************
 // ***********************************************************************************************************************
 	var returnObj = {};
-
+	
+	returnObj.events = ACS.eventManager();
+	
+	returnObj.checkAndSetSynchronisation = function() {
+		if (status != ACS.statusType.DISCONNECTED) {
+						
+			function DDM_successCallback(data, HTTPstatus) {
+				var newSync;
+				var deployedModelXML = $.parseXML(data);
+				// compare actModel with deployed model to determine synchronisation status
+				if (modelList.getActModel().modelName === deployedModelXML.getElementsByTagName('model')[0].attributes.getNamedItem('modelName').textContent) {
+					newSync = true;
+				} else {
+					newSync = false;
+				}
+				if (synchronised != newSync) {
+					synchronised = newSync;
+					returnObj.events.fireEvent('ARESynchronisationChangedEvent');
+				}
+			}
+			
+			function DDM_errorCallback(HTTPstatus, AREerrorMessage) {
+				alert(AREerrorMessage);
+			}
+			
+			// get currently deployed model from the ARE
+			downloadDeployedModel(DDM_successCallback, DDM_errorCallback);			
+		}
+	}
+	
+	returnObj.setSynchronised = function(newSync) {
+		synchronised = newSync;
+		log.debug('setting sync: ' + synchronised);
+		returnObj.events.fireEvent('ARESynchronisationChangedEvent');
+	}
+	
+	returnObj.getSynchronised = function() {
+		return synchronised;
+	}
+	
+	returnObj.setStatus = function(newStatus) { // ACS.statusType
+		status = newStatus;
+		returnObj.events.fireEvent('AREStatusChangedEvent');
+	}
+	
+	returnObj.getStatus = function() {
+		return status;
+	}
+	
 // ***********************************************************************************************************************
 // ************************************************** constructor code ***************************************************
 // ***********************************************************************************************************************
-	log.setLevel(log.levels.TRACE); // loglevel usage log.trace(msg), log.debug(msg), log.info(msg), log.warn(msg), log.error(msg) (https://github.com/pimterry/loglevel)
-		
+	modelList.events.registerHandler('actModelChangedEvent', actModelChangedEventHandler);
+	
 	return returnObj;
 }

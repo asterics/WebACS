@@ -37,7 +37,7 @@
 // ***********************************************************************************************************************
 // ************************************************** private methods ****************************************************
 // ***********************************************************************************************************************
-	removeSubstituteFilename = function() { // is called when actModel is removed or loaded from a file
+	var removeSubstituteFilename = function() { // is called when actModel is removed or loaded from a file
 		var actNumber = list[returnObj.actIndex].getFilename().slice(7); // removing the 7-letter-word "newfile" leaves the number
 		if ((filenameCounter - 1) + '' === actNumber) filenameCounter--;
 	}
