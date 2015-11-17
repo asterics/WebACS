@@ -32,10 +32,42 @@
 // ************************************************** private variables **************************************************
 // ***********************************************************************************************************************
 	var propertiesTabPanel = ACS.tabPanel(ACS.vConst.PROPERTYEDITOR_MOTHERPANEL, 'propEdTab', 'propEdPanel');
+	var actModel = modelList.getActModel();
 	
 // ***********************************************************************************************************************
 // ************************************************** private methods ****************************************************
 // ***********************************************************************************************************************
+	
+	var showPropertiesForComponent = function(selectedComponent){
+	    var selectedElement=null;
+		if(actModel.selectedItemsList.length==0){
+			for(var i = 0; i<actModel.componentList.length;i++){
+				if(actModel.componentList[i].getIsSelected()){
+					selectedElement = i;
+				}
+			}
+			console.log("Selected Element");
+			console.log(selectedElement);
+		}
+		if(actModel.selectedItemsList.length>0){
+			console.log("More than one element selected");
+		}
+	}
+	
+	// ********************************************** handlers ***********************************************************
+	
+	var actModelChangedEventHandler = function(){
+		actModel = modelList.getActModel();
+	}
+	
+	var componentAddedEventHandler = function(){
+		actModel.componentList[actModel.componentList.length-1].events.registerHandler('selectedEvent',selectedEventHandler);
+	}
+	
+	var selectedEventHandler = function(){
+		showPropertiesForComponent();
+	}
+	
 	
 // ***********************************************************************************************************************
 // ************************************************** public stuff *******************************************************
@@ -65,6 +97,11 @@
 	var click_ev = document.createEvent("MouseEvents");
 	click_ev.initEvent("click", true, true);
 	li.dispatchEvent(click_ev);	
+	
+	
+	modelList.events.registerHandler('actModelChangedEvent', actModelChangedEventHandler);
+	actModel.events.registerHandler('componentAddedEvent',componentAddedEventHandler);
+	
 	
 	return returnObj;
 }
