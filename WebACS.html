@@ -44,6 +44,7 @@
 	<script type="text/javascript" language="javascript" src="model/groupComponent.js"></script>
 	<script type="text/javascript" language="javascript" src="model/model.js"></script>
 	<script type="text/javascript" language="javascript" src="model/modelList.js"></script>
+	<script type="text/javascript" language="javascript" src="model/areStatus.js"></script>
     <!-- view:   -->
 	<script type="text/javascript" language="javascript" src="view/view.js"></script>
 	<script type="text/javascript" language="javascript" src="view/vConst.js"></script>
@@ -81,28 +82,28 @@
 				<h2>ARE</h2>
 				<ul class="buttonList">
 					<li><button type="button" class="menuButton" id="connectAREBtn"><div class="buttonContents"><img src="view/images/connect.png" alt="Connect to ARE" />Connect<br />to ARE</div></button></li>
-					<li><button type="button" class="menuButton" id="disconnectAREBtn"><div class="buttonContents"><img src="view/images/disconnect.png" alt="Disconnect from ARE" />Disconnect<br />from ARE</div></button></li>
-					<li><button type="button" class="menuButton" id="uploadModelBtn"><div class="buttonContents"><img src="view/images/Upload.png" alt="Upload model" />Upload<br />Model</div></button></li>
-					<li><button type="button" class="menuButton" id="downloadModelBtn"><div class="buttonContents"><img src="view/images/Download.png" alt="Download model" />Download<br />Model</div></button></li>
-					<li><button type="button" class="menuButton" id="downloadCompCollBtn"><div class="buttonContents"><img src="view/images/DownloadBundle.png" alt="Download component collection" />Download<br />Component Collection</div></button></li>
+					<li><button type="button" class="menuButton" id="disconnectAREBtn" disabled><div class="buttonContents"><img src="view/images/disconnect.png" alt="Disconnect from ARE" />Disconnect<br />from ARE</div></button></li>
+					<li><button type="button" class="menuButton" id="uploadModelBtn" disabled><div class="buttonContents"><img src="view/images/Upload.png" alt="Upload model" />Upload<br />Model</div></button></li>
+					<li><button type="button" class="menuButton" id="downloadModelBtn" disabled><div class="buttonContents"><img src="view/images/Download.png" alt="Download model" />Download<br />Model</div></button></li>
+					<li><button type="button" class="menuButton" id="downloadCompCollBtn" disabled><div class="buttonContents"><img src="view/images/DownloadBundle.png" alt="Download component collection" />Download<br />Component Collection</div></button></li>
 				</ul>
 			</section>
 			<section class="buttonGroup">
 				<h2>ARE Storage</h2>			
 				<ul class="buttonList">
-					<li><button type="button" class="menuButton" id="storeModelAREBtn"><div class="buttonContents"><img src="view/images/storeup.png" alt="Store model on ARE" />Store<br />Model on ARE</div></button></li>
-					<li><button type="button" class="menuButton" id="loadModelAREBtn"><div class="buttonContents"><img src="view/images/storedown.png" alt="Load model from storage" />Load Model<br />from Storage</div></button></li>
-					<li><button type="button" class="menuButton" id="activateStoredModelBtn"><div class="buttonContents"><img src="view/images/storerun.png" alt="Activate a stored model" />Activate a<br />Stored Model</div></button></li>
-					<li><button type="button" class="menuButton" id="deleteStoredModelBtn"><div class="buttonContents"><img src="view/images/storedelete.png" alt="Delete a stored model" />Delete a<br />Stored Model</div></button></li>
-					<li><button type="button" class="menuButton" id="setAsAutorunBtn"><div class="buttonContents"><img src="view/images/autorun.png" alt="Set as autorun" />Set as<br />Autorun</div></button></li>
+					<li><button type="button" class="menuButton" id="storeModelAREBtn" disabled><div class="buttonContents"><img src="view/images/storeup.png" alt="Store model on ARE" />Store<br />Model on ARE</div></button></li>
+					<li><button type="button" class="menuButton" id="loadModelAREBtn" disabled><div class="buttonContents"><img src="view/images/storedown.png" alt="Load model from storage" />Load Model<br />from Storage</div></button></li>
+					<li><button type="button" class="menuButton" id="activateStoredModelBtn" disabled><div class="buttonContents"><img src="view/images/storerun.png" alt="Activate a stored model" />Activate a<br />Stored Model</div></button></li>
+					<li><button type="button" class="menuButton" id="deleteStoredModelBtn" disabled><div class="buttonContents"><img src="view/images/storedelete.png" alt="Delete a stored model" />Delete a<br />Stored Model</div></button></li>
+					<li><button type="button" class="menuButton" id="setAsAutorunBtn" disabled><div class="buttonContents"><img src="view/images/autorun.png" alt="Set as autorun" />Set as<br />Autorun</div></button></li>
 				</ul>
 			</section>
 			<section class="buttonGroup">
 				<h2>Model</h2>			
 				<ul class="buttonList">
-					<li><button type="button" class="menuButton" id="startModelBtn"><div class="buttonContents"><img src="view/images/StartModel.png" alt="Start model" />Start<br />Model</div></button></li>
-					<li><button type="button" class="menuButton" id="pauseModelBtn"><div class="buttonContents"><img src="view/images/PauseModel.png" alt="Pause model" />Pause<br />Model</div></button></li>
-					<li><button type="button" class="menuButton" id="stopModelBtn"><div class="buttonContents"><img src="view/images/StopModel.png" alt="Stop model" />Stop<br />Model</div></button></li>
+					<li><button type="button" class="menuButton" id="startModelBtn" disabled><div class="buttonContents"><img src="view/images/StartModel.png" alt="Start model" />Start<br />Model</div></button></li>
+					<li><button type="button" class="menuButton" id="pauseModelBtn" disabled><div class="buttonContents"><img src="view/images/PauseModel.png" alt="Pause model" />Pause<br />Model</div></button></li>
+					<li><button type="button" class="menuButton" id="stopModelBtn" disabled><div class="buttonContents"><img src="view/images/StopModel.png" alt="Stop model" />Stop<br />Model</div></button></li>
 				</ul>
 			</section>
 			<section class="buttonGroup bg_right">
@@ -195,29 +196,42 @@
 		<ul id="propertyEditorTabList" class="tablist" role="tablist">
 		</ul>
 	</div>
-
+	
+<!-- ****************************************************** status and zoom bar ******************************************************** --> 	
+	<div id="statusAndZoomBar">
+		<div id="statusBar">
+			<span class="bold">ARE status: </span>
+			<span id="AREstatus">Disconnected</span>
+			<span id="synchronisationStatus"></span>
+		</div>	
+		<div id="zoomBar">
+			<span id="zoomPercent">100%</span>
+			<input type="range" name="zoomSlider" id="zoomSlider" min="20" max="200" />
+		</div>
+	</div>
+	
 <!-- ****************************************************** dialog boxes *************************************************************** -->
-	<div id="loadModelFromStorageDialog" title="Load Model from ARE Storage">
+	<div id="loadModelFromStorageDialog" class="displayNone" title="Load Model from ARE Storage">
 		<select name="files" id="loadModelFromStorageSelector">
 			<option value="none">--- please choose file ---</option>
 		</select>
 	</div>
 	
-	<div id="storeModelOnAREDialog" title="Store Model on ARE">
+	<div id="storeModelOnAREDialog" class="displayNone" title="Store Model on ARE">
 		<input type="text" id="storeModelFilename"></input>
 	</div>
 	
-	<div id="activateStoredModelDialog" title="Activate Stored Model">
+	<div id="activateStoredModelDialog" class="displayNone" title="Activate Stored Model">
 		<select name="files" id="activateStoredModelSelector">
 			<option value="none">--- please choose file ---</option>
 		</select>
 	</div>
 
-	<div id="deleteStoredModelDialog" title="Delete Stored Model">
+	<div id="deleteStoredModelDialog" class="displayNone" title="Delete Stored Model">
 		<select name="files" id="deleteStoredModelSelector">
 			<option value="none">--- please choose file ---</option>
 		</select>
-	</div>	
+	</div>
 
 <!-- ****************************************************** main script **************************************************************** -->	
 	<script>

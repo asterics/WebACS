@@ -176,32 +176,26 @@
 					// build propertyList:
 					var propertiesFull = fullComponent.getElementsByTagName('property');
 					var propertiesModel = components.item(i).getElementsByTagName('property');
-					var numProps = propertiesFull.length;
-					if (numProps < propertiesModel.length) numProps = propertiesModel.length; // in case the amount of properties has been reduced by developer in component collection
-					for (j = 0; j < numProps; j++) {
-						if (propertiesFull[j]) {
-							var propertyValue = '';
-							if (propertiesModel.item(j)) {
-								propertyValue = propertiesModel.item(j).attributes.getNamedItem('value').textContent;
-							} else {
-								// in case a new property has been added to component in collection
-								propertyValue = propertiesFull.item(j).attributes.getNamedItem('value').textContent;
-								componentList[i].matchesComponentCollection = false;
-							}
-							componentList[i].propertyList.push(ACS.property(propertiesFull.item(j).attributes.getNamedItem('name').textContent, 
-																			returnObj.getDataType(propertiesFull.item(j).attributes.getNamedItem('type').textContent), 
-																			propertyValue));
-							if (propertiesFull.item(j).attributes.getNamedItem('description'))
-								componentList[i].propertyList[componentList[i].propertyList.length - 1].description = propertiesFull.item(j).attributes.getNamedItem('description').textContent;
-							if (propertiesFull.item(j).attributes.getNamedItem('combobox'))
-								componentList[i].propertyList[componentList[i].propertyList.length - 1].combobox = propertiesFull.item(j).attributes.getNamedItem('combobox').textContent;
-							if (propertiesFull.item(j).attributes.getNamedItem('getStringList'))
-								componentList[i].propertyList[componentList[i].propertyList.length - 1].getStringList = propertiesFull.item(j).attributes.getNamedItem('getStringList').textContent;
-						} else { // if the property was deleted by developer
+					if (propertiesFull.length != propertiesModel.length) componentList[i].matchesComponentCollection = false;
+					for (var j = 0; j < propertiesFull.length; j++) {
+						var propIdx = indexOfPropertyInModel(propertiesFull.item(j).attributes.getNamedItem('name').textContent, propertiesModel);
+						var propertyValue = '';
+						if (propIdx > -1) { // -1 if property not yet existent in model
+							propertyValue = propertiesModel.item(propIdx).attributes.getNamedItem('value').textContent;
+						} else {
+							propertyValue = propertiesFull.item(j).attributes.getNamedItem('value').textContent;
 							componentList[i].matchesComponentCollection = false;
 						}
+						componentList[i].propertyList.push(ACS.property(propertiesFull.item(j).attributes.getNamedItem('name').textContent,
+																		returnObj.getDataType(propertiesFull.item(j).attributes.getNamedItem('type').textContent),
+																		propertyValue));
+						if (propertiesFull.item(j).attributes.getNamedItem('description'))
+							componentList[i].propertyList[componentList[i].propertyList.length - 1].description = propertiesFull.item(j).attributes.getNamedItem('description').textContent;
+						if (propertiesFull.item(j).attributes.getNamedItem('combobox'))
+							componentList[i].propertyList[componentList[i].propertyList.length - 1].combobox = propertiesFull.item(j).attributes.getNamedItem('combobox').textContent;
+						if (propertiesFull.item(j).attributes.getNamedItem('getStringList'))
+							componentList[i].propertyList[componentList[i].propertyList.length - 1].getStringList = propertiesFull.item(j).attributes.getNamedItem('getStringList').textContent;				
 					}
-					
 					// build the gui object:
 					if (components.item(i).getElementsByTagName('gui')) {
 						var isExternal = false;
@@ -401,7 +395,7 @@
 		if (m < 10) m = '0' + m;
 		if (h < 10) h = '0' + h;
 		if (min < 10) min = '0' + min;
-		return d + '/' + m + '/' + y + '_' + h + min;
+		return 'model_nr_' + Math.floor((Math.random() * 10000000000000) + 1) + '_created_at_' + y + '_' + m + '_' + d + '_' + h + '_' + min;
 	}
 	
 	var metaDataIndexOfKey = function(key) {
@@ -410,6 +404,16 @@
 		}
 		return -1;
 	}
+	
+	var indexOfPropertyInModel = function(name, propertiesModel) {
+		for (var i = 0; i < propertiesModel.length; i++) {
+			if (propertiesModel.item(i).attributes.getNamedItem('name').textContent === name) {
+				return i;
+			}
+		}
+		return -1;
+	}
+	
 	
 // ***********************************************************************************************************************
 // ************************************************** public stuff *******************************************************
@@ -498,19 +502,19 @@
 	}
 	
 	returnObj.saveModel = function() {
-		var saveString = returnObj.getModelXMLString();
-		// actually save the string
-		var blob = new Blob([saveString], {type: 'text/plain;charset=utf-8'});
 		var saveName;
-		if (filename.substring(filename.length-4, filename.length) === '.acs') {
+		if (filename.indexOf('.') > -1) { // if file already contains an ending
 			saveName = prompt('Save file as: ', filename);
 		} else {
 			saveName = prompt('Save file as: ', filename + '.acs');
 		}
 		if (saveName) {
-			saveAs(blob, saveName);
+			if (saveName.indexOf('.') === -1) saveName += '.acs'; // in case the user has entered no ending
 			if (saveName !== returnObj.getFilename()) returnObj.setFilename(saveName);
 			returnObj.hasBeenChanged = false;
+			// actually save the model
+			var blob = new Blob([returnObj.getModelXMLString()], {type: 'text/plain;charset=utf-8'});			
+			saveAs(blob, saveName);
 		}
 	}
 	
@@ -573,6 +577,8 @@
 					xmlString += '\t\t\t\t</outputPort>\r';
 				}				
 				xmlString += '\t\t\t</ports>\r';
+			} else {
+				xmlString += '\t\t\t<ports />\r';
 			}
 			// add the properties
 			if (returnObj.componentList[i].propertyList.length > 0) {
@@ -811,10 +817,16 @@
 		return componentCollection; // (XML document)
 	}
 	
+	returnObj.setComponentCollection = function(xmlDoc) {
+		componentCollection = xmlDoc;
+		this.events.fireEvent('componentCollectionChangedEvent');
+	}
+	
 	returnObj.loadComponentCollection = function(loadFile) { // File
 		// loads a component collection from a user-chosen file
 		
 		// componentCollection = ...
+		// set menu to new collection...
 		this.events.fireEvent('componentCollectionChangedEvent');
 		return componentCollection; // (XML document)
 	}

@@ -256,7 +256,6 @@ div[aria-hidden='true'] {
 
 #canvasMotherPanel {
   padding: 0 0.5em 0.5em 0.5em;
-  padding-bottom: 1em;
   background-color: #dfe9f5;
   float: left;
 }
@@ -274,10 +273,36 @@ div[aria-hidden='true'] {
 	border: 1px solid black;
 }
 
+#statusAndZoomBar {
+	clear: left;
+	font-size: 0.8em;
+	padding-left: 1em;
+}
+
+#statusBar {
+	float: left;
+}
+
+#zoomBar {
+	margin-left: 71em;
+}
+
+#zoomSlider {
+	height: 0.7em;
+}
+
 .hidden {
   position: absolute;
   left: -300em;
   top: -300em;
+}
+
+.displayNone {
+	display: none;
+}
+
+.bold {
+	font-weight: bold;
 }
 
 /* ******************** styles for jquery-ui ******************** */

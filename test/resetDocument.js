@@ -35,8 +35,8 @@ var resetDocument = function() {
 					'<h2>Model</h2>'+	
 					'<ul class="buttonList">'+
 						'<li><button type="button" class="menuButton" id="startModelBtn"><div class="buttonContents"><img src="view/images/StartModel.png" alt="Start model" />Start<br />Model</div></button></li>'+
-						'<li><button type="button" class="menuButton" id="PauseModelBtn"><div class="buttonContents"><img src="view/images/PauseModel.png" alt="Pause model" />Pause<br />Model</div></button></li>'+
-						'<li><button type="button" class="menuButton" id="StopModelBtn"><div class="buttonContents"><img src="view/images/StopModel.png" alt="Stop model" />Stop<br />Model</div></button></li>'+
+						'<li><button type="button" class="menuButton" id="pauseModelBtn"><div class="buttonContents"><img src="view/images/PauseModel.png" alt="Pause model" />Pause<br />Model</div></button></li>'+
+						'<li><button type="button" class="menuButton" id="stopModelBtn"><div class="buttonContents"><img src="view/images/StopModel.png" alt="Stop model" />Stop<br />Model</div></button></li>'+
 					'</ul>'+
 				'</section>'+
 				'<section class="buttonGroup bg_right">'+
