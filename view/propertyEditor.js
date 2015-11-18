@@ -33,26 +33,113 @@
 // ***********************************************************************************************************************
 	var propertiesTabPanel = ACS.tabPanel(ACS.vConst.PROPERTYEDITOR_MOTHERPANEL, 'propEdTab', 'propEdPanel');
 	var actModel = modelList.getActModel();
-	
+	var propertyTable =document.createElement('table');
+	var row = [];
+	var cell = null;
+	var dropdownList = document.createElement('select');
+	var numberInput;
+	var textInput;
 // ***********************************************************************************************************************
 // ************************************************** private methods ****************************************************
 // ***********************************************************************************************************************
 	
+	
 	var showPropertiesForComponent = function(selectedComponent){
-	    var selectedElement=null;
-		if(actModel.selectedItemsList.length==0){
+	    var selectedElement;
+
+		
+		if(actModel.selectedItemsList.length===0){//check if only one component is selected
+			//get selected component
 			for(var i = 0; i<actModel.componentList.length;i++){
 				if(actModel.componentList[i].getIsSelected()){
 					selectedElement = i;
 				}
 			}
-			console.log("Selected Element");
-			console.log(selectedElement);
+			
+			//if a new element is selected the old propertyEditor has to be removed from the panel
+			if(propertyTable.parentNode===document.getElementById('propertiesPanel')){
+			document.getElementById('propertiesPanel').removeChild(propertyTable);
+			propertyTable=null;
+			propertyTable = document.createElement('table');
+			row = [];
+			cell = null;
+			}
+			
+			
+			//var tempString=actModel.componentList[selectedElement].getId();
+			for(var h=0; h<actModel.componentList[selectedElement].propertyList.length;h++)
+			{
+			var tempStringa=actModel.componentList[selectedElement].propertyList[h].getKey();
+			row[h] = propertyTable.insertRow(-1);
+			cell = row[h].insertCell(0);
+			cell.innerHTML = tempStringa;
+			tempStringa=actModel.componentList[selectedElement].propertyList[h].combobox;
+			var valtemp = actModel.componentList[selectedElement].propertyList[h].value;
+			var typetemp = actModel.componentList[selectedElement].propertyList[h].getType();
+			
+			//generat dropdown list in case that combox includes values
+			if(tempStringa !== ''){
+				var entries = tempStringa.split('//');
+				
+				dropdownList = null;
+				dropdownList = document.createElement('select');
+				for(l=0;l<entries.length;l++){
+					
+					dropdownList.appendChild(new Option(entries[l],l));
+					dropdownList.selectedIndex=valtemp;
+					
+				}
+				
+				cell = row[h].insertCell(1);
+				cell.appendChild(dropdownList);
+			}
+			//generate intage field
+			//console.log(typetemp);
+			if(tempStringa === '' && typetemp===4){
+			
+				cell = row[h].insertCell(1);
+				numberInput = null;
+				numberInput = document.createElement("INPUT");
+				numberInput.setAttribute("type", "number"); 
+				numberInput.setAttribute("value", valtemp); 
+				cell.appendChild(numberInput);
+			}
+			
+			console.log(typetemp);
+			if(tempStringa === '' && typetemp===5){
+				cell = row[h].insertCell(1);
+				numberInput = null;
+				numberInput = document.createElement("INPUT");
+				numberInput.setAttribute("type", "double"); 
+				numberInput.setAttribute("value", valtemp); 
+				cell.appendChild(numberInput);
+			}
+			
+			if(tempStringa === '' && typetemp===6){
+				cell = row[h].insertCell(1);
+				textInput = null;
+				textInput = document.createElement("INPUT");
+				textInput.setAttribute("type", "text"); 
+				textInput.setAttribute("value", valtemp); 
+				cell.appendChild(textInput);
+			}
+
+			}
+			
+			
+			//element.setAttribute("type", "button");
+			//element.setAttribute("value", tempString);
+
+			document.getElementById('propertiesPanel').appendChild(propertyTable);
 		}
 		if(actModel.selectedItemsList.length>0){
-			console.log("More than one element selected");
+			console.info("More than one element selected");
+			if(element.parentNOde==document.getElementById('propertiesPanel')){
+			document.getElementById('propertiesPanel').removeChild(element);
+			}
 		}
 	}
+	
 	
 	// ********************************************** handlers ***********************************************************
 	
@@ -97,6 +184,7 @@
 	var click_ev = document.createEvent("MouseEvents");
 	click_ev.initEvent("click", true, true);
 	li.dispatchEvent(click_ev);	
+	
 	
 	
 	modelList.events.registerHandler('actModelChangedEvent', actModelChangedEventHandler);
