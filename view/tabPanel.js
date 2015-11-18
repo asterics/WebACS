@@ -63,7 +63,7 @@ ACS.tabPanel = function(id, tab, panel) { // String; the id of the div-container
 		$panels.attr('aria-hidden', 'true');
 		// get the selected tab
 		$tab = $tabs.filter('[aria-selected="true"]');
-		// set to first ab, in case none is selected yet
+		// set to first tab, in case none is selected yet
 		if ($tab === undefined) {
 			$tab = $tabs.first();
 		}

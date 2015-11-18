@@ -52,6 +52,10 @@ body {
   list-style: none;
 }
 
+#canvasPanelTabList {
+	max-width: 70em;
+}
+
 .tab {
   border: 1px solid black;
   float: left;
@@ -78,6 +82,7 @@ body {
   font-size: 0.8em;
   border-top-left-radius: 3px;
   border-top-right-radius: 3px;
+  overflow: hidden;
 }
 
 .modelTab {
@@ -210,11 +215,40 @@ li[aria-selected='true'] {
 	border-right: 0;
 }
 
+.componentsMenu {
+	border: none !important;
+	top: -8.5em;
+	font-size: 0.8em !important;
+}
+
+.componentsMenu img {
+	display: block;
+	margin: auto;
+}
+
+.componentsMenu-item {
+	margin-right: 0.5em !important;
+	padding-top: 1em !important;
+	padding-bottom: 0.5em !important;
+	border: 1px solid #999;
+	border-radius: 3px;
+}
+
+.ui-menu-item {
+	border-bottom: 1px solid #999;
+}
+
+.ui-state-focus {
+	margin-bottom: 0 !important;
+}
+
+.ui-state-active {
+	margin-bottom: 0 !important;
+}
+
 .compMenu {
-	position: absolute;
-	padding: 0;
 	width: 12em;
-	z-index: 1000;
+	border: none !important;
 }
 
 .compMenu li {
@@ -225,29 +259,14 @@ li[aria-selected='true'] {
 
 .compMenu div {
 	padding: 2px;
-	border-top: 1px solid white;
-	border-bottom: 1px solid white;
-}
-
-.compMenuL2 {
-	left: 12.5em;
 }
 
 .compMenuL2 li {
-	position: relative;
-	clear: left;
-	top: -1.6em;
-	padding: 2px 0 2px 0;
-	border-top: 1px solid white;
-	border-bottom: 1px solid white;
+	top: -0.7em;
 }
 
 .compMenu li:hover, .compMenu li:focus {
 	background-color: #afdef8;
-}
-
-.hiddenMenu {
-	left: -3000em;
 }
 
 div[aria-hidden='true'] {
@@ -305,13 +324,10 @@ div[aria-hidden='true'] {
 	font-weight: bold;
 }
 
-/* ******************** styles for jquery-ui ******************** */
-.ui-widget {
-	font-size: 0.8em !important;
-}
-
+/* ******************** styles for jquery-ui dialog ******************** */
 .ui-dialog {
 	width: auto !important;
+	font-size: 0.8em !important;
 }
 
 .ui-dialog-content {
