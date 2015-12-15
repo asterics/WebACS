@@ -103,5 +103,9 @@ ACS.vConst = {
 	MODELVIEW_ALERTSTRINGCHANGEDCOMPONENTS: 'The definition of the following components did not match the component\ncollection - undefined properties or ports have been reset to default values:\n\n',
 	// property editor
 	PROPERTYEDITOR_MOTHERPANEL: 'propertyEditorMotherPanel',
-	PROPERTYEDITOR_TABLIST: 'propertyEditorTabList'
+	PROPERTYEDITOR_TABLIST: 'propertyEditorTabList',
+	PROPERTYEDITOR_PROPERTIESHEADER: 'Properties',
+	PROPERTYEDITOR_INPUTHEADER: 'Input',
+	PROPERTYEDITOR_OUTPUTHEADER: 'Output',
+	PROPERTYEDITOR_TRIGGERHEADER: 'Trigger'
 }

@@ -31,7 +31,7 @@
 // ***********************************************************************************************************************
 // ************************************************** private variables **************************************************
 // ***********************************************************************************************************************
-	var propertiesTabPanel = ACS.tabPanel(ACS.vConst.PROPERTYEDITOR_MOTHERPANEL, 'propEdTab', 'propEdPanel');
+	var propertiesTabPanel = ACS.tabPanel(ACS.vConst.PROPERTYEDITOR_MOTHERPANEL, 'propertiesTab', 'propertiesPanel');
 	var actModel = modelList.getActModel();
 	var propertyTable =document.createElement('table');
 	var row = [];
@@ -164,26 +164,84 @@
 // ***********************************************************************************************************************
 // ************************************************** constructor code ***************************************************
 // ***********************************************************************************************************************
-	var li = document.createElement('li');
-	li.setAttribute('id', 'propertiesTab');
-	li.setAttribute('class', 'tab propEdTab');
-	li.setAttribute('aria-controls', 'propertiesPanel');
-	li.setAttribute('aria-selected', 'false');
-	li.setAttribute('role', 'tab');
-	li.setAttribute('tabindex', -1);
-	li.textContent = 'Properties';
-	document.getElementById(ACS.vConst.PROPERTYEDITOR_TABLIST).appendChild(li);
+	/*var ul = document.createElement('ul');
+	ul.setAttribute('id', 'TabList');
+	ul.setAttribute('class', 'tablist');
+	ul.setAttribute('role', 'tablist');
+	document.getElementById(ACS.vConst.PROPERTYEDITOR_MOTHERPANEL).appendChild(ul);
+	*/
+	var li1 = document.createElement('li');
+	li1.setAttribute('id', 'propertiesTab');
+	li1.setAttribute('class', 'tab propertiesTab');
+	li1.setAttribute('aria-controls', 'propertiesPanel');
+	li1.setAttribute('aria-selected', 'false');
+	li1.setAttribute('role', 'tab');
+	li1.setAttribute('tabindex', -1);
+	li1.textContent = ACS.vConst.PROPERTYEDITOR_PROPERTIESHEADER;
+	document.getElementById(ACS.vConst.PROPERTYEDITOR_TABLIST).appendChild(li1);
 	var div = document.createElement('div');
 	div.setAttribute('id', 'propertiesPanel');
-	div.setAttribute('class', 'panel propEdPanel');
+	div.setAttribute('class', 'panel propertiesPanel');
 	div.setAttribute('aria-labelledby', 'propertiesTab');
 	div.setAttribute('role', 'tabpanel');
 	document.getElementById(ACS.vConst.PROPERTYEDITOR_MOTHERPANEL).appendChild(div);
+		
+	var li2 = document.createElement('li');
+	li2.setAttribute('id', 'propertiesInputTab');
+	li2.setAttribute('class', 'tab propertiesTab');
+	li2.setAttribute('aria-controls', 'inputPanel');
+	li2.setAttribute('aria-selected', 'false');
+	li2.setAttribute('role', 'tab');
+	li2.setAttribute('tabindex', -1);
+	li2.textContent = ACS.vConst.PROPERTYEDITOR_INPUTHEADER;
+	//li2.textContent = 'Input';
+	document.getElementById(ACS.vConst.PROPERTYEDITOR_TABLIST).appendChild(li2);
+	div = document.createElement('div');
+	div.setAttribute('id', 'inputPanel');
+	div.setAttribute('class', 'panel propertiesPanel');
+	div.setAttribute('aria-labelledby', 'inputTab');
+	div.setAttribute('role', 'tabpanel');
+	document.getElementById(ACS.vConst.PROPERTYEDITOR_MOTHERPANEL).appendChild(div);
+	
+	var li3 = document.createElement('li');
+	li3.setAttribute('id', 'propertiesOutputTab');
+	li3.setAttribute('class', 'tab propertiesTab');
+	li3.setAttribute('aria-controls', 'outputPanel');
+	li3.setAttribute('aria-selected', 'false');
+	li3.setAttribute('role', 'tab');
+	li3.setAttribute('tabindex', -1);
+	li3.textContent = ACS.vConst.PROPERTYEDITOR_OUTPUTHEADER;
+	//li3.textContent='Outputs';
+	document.getElementById(ACS.vConst.PROPERTYEDITOR_TABLIST).appendChild(li3);
+	div = document.createElement('div');
+	div.setAttribute('id', 'outputPanel');
+	div.setAttribute('class', 'panel propertiesPanel');
+	div.setAttribute('aria-labelledby', 'outputTab');
+	div.setAttribute('role', 'tabpanel');
+	document.getElementById(ACS.vConst.PROPERTYEDITOR_MOTHERPANEL).appendChild(div);
+	
+	var li4 = document.createElement('li');
+	li4.setAttribute('id', 'propertiesTriggerTab');
+	li4.setAttribute('class', 'tab propertiesTab');
+	li4.setAttribute('aria-controls', 'triggerPanel');
+	li4.setAttribute('aria-selected', 'false');
+	li4.setAttribute('role', 'tab');
+	li4.setAttribute('tabindex', -1);
+	li4.textContent = ACS.vConst.PROPERTYEDITOR_TRIGGERHEADER;
+	document.getElementById(ACS.vConst.PROPERTYEDITOR_TABLIST).appendChild(li4);
+	div = document.createElement('div');
+	div.setAttribute('id', 'triggerPanel');
+	div.setAttribute('class', 'panel propertiesPanel');
+	div.setAttribute('aria-labelledby', 'triggerTab');
+	div.setAttribute('role', 'tabpanel');
+	document.getElementById(ACS.vConst.PROPERTYEDITOR_MOTHERPANEL).appendChild(div);
+	
+	
 	propertiesTabPanel.updatePanel();
 	// activate the propertiesTab (a simple li.click() will not work in safari)
 	var click_ev = document.createEvent("MouseEvents");
 	click_ev.initEvent("click", true, true);
-	li.dispatchEvent(click_ev);	
+	li1.dispatchEvent(click_ev);	
 	
 	
 	
