@@ -31,7 +31,7 @@
 // ***********************************************************************************************************************
 // ************************************************** private variables **************************************************
 // ***********************************************************************************************************************
-	var propertiesTabPanel = ACS.tabPanel(ACS.vConst.PROPERTYEDITOR_MOTHERPANEL, 'propertiesTab', 'propertiesPanel');
+	var propertiesTabPanel = ACS.tabPanel(ACS.vConst.PROPERTYEDITOR_MOTHERPANEL, 'propEdTab', 'propEdPanel');
 	var actModel = modelList.getActModel();
 	var propertyTable =document.createElement('table');
 	var row = [];
@@ -44,9 +44,8 @@
 // ***********************************************************************************************************************
 	
 	
-	var showPropertiesForComponent = function(selectedComponent){
+	var generatePropertiesForComponent = function(selectedComponent){
 	    var selectedElement;
-
 		
 		if(actModel.selectedItemsList.length===0){//check if only one component is selected
 			//get selected component
@@ -57,91 +56,84 @@
 			}
 			
 			//if a new element is selected the old propertyEditor has to be removed from the panel
-			if(propertyTable.parentNode===document.getElementById('propertiesPanel')){
-			document.getElementById('propertiesPanel').removeChild(propertyTable);
+			if(propertyTable.parentNode===document.getElementById('propEdPanel')){
+			document.getElementById('propEdPanel').removeChild(propertyTable);
 			propertyTable=null;
 			propertyTable = document.createElement('table');
 			row = [];
 			cell = null;
 			}
 			
-			
 			//var tempString=actModel.componentList[selectedElement].getId();
-			for(var h=0; h<actModel.componentList[selectedElement].propertyList.length;h++)
-			{
-			var tempStringa=actModel.componentList[selectedElement].propertyList[h].getKey();
-			row[h] = propertyTable.insertRow(-1);
-			cell = row[h].insertCell(0);
-			cell.innerHTML = tempStringa;
-			tempStringa=actModel.componentList[selectedElement].propertyList[h].combobox;
-			var valtemp = actModel.componentList[selectedElement].propertyList[h].value;
-			var typetemp = actModel.componentList[selectedElement].propertyList[h].getType();
+			for(var h=0; h<actModel.componentList[selectedElement].propertyList.length;h++){
+				var tempStringa=actModel.componentList[selectedElement].propertyList[h].getKey();
+				row[h] = propertyTable.insertRow(-1);
+				cell = row[h].insertCell(0);
+				cell.innerHTML = tempStringa;
+				tempStringa=actModel.componentList[selectedElement].propertyList[h].combobox;
+				var valtemp = actModel.componentList[selectedElement].propertyList[h].value;
+				var typetemp = actModel.componentList[selectedElement].propertyList[h].getType();
 			
-			//generat dropdown list in case that combox includes values
-			if(tempStringa !== ''){
-				var entries = tempStringa.split('//');
+				//generat dropdown list in case that combox includes values
+				if(tempStringa !== ''){
+					var entries = tempStringa.split('//');
 				
-				dropdownList = null;
-				dropdownList = document.createElement('select');
-				for(l=0;l<entries.length;l++){
-					
-					dropdownList.appendChild(new Option(entries[l],l));
-					dropdownList.selectedIndex=valtemp;
-					
+					dropdownList = null;
+					dropdownList = document.createElement('select');
+					for(l=0;l<entries.length;l++){
+						dropdownList.appendChild(new Option(entries[l],l));
+						dropdownList.selectedIndex=valtemp;
+					}
+					cell = row[h].insertCell(1);
+					cell.appendChild(dropdownList);
 				}
-				
-				cell = row[h].insertCell(1);
-				cell.appendChild(dropdownList);
-			}
-			//generate intage field
-			//console.log(typetemp);
-			if(tempStringa === '' && typetemp===4){
+					//generate intage field
+					//console.log(typetemp);
+				if(tempStringa === '' && typetemp===4){
+					cell = row[h].insertCell(1);
+					numberInput = null;
+					numberInput = document.createElement("INPUT");
+					numberInput.setAttribute("type", "number"); 
+					numberInput.setAttribute("value", valtemp); 
+					cell.appendChild(numberInput);
+				}
 			
-				cell = row[h].insertCell(1);
-				numberInput = null;
-				numberInput = document.createElement("INPUT");
-				numberInput.setAttribute("type", "number"); 
-				numberInput.setAttribute("value", valtemp); 
-				cell.appendChild(numberInput);
-			}
+				console.log(typetemp);
+				if(tempStringa === '' && typetemp===5){
+					cell = row[h].insertCell(1);
+					numberInput = null;
+					numberInput = document.createElement("INPUT");
+					numberInput.setAttribute("type", "double"); 
+					numberInput.setAttribute("value", valtemp); 
+					cell.appendChild(numberInput);
+				}
 			
-			console.log(typetemp);
-			if(tempStringa === '' && typetemp===5){
-				cell = row[h].insertCell(1);
-				numberInput = null;
-				numberInput = document.createElement("INPUT");
-				numberInput.setAttribute("type", "double"); 
-				numberInput.setAttribute("value", valtemp); 
-				cell.appendChild(numberInput);
-			}
-			
-			if(tempStringa === '' && typetemp===6){
-				cell = row[h].insertCell(1);
-				textInput = null;
-				textInput = document.createElement("INPUT");
-				textInput.setAttribute("type", "text"); 
-				textInput.setAttribute("value", valtemp); 
-				cell.appendChild(textInput);
-			}
+				if(tempStringa === '' && typetemp===6){
+					cell = row[h].insertCell(1);
+					textInput = null;
+					textInput = document.createElement("INPUT");
+					textInput.setAttribute("type", "text"); 
+					textInput.setAttribute("value", valtemp); 
+					cell.appendChild(textInput);
+				}
 
 			}
-			
-			
+						
 			//element.setAttribute("type", "button");
 			//element.setAttribute("value", tempString);
 
-			document.getElementById('propertiesPanel').appendChild(propertyTable);
+			document.getElementById('propEdPanel').appendChild(propertyTable);
 		}
 		if(actModel.selectedItemsList.length>0){
 			console.info("More than one element selected");
-			if(element.parentNOde==document.getElementById('propertiesPanel')){
-			document.getElementById('propertiesPanel').removeChild(element);
+			if(element.parentNOde==document.getElementById('propEdPanel')){
+			document.getElementById('propEdPanel').removeChild(element);
 			}
 		}
 	}
 	
 	
-	// ********************************************** handlers ***********************************************************
+// ********************************************** handlers ***********************************************************
 	
 	var actModelChangedEventHandler = function(){
 		actModel = modelList.getActModel();
@@ -152,7 +144,7 @@
 	}
 	
 	var selectedEventHandler = function(){
-		showPropertiesForComponent();
+		generatePropertiesForComponent();
 	}
 	
 	
@@ -164,31 +156,31 @@
 // ***********************************************************************************************************************
 // ************************************************** constructor code ***************************************************
 // ***********************************************************************************************************************
-	/*var ul = document.createElement('ul');
+	var ul = document.createElement('ul');
 	ul.setAttribute('id', 'TabList');
 	ul.setAttribute('class', 'tablist');
 	ul.setAttribute('role', 'tablist');
 	document.getElementById(ACS.vConst.PROPERTYEDITOR_MOTHERPANEL).appendChild(ul);
-	*/
+	
 	var li1 = document.createElement('li');
-	li1.setAttribute('id', 'propertiesTab');
-	li1.setAttribute('class', 'tab propertiesTab');
-	li1.setAttribute('aria-controls', 'propertiesPanel');
+	li1.setAttribute('id', 'propEdTab');
+	li1.setAttribute('class', 'tab propEdTab');
+	li1.setAttribute('aria-controls', 'propEdPanel');
 	li1.setAttribute('aria-selected', 'false');
 	li1.setAttribute('role', 'tab');
 	li1.setAttribute('tabindex', -1);
 	li1.textContent = ACS.vConst.PROPERTYEDITOR_PROPERTIESHEADER;
 	document.getElementById(ACS.vConst.PROPERTYEDITOR_TABLIST).appendChild(li1);
 	var div = document.createElement('div');
-	div.setAttribute('id', 'propertiesPanel');
-	div.setAttribute('class', 'panel propertiesPanel');
-	div.setAttribute('aria-labelledby', 'propertiesTab');
+	div.setAttribute('id', 'propEdPanel');
+	div.setAttribute('class', 'panel propEdPanel');
+	div.setAttribute('aria-labelledby', 'propEdTab');
 	div.setAttribute('role', 'tabpanel');
 	document.getElementById(ACS.vConst.PROPERTYEDITOR_MOTHERPANEL).appendChild(div);
 		
 	var li2 = document.createElement('li');
 	li2.setAttribute('id', 'propertiesInputTab');
-	li2.setAttribute('class', 'tab propertiesTab');
+	li2.setAttribute('class', 'tab propEdTab');
 	li2.setAttribute('aria-controls', 'inputPanel');
 	li2.setAttribute('aria-selected', 'false');
 	li2.setAttribute('role', 'tab');
@@ -198,14 +190,14 @@
 	document.getElementById(ACS.vConst.PROPERTYEDITOR_TABLIST).appendChild(li2);
 	div = document.createElement('div');
 	div.setAttribute('id', 'inputPanel');
-	div.setAttribute('class', 'panel propertiesPanel');
+	div.setAttribute('class', 'panel propEdPanel');
 	div.setAttribute('aria-labelledby', 'inputTab');
 	div.setAttribute('role', 'tabpanel');
 	document.getElementById(ACS.vConst.PROPERTYEDITOR_MOTHERPANEL).appendChild(div);
 	
 	var li3 = document.createElement('li');
 	li3.setAttribute('id', 'propertiesOutputTab');
-	li3.setAttribute('class', 'tab propertiesTab');
+	li3.setAttribute('class', 'tab propEdTab');
 	li3.setAttribute('aria-controls', 'outputPanel');
 	li3.setAttribute('aria-selected', 'false');
 	li3.setAttribute('role', 'tab');
@@ -215,14 +207,14 @@
 	document.getElementById(ACS.vConst.PROPERTYEDITOR_TABLIST).appendChild(li3);
 	div = document.createElement('div');
 	div.setAttribute('id', 'outputPanel');
-	div.setAttribute('class', 'panel propertiesPanel');
+	div.setAttribute('class', 'panel propEdPanel');
 	div.setAttribute('aria-labelledby', 'outputTab');
 	div.setAttribute('role', 'tabpanel');
 	document.getElementById(ACS.vConst.PROPERTYEDITOR_MOTHERPANEL).appendChild(div);
 	
 	var li4 = document.createElement('li');
 	li4.setAttribute('id', 'propertiesTriggerTab');
-	li4.setAttribute('class', 'tab propertiesTab');
+	li4.setAttribute('class', 'tab propEdTab');
 	li4.setAttribute('aria-controls', 'triggerPanel');
 	li4.setAttribute('aria-selected', 'false');
 	li4.setAttribute('role', 'tab');
@@ -231,7 +223,7 @@
 	document.getElementById(ACS.vConst.PROPERTYEDITOR_TABLIST).appendChild(li4);
 	div = document.createElement('div');
 	div.setAttribute('id', 'triggerPanel');
-	div.setAttribute('class', 'panel propertiesPanel');
+	div.setAttribute('class', 'panel propEdPanel');
 	div.setAttribute('aria-labelledby', 'triggerTab');
 	div.setAttribute('role', 'tabpanel');
 	document.getElementById(ACS.vConst.PROPERTYEDITOR_MOTHERPANEL).appendChild(div);
