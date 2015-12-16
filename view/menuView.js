@@ -665,6 +665,8 @@
 					break;
 			}
 		}
+		// destroy the old jqueryui-menu and then init the new one
+		if ($('.componentsMenu').menu('instance')) $('.componentsMenu').menu('destroy');
 		$('.componentsMenu').menu({
 			position: { my: "left top", at: "right top+10" },
 			select: function(event, ui) {
