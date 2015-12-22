@@ -34,18 +34,25 @@
 	var propertiesTabPanel = ACS.tabPanel(ACS.vConst.PROPERTYEDITOR_MOTHERPANEL, 'propEdTab', 'propEdPanel');
 	var actModel = modelList.getActModel();
 	var propertyTable =document.createElement('table');
+	var inputPortTable = document.createElement('table');
 	var row = [];
 	var cell = null;
 	var dropdownList = document.createElement('select');
 	var numberInput;
 	var textInput;
+	var selectedElement;
 // ***********************************************************************************************************************
 // ************************************************** private methods ****************************************************
 // ***********************************************************************************************************************
 	
-	
-	var generatePropertiesForComponent = function(selectedComponent){
-	    var selectedElement;
+	//methodes handling incoming events
+	var generateViews = function(){
+		clearPropertyEditor();
+		generatePropertiesForComponent();
+		generateInputPortsForComponent();
+	}
+	var generatePropertiesForComponent = function(){
+
 		
 		if(actModel.selectedItemsList.length===0){//check if only one component is selected
 			//get selected component
@@ -66,11 +73,11 @@
 			
 			//var tempString=actModel.componentList[selectedElement].getId();
 			for(var h=0; h<actModel.componentList[selectedElement].propertyList.length;h++){
-				var tempStringa=actModel.componentList[selectedElement].propertyList[h].getKey();
+				var propName=actModel.componentList[selectedElement].propertyList[h].getKey();
 				row[h] = propertyTable.insertRow(-1);
 				cell = row[h].insertCell(0);
-				cell.innerHTML = tempStringa;
-				tempStringa=actModel.componentList[selectedElement].propertyList[h].combobox;
+				cell.innerHTML = propName;
+				var tempStringa=actModel.componentList[selectedElement].propertyList[h].combobox;
 				var valtemp = actModel.componentList[selectedElement].propertyList[h].value;
 				var typetemp = actModel.componentList[selectedElement].propertyList[h].getType();
 			
@@ -98,7 +105,7 @@
 					cell.appendChild(numberInput);
 				}
 			
-				console.log(typetemp);
+				//console.log(typetemp);
 				if(tempStringa === '' && typetemp===5){
 					cell = row[h].insertCell(1);
 					numberInput = null;
@@ -113,7 +120,10 @@
 					textInput = null;
 					textInput = document.createElement("INPUT");
 					textInput.setAttribute("type", "text"); 
+					textInput.setAttribute("name",propName);
 					textInput.setAttribute("value", valtemp); 
+					textInput.setAttribute("id",h+ "/1/"+ valtemp); 
+					textInput.addEventListener("blur", writeProperty);
 					cell.appendChild(textInput);
 				}
 
@@ -125,26 +135,96 @@
 			document.getElementById('propEdPanel').appendChild(propertyTable);
 		}
 		if(actModel.selectedItemsList.length>0){
-			console.info("More than one element selected");
-			if(element.parentNOde==document.getElementById('propEdPanel')){
-			document.getElementById('propEdPanel').removeChild(element);
+			//console.info("More than one element selected");
+			if(propertyTable.parentNode==document.getElementById('propEdPanel')){
+			document.getElementById('propEdPanel').removeChild(propertyTable);
 			}
 		}
 	}
+	
+	var generateInputPortsForComponent = function(){
+		var selectedElement;
+		if(actModel.selectedItemsList.length===0){//check if only one component is selected
+			//get selected component
+			for(var i = 0; i<actModel.componentList.length;i++){
+				if(actModel.componentList[i].getIsSelected()){
+					selectedElement = i;
+				}
+			}	
+			
+			for(var h=0; h<actModel.componentList[selectedElement].inputPortList.length;h++){
+				var tempStringa=actModel.componentList[selectedElement].inputPortList[h].getId();
+				row[h] = inputPortTable.insertRow(-1);
+				cell = row[h].insertCell(0);
+				cell.innerHTML = tempStringa;
+			}
+			
+			document.getElementById('inputPanel').appendChild(inputPortTable);
+				
+		}
+		
+		if(actModel.selectedItemsList.length>0){
+			//console.info("More than one element selected");
+			if(inputPortTable.parentNode==document.getElementById('inputPanel')){
+			document.getElementById('inputPanel').removeChild(inputPortTable);
+			}
+		}
+	}
+	
+	var clearPropertyEditor = function(){
+
+		if(inputPortTable.parentNode===document.getElementById('inputPanel')){
+			document.getElementById('inputPanel').removeChild(inputPortTable);
+			inputPortTable=null;
+			inputPortTable= document.createElement('table');
+			row = [];
+			cell = null;
+		}
+		if(propertyTable.parentNode===document.getElementById('propEdPanel')){
+			document.getElementById('propEdPanel').removeChild(propertyTable);
+			propertyTable=null;
+			propertyTable = document.createElement('table');
+			row = [];
+			cell = null;
+		}
+	}
+
+	
+	//methods handling outgoing events
+	var writeProperty = function(evt){
+		var completeId = evt.target.id;
+		var splitIda = completeId.split("/1/");
+		var splitId = splitIda[0];
+		console.log(splitId);
+		var t = document.getElementById(evt.target.id).value;
+		actModel.componentList[selectedElement].propertyList[splitId].setValue(t);
+	}
+	
+	//class needed methodes
 	
 	
 // ********************************************** handlers ***********************************************************
 	
 	var actModelChangedEventHandler = function(){
+		//remove eventlistener else it would be added in each new selecting of the model
+		//TODO mabe find way to listen on another event vor instance creat new model
+		actModel.events.removeHandler('componentAddedEvent',componentAddedEventHandler);
 		actModel = modelList.getActModel();
+		actModel.events.registerHandler('componentAddedEvent',componentAddedEventHandler);
+		clearPropertyEditor();
 	}
 	
 	var componentAddedEventHandler = function(){
 		actModel.componentList[actModel.componentList.length-1].events.registerHandler('selectedEvent',selectedEventHandler);
+		actModel.componentList[actModel.componentList.length-1].events.registerHandler('deSelectedEvent',deSelectedEventHandler);
 	}
 	
 	var selectedEventHandler = function(){
-		generatePropertiesForComponent();
+		generateViews();
+	}
+	
+	var deSelectedEventHandler = function(){
+		clearPropertyEditor();
 	}
 	
 	
