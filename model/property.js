@@ -57,7 +57,6 @@
 	}
 	
 	returnObj.setValue = function(val){
-		console.log("propvalue is set" + val);
 		returnObj.value = val;
 	}
 

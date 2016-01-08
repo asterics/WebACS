@@ -51,6 +51,7 @@
 		generatePropertiesForComponent();
 		generateInputPortsForComponent();
 	}
+	
 	var generatePropertiesForComponent = function(){
 
 		
@@ -67,6 +68,7 @@
 			document.getElementById('propEdPanel').removeChild(propertyTable);
 			propertyTable=null;
 			propertyTable = document.createElement('table');
+			
 			row = [];
 			cell = null;
 			}
@@ -76,11 +78,12 @@
 				var propName=actModel.componentList[selectedElement].propertyList[h].getKey();
 				row[h] = propertyTable.insertRow(-1);
 				cell = row[h].insertCell(0);
-				cell.innerHTML = propName;
+				
 				var tempStringa=actModel.componentList[selectedElement].propertyList[h].combobox;
 				var valtemp = actModel.componentList[selectedElement].propertyList[h].value;
 				var typetemp = actModel.componentList[selectedElement].propertyList[h].getType();
-			
+				cell.innerHTML = propName;
+				
 				//generat dropdown list in case that combox includes values
 				if(tempStringa !== ''){
 					var entries = tempStringa.split('//');
@@ -91,8 +94,23 @@
 						dropdownList.appendChild(new Option(entries[l],l));
 						dropdownList.selectedIndex=valtemp;
 					}
+					dropdownList.setAttribute("id",h+ "/1/"+ valtemp);
+					dropdownList.addEventListener("change",writeProperty);
 					cell = row[h].insertCell(1);
 					cell.appendChild(dropdownList);
+				}
+				
+					//generate checkbox field for boolean
+				if(tempStringa === '' && typetemp===1){
+					cell = row[h].insertCell(1);
+					boolInput = null;
+					boolInput = document.createElement("INPUT");
+					boolInput.setAttribute("type", "checkbox"); 
+					boolInput.setAttribute("value", valtemp);
+					if(valtemp==="true"){boolInput.setAttribute("checked", true);}
+					boolInput.setAttribute("id",h+ "/1/"+ valtemp);
+					boolInput.addEventListener("change",writeProperty);
+					cell.appendChild(boolInput);
 				}
 					//generate intage field
 					//console.log(typetemp);
@@ -102,6 +120,9 @@
 					numberInput = document.createElement("INPUT");
 					numberInput.setAttribute("type", "number"); 
 					numberInput.setAttribute("value", valtemp); 
+					numberInput.setAttribute("id",h+ "/1/"+ valtemp);
+					numberInput.addEventListener("change",writeProperty);
+					//numberInput.addEventListener("input",writeProperty);
 					cell.appendChild(numberInput);
 				}
 			
@@ -112,6 +133,9 @@
 					numberInput = document.createElement("INPUT");
 					numberInput.setAttribute("type", "double"); 
 					numberInput.setAttribute("value", valtemp); 
+					numberInput.setAttribute("id",h+ "/1/"+ valtemp);
+					numberInput.addEventListener("change",writeProperty);
+					numberInput.addEventListener("input",writeProperty);
 					cell.appendChild(numberInput);
 				}
 			
@@ -124,6 +148,7 @@
 					textInput.setAttribute("value", valtemp); 
 					textInput.setAttribute("id",h+ "/1/"+ valtemp); 
 					textInput.addEventListener("blur", writeProperty);
+					textInput.addEventListener("input",writeProperty);
 					cell.appendChild(textInput);
 				}
 
@@ -194,9 +219,16 @@
 	var writeProperty = function(evt){
 		var completeId = evt.target.id;
 		var splitIda = completeId.split("/1/");
-		var splitId = splitIda[0];
-		console.log(splitId);
+		var splitId = splitIda[0];				
 		var t = document.getElementById(evt.target.id).value;
+		// toggle t in case of a boolean value
+		if(t==='false'){
+		t='true';
+		document.getElementById(evt.target.id).value='true';
+		}
+		else if(t==='true'){
+		t='false';
+		document.getElementById(evt.target.id).value='false';}
 		actModel.componentList[selectedElement].propertyList[splitId].setValue(t);
 	}
 	
@@ -308,14 +340,13 @@
 	div.setAttribute('role', 'tabpanel');
 	document.getElementById(ACS.vConst.PROPERTYEDITOR_MOTHERPANEL).appendChild(div);
 	
-	
 	propertiesTabPanel.updatePanel();
 	// activate the propertiesTab (a simple li.click() will not work in safari)
 	var click_ev = document.createEvent("MouseEvents");
 	click_ev.initEvent("click", true, true);
 	li1.dispatchEvent(click_ev);	
 	
-	
+	document.getElementById('propEdPanel').setAttribute("style","overflow:auto;");
 	
 	modelList.events.registerHandler('actModelChangedEvent', actModelChangedEventHandler);
 	actModel.events.registerHandler('componentAddedEvent',componentAddedEventHandler);
