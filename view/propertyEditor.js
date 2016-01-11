@@ -240,10 +240,31 @@
 	var actModelChangedEventHandler = function(){
 		//remove eventlistener else it would be added in each new selecting of the model
 		//TODO mabe find way to listen on another event vor instance creat new model
+
 		actModel.events.removeHandler('componentAddedEvent',componentAddedEventHandler);
-		actModel = modelList.getActModel();
+		actModel.events.removeHandler('modelChangedEvent', modelChangedEventHandler);
+		actModel.events.removeHandler('componentRemovedEvent',removeComponentEventHandler);
+				actModel = modelList.getActModel();
 		actModel.events.registerHandler('componentAddedEvent',componentAddedEventHandler);
+		actModel.events.registerHandler('modelChangedEvent', modelChangedEventHandler);
+		actModel.events.registerHandler('componentRemovedEvent',removeComponentEventHandler);
+		
+		
 		clearPropertyEditor();
+		}
+	
+	var modelChangedEventHandler = function(){
+		// derigister all event for the actual model
+		for(var countera=0; countera<=actModel.componentList.length-1; countera++){
+			actModel.componentList[countera].events.removeHandler('selectedEvent',selectedEventHandler);
+			actModel.componentList[countera].events.removeHandler('deSelectedEvent',deSelectedEventHandler);
+			}
+		actModel = modelList.getActModel();
+		//in case that model was loaded select and deselect events must be registered
+		for(var counterb=0; counterb<=actModel.componentList.length-1; counterb++){
+			actModel.componentList[counterb].events.registerHandler('selectedEvent',selectedEventHandler);
+			actModel.componentList[counterb].events.registerHandler('deSelectedEvent',deSelectedEventHandler);
+		}
 	}
 	
 	var componentAddedEventHandler = function(){
@@ -251,11 +272,17 @@
 		actModel.componentList[actModel.componentList.length-1].events.registerHandler('deSelectedEvent',deSelectedEventHandler);
 	}
 	
+
 	var selectedEventHandler = function(){
 		generateViews();
 	}
 	
 	var deSelectedEventHandler = function(){
+		clearPropertyEditor();
+	}
+	
+	var removeComponentEventHandler = function(){
+		console.log("here we are");
 		clearPropertyEditor();
 	}
 	
@@ -349,8 +376,11 @@
 	document.getElementById('propEdPanel').setAttribute("style","overflow:auto;");
 	
 	modelList.events.registerHandler('actModelChangedEvent', actModelChangedEventHandler);
+	//modelList.events.registerHandler('modelChangedEvent', modelChangedEventHandler);
+	actModel.events.registerHandler('modelChangedEvent', modelChangedEventHandler);
 	actModel.events.registerHandler('componentAddedEvent',componentAddedEventHandler);
-	
+	actModel.events.registerHandler('componentRemovedEvent',removeComponentEventHandler);
+
 	
 	return returnObj;
 }
