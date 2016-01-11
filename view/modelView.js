@@ -43,6 +43,8 @@
 	var guiStage; // Kinetic.Stage
 	var guiLayer; // Kinetic.Layer
 	var focusRect = null; // Kinetic.Rect
+	var dragAct = null; // ACS.dragDropAction
+	var dragging = false; // boolean
 	
 // ***********************************************************************************************************************
 // ************************************************** private methods ****************************************************
@@ -78,10 +80,10 @@
 		alertUserOfChangedComponents(changedComponents);
 		
 		for (i = 0; i < model.dataChannelList.length; i++) {
-			dataChannelViewList[i] = ACS.dataChannelView(model.dataChannelList[i], model, modelLayer);
+			dataChannelViewList[i] = ACS.dataChannelView(model.dataChannelList[i], model, returnObj, modelLayer);
 		}
 		for (i = 0; i < model.eventChannelList.length; i++) {
-			eventChannelViewList[i] = ACS.eventChannelView(model.eventChannelList[i], model, modelLayer);
+			eventChannelViewList[i] = ACS.eventChannelView(model.eventChannelList[i], model, returnObj, modelLayer);
 		}
 		for (i = 0; i < model.visualAreaMarkerList.length; i++) {
 			visualAreaMarkerViewList[i] = ACS.visualAreaMarkerView(model.visualAreaMarkerList[i], modelLayer);
@@ -223,6 +225,15 @@
 		}
 	}
 	
+	var getSelectedComponentsList = function() {
+		var compList = [];
+		for (var i = 0; i <returnObj.selectedComponentsGroup.children.length; i++) {
+			compList[i] = returnObj.selectedComponentsGroup.getChildren()[i].attrs.comp;
+		}
+		
+		return compList;
+	}
+	
 	// ********************************************** handlers ***********************************************************
 	var modelChangedEventHandler = function() {
 		drawCompleteModel();
@@ -251,7 +262,7 @@
 	}
 	
 	var dataChannelAddedEventHandler = function() {
-		dataChannelViewList.push(ACS.dataChannelView(model.dataChannelList[model.dataChannelList.length -1], model, modelLayer));
+		dataChannelViewList.push(ACS.dataChannelView(model.dataChannelList[model.dataChannelList.length -1], model, returnObj, modelLayer));
 		modelLayer.draw();
 	}
 	
@@ -270,7 +281,7 @@
 	}
 	
 	var eventChannelAddedEventHandler = function() {
-		eventChannelViewList.push(ACS.eventChannelView(model.eventChannelList[model.eventChannelList.length -1], model, modelLayer));
+		eventChannelViewList.push(ACS.eventChannelView(model.eventChannelList[model.eventChannelList.length -1], model, returnObj, modelLayer));
 		modelLayer.draw();
 	}
 	
@@ -307,6 +318,10 @@
 	returnObj.getModelContainerId = function() {
 		return modelContainerId;
 	}
+	
+	returnObj.isDragging = function() {
+		return dragging;
+	}	
 	
 // ***********************************************************************************************************************
 // ************************************************** constructor code ***************************************************
@@ -386,8 +401,55 @@
 	modelLayer.add(transparentRect);
 	// initiate and add the Kinetic.Group that will hold the selected components (to make them draggable together)
 	returnObj.selectedComponentsGroup = new Kinetic.Group({
-		draggable: true
+		x: 0,
+		y: 0,
+		draggable: true,
+		dragBoundFunc: function(pos) {
+			var dx = pos.x - this.oldX;
+			var dy = pos.y - this.oldY;
+			// recalculate the groups bounds (see below)
+			this.leftBound = this.leftBound + dx;
+			this.rightBound = this.rightBound + dx;
+			this.upperBound = this.upperBound + dy;
+			this.lowerBound = this.lowerBound + dy;
+			// check if any bound is now outside the canvas and set to canvas-edge if so
+			if (this.leftBound < 0) {
+				dx = dx - this.leftBound;
+				this.leftBound = 0;
+			}
+			if (this.rightBound > ACS.vConst.MODELVIEW_MODELDESIGNERSIZEX) {
+				dx = dx - (this.rightBound - ACS.vConst.MODELVIEW_MODELDESIGNERSIZEX);
+				this.rightBound = ACS.vConst.MODELVIEW_MODELDESIGNERSIZEX;
+			}
+			if (this.upperBound < 0) {
+				dy = dy - this.upperBound;
+				this.upperBound = 0;
+			}
+			if (this.lowerBound > ACS.vConst.MODELVIEW_MODELDESIGNERSIZEY) {
+				dy = dy - (this.lowerBound - ACS.vConst.MODELVIEW_MODELDESIGNERSIZEY);
+				this.lowerBound = ACS.vConst.MODELVIEW_MODELDESIGNERSIZEY;
+			}
+			// calculate new position, based on corrected dx and dy
+			var newX = this.oldX + dx;
+			var newY = this.oldY + dy;
+			// set oldX and OldY to new values for next dragMove
+			this.oldX = newX;
+			this.oldY = newY;
+			// set the group to the corrected position - dragging outside the canvas is now not possible any more
+			return {x: newX, y: newY};
+		}
 	});
+	// the following custom attributes remember the old position of the group (to enalbe calculation of relative position changes while dragging)
+	returnObj.selectedComponentsGroup.oldX = 0;
+	returnObj.selectedComponentsGroup.oldY = 0;
+	// the following are custom attributes for the outer bounds of the group, defined by the left-most, right-most, up-most and down-most element in the group
+	// (the built-in attributes of the group cannot be used for this, since the Kinetic-group has width and height always 0 and its absolutePosition has 
+	// nothing to do with the position of the child elements, when added)
+	returnObj.selectedComponentsGroup.leftBound = 0;
+	returnObj.selectedComponentsGroup.rightBound = 0;
+	returnObj.selectedComponentsGroup.upperBound = 0;
+	returnObj.selectedComponentsGroup.lowerBound = 0;		
+		
 	modelLayer.add(returnObj.selectedComponentsGroup);
 	// draw the model
 	drawCompleteModel();
@@ -468,11 +530,21 @@
 		e.cancelBubble = true; // avoids the starting of a focusRect
 	});
 	
+	returnObj.selectedComponentsGroup.on('dragstart', function() {
+		dragging = true;
+		dragAct = ACS.dragDropAction(model, getSelectedComponentsList());
+	});
+	
 	returnObj.selectedComponentsGroup.on('dragmove', function() {
 		for (var i = 0; i <returnObj.selectedComponentsGroup.children.length; i++) {
 			var elem = returnObj.selectedComponentsGroup.getChildren()[i];
 			elem.attrs.comp.setNewPosition(elem.getChildren()[2].getAbsolutePosition().x, elem.getChildren()[2].getAbsolutePosition().y);
 		}
+	});
+	
+	returnObj.selectedComponentsGroup.on('dragend', function() {
+		dragging = false;
+		dragAct.execute();
 	});
 	
 	return returnObj;

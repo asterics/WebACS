@@ -74,7 +74,7 @@
 			strokeWidth: 1,
 			cornerRadius: 5,
 			listening: true
-		});	
+		});
 		// add header-box and textual heading
 		var topRect = new Kinetic.Rect({
 			x: component.getX(),
@@ -369,9 +369,6 @@
 				}
 			}
 		});
-		view.on('dragmove', function() {
-			component.setNewPosition(mainRect.getAbsolutePosition().x, mainRect.getAbsolutePosition().y);
-		});
 		// add the group to the layer
 		modelLayer.add(view);
 	}
@@ -421,9 +418,36 @@
 		view.y(view.getY() - modelView.selectedComponentsGroup.getY());
 	}
 	
+	var setSelectionBounds = function() {
+		if (modelView.selectedComponentsGroup.children.length > 0) {
+			var i, left, right, upper, lower;
+			for (i = 0; i < modelView.selectedComponentsGroup.children.length; i++) {
+				// calculate the bounds of the element
+				left = modelView.selectedComponentsGroup.children[i].children[2].x();
+				right = modelView.selectedComponentsGroup.children[i].children[2].x() + ACS.vConst.COMPONENTVIEW_ELEMENTWIDTH;
+				upper = modelView.selectedComponentsGroup.children[i].children[2].y();
+				lower = modelView.selectedComponentsGroup.children[i].children[2].y() + ACS.vConst.COMPONENTVIEW_ELEMENTHEIGHT;
+				if (modelView.selectedComponentsGroup.children.length > 1) {
+					// compare to the current bounds and set to the outer-most
+					if (left < modelView.selectedComponentsGroup.leftBound) modelView.selectedComponentsGroup.leftBound = left;
+					if (right > modelView.selectedComponentsGroup.rightBound) modelView.selectedComponentsGroup.rightBound = right;
+					if (upper < modelView.selectedComponentsGroup.upperBound) modelView.selectedComponentsGroup.upperBound = upper;
+					if (lower > modelView.selectedComponentsGroup.lowerBound) modelView.selectedComponentsGroup.lowerBound = lower;
+				} else {
+					// set current bounds to bounds of the only element
+					modelView.selectedComponentsGroup.leftBound = left;
+					modelView.selectedComponentsGroup.rightBound = right;
+					modelView.selectedComponentsGroup.upperBound = upper;
+					modelView.selectedComponentsGroup.lowerBound = lower;
+				}
+			}
+		}
+	}
+	
 	// ********************************************** handlers ***********************************************************
 	var selectedEventHandler = function() {
 		selectView();
+		setSelectionBounds();
 		modelLayer.draw();
 	}
 	
@@ -433,7 +457,26 @@
 		view.remove(); // view is in selectedComponentsGroup AND modelLayer, the remove-function only exists for removing from all parents, thus we need to remove and then add to the modelLayer again
 		modelLayer.add(view);
 		setViewPosition();
+		setSelectionBounds();
 		modelLayer.draw();
+		// reset selectedComponentsGroup to coordinates 0,0, if empty
+		if (modelView.selectedComponentsGroup.children.length === 0) {
+			modelView.selectedComponentsGroup.position({x: 0,
+														y: 0});
+		}
+	}
+	
+	var componentPositionChangedEventHandler  = function() {
+		if (!modelView.isDragging()) {
+			if (component.getIsSelected()) {
+				// this will set the position of the component right in the view
+				component.setIsSelected(false);
+				component.setIsSelected(true);
+			} else {
+				setViewPosition();
+			}
+			modelLayer.draw();
+		}
 	}
 	
 // ***********************************************************************************************************************
@@ -485,6 +528,7 @@
 	// register event handlers
 	component.events.registerHandler('selectedEvent', selectedEventHandler);
 	component.events.registerHandler('deSelectedEvent', deSelectedEventHandler);
+	component.events.registerHandler('componentPositionChangedEvent', componentPositionChangedEventHandler);
 
 	return returnObj;
 }

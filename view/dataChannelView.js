@@ -28,6 +28,7 @@
  
  ACS.dataChannelView = function(dc, // ACS.dataChannel (must have at least the outputPort already set)
 								model, // ACS.model
+								modelView, // ACS.modelView
 								modelLayer) { // Kinetic.Layer
 								
 // ***********************************************************************************************************************
@@ -50,6 +51,10 @@
 								returnObj.line.points()[1], 
 								inputPort.getParentComponent().getX() - ACS.vConst.DATACHANNELVIEW_INPUTPORTLEFTOFCOMPONENT,
 								inputPort.getParentComponent().getY() + ACS.vConst.DATACHANNELVIEW_FIRSTINPUTPORTDOCKINGPOINTY + ACS.vConst.COMPONENTVIEW_PORTHEIGHTPLUSGAP * inputPort.getPosition()]);
+		
+		if (!modelView.isDragging()) {
+			modelLayer.draw();
+		}
 	}
 	
 	var componentPositionChangedEventHandlerOutPort = function() {
@@ -57,6 +62,9 @@
 								outputPort.getParentComponent().getY() + ACS.vConst.DATACHANNELVIEW_FIRSTOUTPUTPORTDOCKINGPOINTY + ACS.vConst.COMPONENTVIEW_PORTHEIGHTPLUSGAP * outputPort.getPosition(), 
 								returnObj.line.points()[2], 
 								returnObj.line.points()[3]]);
+		if (!modelView.isDragging()) {
+			modelLayer.draw();
+		}
 	}
 	
 	var dataChannelCompletedEventHandler = function() {
@@ -84,7 +92,7 @@
 // ***********************************************************************************************************************
 // ************************************************** public stuff *******************************************************
 // ***********************************************************************************************************************
-	var returnObj = ACS.channelView(model, modelLayer);
+	var returnObj = ACS.channelView(model, modelView, modelLayer);
 	
 	returnObj.getChannel = function() {
 		return dc;

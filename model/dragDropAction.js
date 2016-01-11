@@ -26,8 +26,8 @@
  * limitations under the License.
  */
  
-ACS.addComponentAction = function(parentModel, // ACS.model
-								  c) { // ACS.component
+ACS.dragDropAction = function(parentModel, 	// ACS.model
+							  compList) {	// Array<ACS.component>
 
 // ***********************************************************************************************************************
 // ************************************************** private variables **************************************************
@@ -43,18 +43,38 @@ ACS.addComponentAction = function(parentModel, // ACS.model
 	var returnObj = ACS.action(parentModel);
 	
 	returnObj.execute = function() {
-		parentModel.addComponent(c);
+		if (endCoord.length === 0) {
+			// set end coordinates to current values
+			for (var i = 0; i < compList.length; i++) {
+				endCoord[i] = {'x': compList[i].getX(),
+							   'y': compList[i].getY()};
+			}
+		}
+		// assume that this is a redo and reposition components
+		for (var i = 0; i < compList.length; i++) {
+			compList[i].setNewPosition(endCoord[i].x, endCoord[i].y);
+		}
 		parentModel.undoStack.push(returnObj);
 	}
 	
 	returnObj.undo = function() {
-		parentModel.removeComponent(c);
+		// reset components to start coordinates
+		for (var i = 0; i < compList.length; i++) {
+			compList[i].setNewPosition(startCoord[i].x, startCoord[i].y);
+		}
 		parentModel.redoStack.push(returnObj);
 	}
 
 // ***********************************************************************************************************************
 // ************************************************** constructor code ***************************************************
 // ***********************************************************************************************************************
+	var startCoord = [];
+	var endCoord = [];
+
+	for (var i = 0; i < compList.length; i++) {
+		startCoord[i] = {'x': compList[i].getX(),
+						 'y': compList[i].getY()};
+	}
 	
 	return returnObj;
 }

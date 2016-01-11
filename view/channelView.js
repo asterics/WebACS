@@ -27,7 +27,8 @@
  */
  
  ACS.channelView = function(model, // ACS.model
-						   modelLayer) { // Kinetic.Layer
+						    modelView, // ACS.modelView
+						    modelLayer) { // Kinetic.Layer
 						   
 // ***********************************************************************************************************************
 // ************************************************** private variables **************************************************
