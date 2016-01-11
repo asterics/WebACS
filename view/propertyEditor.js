@@ -122,7 +122,7 @@
 					numberInput.setAttribute("value", valtemp); 
 					numberInput.setAttribute("id",h+ "/1/"+ valtemp);
 					numberInput.addEventListener("change",writeProperty);
-					//numberInput.addEventListener("input",writeProperty);
+					numberInput.addEventListener("input",writeProperty);
 					cell.appendChild(numberInput);
 				}
 			
