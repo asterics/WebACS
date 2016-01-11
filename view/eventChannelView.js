@@ -28,6 +28,7 @@
  
  ACS.eventChannelView = function(ec, // ACS.eventChannel (must have at least the startComponent already set)
 								model, // ACS.model
+								modelView, // ACS.modelView
 								modelLayer) { // Kinetic.Layer
 								
 // ***********************************************************************************************************************
@@ -62,6 +63,9 @@
 									ec.startComponent.getY() + getComponentHeight(ec.startComponent) + ACS.vConst.EVENTCHANNELVIEW_TRIGGERBELOWCOMPONENT, 
 									returnObj.line.points()[2], 
 									returnObj.line.points()[3]]);
+		if (!modelView.isDragging()) {
+			modelLayer.draw();
+		}									
 	}
 
 	var componentPositionChangedEventHandlerEndComponent = function() {
@@ -69,6 +73,9 @@
 									returnObj.line.points()[1], 
 									ec.endComponent.getX() + ACS.vConst.EVENTCHANNELVIEW_LISTENERPOSX,
 									ec.endComponent.getY() + getComponentHeight(ec.endComponent) + ACS.vConst.EVENTCHANNELVIEW_LISTENERBELOWCOMPONENT]);
+		if (!modelView.isDragging()) {
+			modelLayer.draw();
+		}									
 	}
 	
 	var eventChannelCompletedEventHandler = function() {
@@ -95,7 +102,7 @@
 // ***********************************************************************************************************************
 // ************************************************** public stuff *******************************************************
 // ***********************************************************************************************************************
-	var returnObj = ACS.channelView(model, modelLayer);
+	var returnObj = ACS.channelView(model, modelView, modelLayer);
 	
 	returnObj.getChannel = function() {
 		return ec;
