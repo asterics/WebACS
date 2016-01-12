@@ -41,6 +41,7 @@
 	var numberInput;
 	var textInput;
 	var selectedElement;
+	var flagActiveModelChanged=false;
 // ***********************************************************************************************************************
 // ************************************************** private methods ****************************************************
 // ***********************************************************************************************************************
@@ -54,15 +55,14 @@
 	
 	var generatePropertiesForComponent = function(){
 
-		
-		if(actModel.selectedItemsList.length===0){//check if only one component is selected
+			if(actModel.selectedItemsList.length===0 || flagActiveModelChanged){//check if only one component is selected
 			//get selected component
 			for(var i = 0; i<actModel.componentList.length;i++){
 				if(actModel.componentList[i].getIsSelected()){
 					selectedElement = i;
 				}
 			}
-			
+						
 			//if a new element is selected the old propertyEditor has to be removed from the panel
 			if(propertyTable.parentNode===document.getElementById('propEdPanel')){
 			document.getElementById('propEdPanel').removeChild(propertyTable);
@@ -159,12 +159,13 @@
 
 			document.getElementById('propEdPanel').appendChild(propertyTable);
 		}
-		if(actModel.selectedItemsList.length>0){
+		if(actModel.selectedItemsList.length>0 && !flagActiveModelChanged){
 			//console.info("More than one element selected");
 			if(propertyTable.parentNode==document.getElementById('propEdPanel')){
 			document.getElementById('propEdPanel').removeChild(propertyTable);
 			}
 		}
+		flagActiveModelChanged=false;
 	}
 	
 	var generateInputPortsForComponent = function(){
@@ -240,7 +241,7 @@
 	var actModelChangedEventHandler = function(){
 		//remove eventlistener else it would be added in each new selecting of the model
 		//TODO mabe find way to listen on another event vor instance creat new model
-
+				
 		actModel.events.removeHandler('componentAddedEvent',componentAddedEventHandler);
 		actModel.events.removeHandler('modelChangedEvent', modelChangedEventHandler);
 		actModel.events.removeHandler('componentRemovedEvent',removeComponentEventHandler);
@@ -250,8 +251,13 @@
 		actModel.events.registerHandler('componentRemovedEvent',removeComponentEventHandler);
 		
 		
-		clearPropertyEditor();
+		//clearPropertyEditor();
+		if(actModel.selectedItemsList.length===1){
+			flagActiveModelChanged=true;
+			generateViews();
 		}
+		else{clearPropertyEditor();}
+	}
 	
 	var modelChangedEventHandler = function(){
 		// derigister all event for the actual model
@@ -282,7 +288,6 @@
 	}
 	
 	var removeComponentEventHandler = function(){
-		console.log("here we are");
 		clearPropertyEditor();
 	}
 	
