@@ -55,7 +55,7 @@
 	var generatePropertiesForComponent = function(){
 
 		
-		if(actModel.selectedItemsList.length===0){//check if only one component is selected
+		if(actModel.selectedItemsList.length===1){//check if only one component is selected
 			//get selected component
 			for(var i = 0; i<actModel.componentList.length;i++){
 				if(actModel.componentList[i].getIsSelected()){
@@ -159,7 +159,7 @@
 
 			document.getElementById('propEdPanel').appendChild(propertyTable);
 		}
-		if(actModel.selectedItemsList.length>0){
+		if(actModel.selectedItemsList.length>1){
 			//console.info("More than one element selected");
 			if(propertyTable.parentNode==document.getElementById('propEdPanel')){
 			document.getElementById('propEdPanel').removeChild(propertyTable);
@@ -169,7 +169,7 @@
 	
 	var generateInputPortsForComponent = function(){
 		var selectedElement;
-		if(actModel.selectedItemsList.length===0){//check if only one component is selected
+		if(actModel.selectedItemsList.length===1){//check if only one component is selected
 			//get selected component
 			for(var i = 0; i<actModel.componentList.length;i++){
 				if(actModel.componentList[i].getIsSelected()){
@@ -188,7 +188,7 @@
 				
 		}
 		
-		if(actModel.selectedItemsList.length>0){
+		if(actModel.selectedItemsList.length>1){
 			//console.info("More than one element selected");
 			if(inputPortTable.parentNode==document.getElementById('inputPanel')){
 			document.getElementById('inputPanel').removeChild(inputPortTable);

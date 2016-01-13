@@ -407,7 +407,7 @@
 		dragBoundFunc: function(pos) {
 			var dx = pos.x - this.oldX;
 			var dy = pos.y - this.oldY;
-			// recalculate the groups bounds (see below)
+			// recalculate the groups bounds
 			this.leftBound = this.leftBound + dx;
 			this.rightBound = this.rightBound + dx;
 			this.upperBound = this.upperBound + dy;

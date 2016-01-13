@@ -832,8 +832,8 @@
 	}
 	
 	returnObj.addItemToSelection = function(item) {
-		item.setIsSelected(true);
 		returnObj.selectedItemsList.push(item);
+		item.setIsSelected(true);
 	}
 	
 	returnObj.removeItemFromSelection = function(item) {

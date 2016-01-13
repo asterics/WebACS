@@ -458,12 +458,13 @@
 		modelLayer.add(view);
 		setViewPosition();
 		setSelectionBounds();
-		modelLayer.draw();
-		// reset selectedComponentsGroup to coordinates 0,0, if empty
+		// reset selectedComponentsGroup to coordinates 0,0, if empty; also reset OldX and OldY
 		if (modelView.selectedComponentsGroup.children.length === 0) {
-			modelView.selectedComponentsGroup.position({x: 0,
-														y: 0});
+			modelView.selectedComponentsGroup.position({x: 0, y: 0});
+			modelView.selectedComponentsGroup.oldX = 0;
+			modelView.selectedComponentsGroup.oldY = 0;
 		}
+		modelLayer.draw();
 	}
 	
 	var componentPositionChangedEventHandler  = function() {
