@@ -47,22 +47,59 @@
 // ***********************************************************************************************************************
 	
 	//methodes handling incoming events
+	//=================================
+		
+		//generate view based on the type eventchannel or coponent and the selected tab 
 	var generateViews = function(){
+		
 		clearPropertyEditor();
-		generatePropertiesForComponent();
-		generateInputPortsForComponent();
-	}
-	
-	var generatePropertiesForComponent = function(){
-
-			if(actModel.selectedItemsList.length===1 || flagActiveModelChanged){//check if only one component is selected
+		console.log(actModel.selectedItemsList.length);
+		console.log("jaja");
+		var selectedElementType = null;
+		if(actModel.selectedItemsList.length===1 || flagActiveModelChanged){//check if only one component is selected
 			//get selected component
 			for(var i = 0; i<actModel.componentList.length;i++){
 				if(actModel.componentList[i].getIsSelected()){
 					selectedElement = i;
+					selectedElementType = "component";
 				}
 			}
-						
+			
+			for(var i = 0; i<actModel.eventChannelList.length;i++){
+				if(actModel.eventChannelList[i].getIsSelected()){
+					selectedElement = i;
+					selectedElementType = "channel";
+				}
+			}
+		
+
+		console.log(selectedElement);
+		console.info(actModel.componentList[selectedElement]);
+		
+		//Part for component
+		if(selectedElementType ==="component"){
+			console.log("====Component");
+			generatePropertiesForComponent();
+			generateInputPortsForComponent();
+		}
+			
+		//Part for Events		
+		if(selectedElementType ==="channel"){
+			console.log("====Channel");
+		}
+
+		}
+		
+		
+		/*if(actModel.selectedItemsList.length>1){
+		
+		clearPropertyEditor();
+		}*/
+	}
+	
+		//generate the parts / fields for the properties for the selected component
+	var generatePropertiesForComponent = function(){
+
 			//if a new element is selected the old propertyEditor has to be removed from the panel
 			if(propertyTable.parentNode===document.getElementById('propEdPanel')){
 			document.getElementById('propEdPanel').removeChild(propertyTable);
@@ -151,55 +188,32 @@
 					textInput.addEventListener("input",writeProperty);
 					cell.appendChild(textInput);
 				}
-
-			}
-						
+			
 			//element.setAttribute("type", "button");
 			//element.setAttribute("value", tempString);
-
-			document.getElementById('propEdPanel').appendChild(propertyTable);
-		}
-
-		if(actModel.selectedItemsList.length>1 && !flagActiveModelChanged){
-			//console.info("More than one element selected");
-			if(propertyTable.parentNode==document.getElementById('propEdPanel')){
-			document.getElementById('propEdPanel').removeChild(propertyTable);
 			}
-		}
+			document.getElementById('propEdPanel').appendChild(propertyTable);
+
+
+
 		flagActiveModelChanged=false;
 	}
 	
+		//generate the parts / fields for the inputs of the selected property
 	var generateInputPortsForComponent = function(){
-		var selectedElement;
-		if(actModel.selectedItemsList.length===1){//check if only one component is selected
-			//get selected component
-			for(var i = 0; i<actModel.componentList.length;i++){
-				if(actModel.componentList[i].getIsSelected()){
-					selectedElement = i;
-				}
-			}	
-			
-			for(var h=0; h<actModel.componentList[selectedElement].inputPortList.length;h++){
-				var tempStringa=actModel.componentList[selectedElement].inputPortList[h].getId();
-				row[h] = inputPortTable.insertRow(-1);
-				cell = row[h].insertCell(0);
-				cell.innerHTML = tempStringa;
-			}
-			
-			document.getElementById('inputPanel').appendChild(inputPortTable);
-				
+
+		for(var h=0; h<actModel.componentList[selectedElement].inputPortList.length;h++){
+			var tempStringa=actModel.componentList[selectedElement].inputPortList[h].getId();
+			row[h] = inputPortTable.insertRow(-1);
+			cell = row[h].insertCell(0);
+			cell.innerHTML = tempStringa;
 		}
-		
-		if(actModel.selectedItemsList.length>1){
-			//console.info("More than one element selected");
-			if(inputPortTable.parentNode==document.getElementById('inputPanel')){
-			document.getElementById('inputPanel').removeChild(inputPortTable);
-			}
-		}
+			
+		document.getElementById('inputPanel').appendChild(inputPortTable);
 	}
 	
+		//remove the content of the property editor 
 	var clearPropertyEditor = function(){
-
 		if(inputPortTable.parentNode===document.getElementById('inputPanel')){
 			document.getElementById('inputPanel').removeChild(inputPortTable);
 			inputPortTable=null;
@@ -218,6 +232,9 @@
 
 	
 	//methods handling outgoing events
+	//================================
+	
+	//write the actual input modifiaction to the property
 	var writeProperty = function(evt){
 		var completeId = evt.target.id;
 		var splitIda = completeId.split("/1/");
@@ -244,12 +261,17 @@
 		//TODO mabe find way to listen on another event vor instance creat new model
 				
 		actModel.events.removeHandler('componentAddedEvent',componentAddedEventHandler);
-		actModel.events.removeHandler('modelChangedEvent', modelChangedEventHandler);
 		actModel.events.removeHandler('componentRemovedEvent',removeComponentEventHandler);
-				actModel = modelList.getActModel();
+		actModel.events.removeHandler('eventChannelAddedEvent',eventChannelAddedEvemtHandler);
+		actModel.events.removeHandler('eventChannelRemovedEvent',eventChannelRemovedEvemtHandler);
+		actModel.events.removeHandler('modelChangedEvent', modelChangedEventHandler);
+			actModel = modelList.getActModel();
 		actModel.events.registerHandler('componentAddedEvent',componentAddedEventHandler);
-		actModel.events.registerHandler('modelChangedEvent', modelChangedEventHandler);
 		actModel.events.registerHandler('componentRemovedEvent',removeComponentEventHandler);
+		actModel.events.registerHandler('eventChannelAddedEvent',eventChannelAddedEvemtHandler);
+		actModel.events.registerHandler('eventChannelRemovedEvent',eventChannelRemovedEvemtHandler);
+		actModel.events.registerHandler('modelChangedEvent', modelChangedEventHandler);
+		
 		
 		
 		//clearPropertyEditor();
@@ -266,11 +288,19 @@
 			actModel.componentList[countera].events.removeHandler('selectedEvent',selectedEventHandler);
 			actModel.componentList[countera].events.removeHandler('deSelectedEvent',deSelectedEventHandler);
 			}
+		for(var counterx=0; counterx<=actModel.eventChannelList.length-1; counterx++){
+			actModel.eventChannelList[counterx].events.removeHandler('selectedEvent',selectedEventHandler);
+			actModel.eventChannelList[counterx].events.removeHandler('deSelectedEvent',deSelectedEventHandler);
+		}
 		actModel = modelList.getActModel();
 		//in case that model was loaded select and deselect events must be registered
 		for(var counterb=0; counterb<=actModel.componentList.length-1; counterb++){
 			actModel.componentList[counterb].events.registerHandler('selectedEvent',selectedEventHandler);
 			actModel.componentList[counterb].events.registerHandler('deSelectedEvent',deSelectedEventHandler);
+		}
+		for(var countery=0; counterx<=actModel.eventChannelList.length-1; countery++){
+			actModel.eventChannelList[countery].events.registerHandler('selectedEvent',selectedEventHandler);
+			actModel.eventChannelList[countery].events.registerHandler('deSelectedEvent',deSelectedEventHandler);
 		}
 	}
 	
@@ -292,6 +322,14 @@
 		clearPropertyEditor();
 	}
 	
+	var eventChannelAddedEvemtHandler =function(){
+		actModel.eventChannelList[actModel.eventChannelList.length-1].events.registerHandler('selectedEvent',selectedEventHandler);
+		actModel.eventChannelList[actModel.eventChannelList.length-1].events.registerHandler('deSelectedEvent',deSelectedEventHandler);
+	}
+	
+	var eventChannelRemovedEvemtHandler =function(){
+		clearPropertyEditor();
+	}
 	
 // ***********************************************************************************************************************
 // ************************************************** public stuff *******************************************************
@@ -386,7 +424,9 @@
 	actModel.events.registerHandler('modelChangedEvent', modelChangedEventHandler);
 	actModel.events.registerHandler('componentAddedEvent',componentAddedEventHandler);
 	actModel.events.registerHandler('componentRemovedEvent',removeComponentEventHandler);
-
+	actModel.events.registerHandler('componentRemovedEvent',removeComponentEventHandler);
+	actModel.events.registerHandler('eventChannelAddedEvent',eventChannelAddedEvemtHandler);
+	actModel.events.registerHandler('eventChannelRemovedEvent',eventChannelRemovedEvemtHandler);
 	
 	return returnObj;
 }
