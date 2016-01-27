@@ -42,6 +42,7 @@
 	var textInput;
 	var selectedElement;
 	var flagActiveModelChanged=false;
+	var eventChannelTable=document.createElement('table');; 
 // ***********************************************************************************************************************
 // ************************************************** private methods ****************************************************
 // ***********************************************************************************************************************
@@ -53,8 +54,6 @@
 	var generateViews = function(){
 		
 		clearPropertyEditor();
-		console.log(actModel.selectedItemsList.length);
-		console.log("jaja");
 		var selectedElementType = null;
 		if(actModel.selectedItemsList.length===1 || flagActiveModelChanged){//check if only one component is selected
 			//get selected component
@@ -73,19 +72,16 @@
 			}
 		
 
-		console.log(selectedElement);
-		console.info(actModel.componentList[selectedElement]);
 		
 		//Part for component
 		if(selectedElementType ==="component"){
-			console.log("====Component");
 			generatePropertiesForComponent();
 			generateInputPortsForComponent();
 		}
 			
 		//Part for Events		
 		if(selectedElementType ==="channel"){
-			console.log("====Channel");
+			generateChannelEventsForChannel();
 		}
 
 		}
@@ -109,6 +105,7 @@
 			row = [];
 			cell = null;
 			}
+			propertyTable.innerHTML=actModel.componentList[selectedElement].getId();
 			
 			//var tempString=actModel.componentList[selectedElement].getId();
 			for(var h=0; h<actModel.componentList[selectedElement].propertyList.length;h++){
@@ -212,6 +209,56 @@
 		document.getElementById('inputPanel').appendChild(inputPortTable);
 	}
 	
+		//generate the event fileds for the channel based on startcompoment and endcomponent
+	var generateChannelEventsForChannel = function(){
+		
+		
+		if(eventChannelTable.parentNode===document.getElementById('propEdPanel')){
+			document.getElementById('propEdPanel').removeChild(eventChannelTable);
+			eventChannelTable=null;
+			eventChannelTable = document.createElement('table');
+			
+			row = [];
+			cell = null;
+		}
+		
+		var chan = actModel.eventChannelList[selectedElement];
+		var startcomp = chan.startComponent;
+		var endcomp = chan.endComponent;
+		
+		row[0] = eventChannelTable.insertRow(-1);
+		cell = row[0].insertCell(0);
+		cell.innerHTML=endcomp.getId();
+		cell = row[0].insertCell(1);
+		cell.innerHTML=startcomp.getId();
+		cell = row[0].insertCell(2);
+		cell.innerHTML='Description';
+		
+		for(var h = 0; h<endcomp.listenEventList.length; h++){
+				var eventName=endcomp.listenEventList[h].getId();
+				row[h+1] = eventChannelTable.insertRow(-1);
+				cell = row[h+1].insertCell(0);
+				cell.innerHTML = eventName;
+				
+				cell = row[h+1].insertCell(1);
+				dropdownList = null;
+				dropdownList = document.createElement('select');
+				for(l=0;l<startcomp.triggerEventList.length;l++){
+						dropdownList.appendChild(new Option(startcomp.triggerEventList[l].getId(),l));
+				}
+				dropdownList.setAttribute("id",h+ "/1/");
+				dropdownList.addEventListener("change",writeChannel);
+				cell.appendChild(dropdownList);
+				cell = row[h+1].insertCell(2);
+				textInput = document.createElement("INPUT");
+				textInput.setAttribute("type", "text"); 
+				cell.appendChild(textInput);
+		}
+		
+		
+		document.getElementById('propEdPanel').appendChild(eventChannelTable);
+	}	
+	
 		//remove the content of the property editor 
 	var clearPropertyEditor = function(){
 		if(inputPortTable.parentNode===document.getElementById('inputPanel')){
@@ -225,6 +272,13 @@
 			document.getElementById('propEdPanel').removeChild(propertyTable);
 			propertyTable=null;
 			propertyTable = document.createElement('table');
+			row = [];
+			cell = null;
+		}
+		if(eventChannelTable.parentNode===document.getElementById('propEdPanel')){
+			document.getElementById('propEdPanel').removeChild(eventChannelTable);
+			eventChannelTable=null;
+			eventChannelTable = document.createElement('table');
 			row = [];
 			cell = null;
 		}
@@ -249,6 +303,30 @@
 		t='false';
 		document.getElementById(evt.target.id).value='false';}
 		actModel.componentList[selectedElement].propertyList[splitId].setValue(t);
+	}
+	
+	var writeChannel = function(evt){
+		console.log("====Channel Write");
+		console.info(evt);
+		var selectedChan = actModel.eventChannelList[selectedElement];
+		console.info(selectedChan);
+		var listenerComponent=selectedChan.startComponent;
+		var triggerComponent=selectedChan.endComponent;
+		
+		var completeId = evt.target.id;
+		var splitIda = completeId.split("/1/");
+		var splitId = splitIda[0];				
+		var t = document.getElementById(evt.target.id).value;
+		
+		var listener = ACS.event(t,'',listenerComponent.getId());
+		var trigger = ACS.event(t,'',triggerComponent.getId());
+		var eventConnectionDescription = '';
+						
+		var eventConnection = {listener,trigger,eventConnectionDescription};
+		selectedChan.eventConnections.push(eventConnection);
+		console.info(selectedChan);
+		//TODO Generate Event and Put it into EventChannel List
+		
 	}
 	
 	//class needed methodes
@@ -298,7 +376,7 @@
 			actModel.componentList[counterb].events.registerHandler('selectedEvent',selectedEventHandler);
 			actModel.componentList[counterb].events.registerHandler('deSelectedEvent',deSelectedEventHandler);
 		}
-		for(var countery=0; counterx<=actModel.eventChannelList.length-1; countery++){
+		for(var countery=0; countery<=actModel.eventChannelList.length-1; countery++){
 			actModel.eventChannelList[countery].events.registerHandler('selectedEvent',selectedEventHandler);
 			actModel.eventChannelList[countery].events.registerHandler('deSelectedEvent',deSelectedEventHandler);
 		}
