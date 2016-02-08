@@ -26,7 +26,7 @@
  * limitations under the License.
  */
  
- ACS.propertyEditor = function(modelList) {
+ACS.propertyEditor = function(modelList) {
 
 // ***********************************************************************************************************************
 // ************************************************** private variables **************************************************
@@ -250,13 +250,16 @@
 			}
 			dropdownList.selectedIndex='0';
 			dropdownList.setAttribute("id",eventTableId+ "/1/"+eventName);
-			eventTableId=eventTableId+1;
 			dropdownList.addEventListener("change",writeChannel);
 			dropdownList.addEventListener("focus",setPreviousSelected);
 			cell.appendChild(dropdownList);
 			cell = row[h+1].insertCell(2);
 			textInput = document.createElement("INPUT");
 			textInput.setAttribute("type", "text"); 
+			textInput.setAttribute("id",eventTableId+ "/2/"+eventName);
+			eventTableId=eventTableId+1;
+			textInput.addEventListener("input",writeChannelDescription);
+			textInput.addEventListener("blur",writeChannelDescription);
 			cell.appendChild(textInput);
 		}
 		
@@ -267,6 +270,9 @@
 			for(var countx = 0; countx<chan.eventConnections.length; countx++){
 				var storedEventName=chan.eventConnections[countx].listener.getId();
 				var storedTriggerEventName=chan.eventConnections[countx].trigger.getId();
+				console.log(chan.eventConnections[countx]);
+			var eventDescription = chan.eventConnections[countx].description;
+				console.log(eventDescription);
 				if(eventName===storedEventName){
 					var rowToInsert = eventChannelTable.insertRow(insertPosition);
 					cell = rowToInsert.insertCell(0);
@@ -284,18 +290,24 @@
 							if(startcomp.triggerEventList[l-1].getId()===storedTriggerEventName){
 								selectedEventIndex=l;
 							}
-						}
-						
+						}		
 					}
 					dropdownList.selectedIndex=selectedEventIndex;
 					dropdownList.setAttribute("id",eventTableId+ "/1/"+eventName);
-					eventTableId=eventTableId+1;
 					dropdownList.addEventListener("change",writeChannel);
 					dropdownList.addEventListener("focus",setPreviousSelected);
 					cell.appendChild(dropdownList);
 					cell = rowToInsert.insertCell(2);
 					textInput = document.createElement("INPUT");
 					textInput.setAttribute("type", "text"); 
+					textInput.value=eventDescription;
+					if(eventDescription==="undefined"){
+						textInput.value="";
+					}
+					textInput.setAttribute("id",eventTableId+ "/2/"+eventName);
+					textInput.addEventListener("input",writeChannelDescription);
+					textInput.addEventListener("blur",writeChannelDescription);
+					eventTableId=eventTableId+1;
 					cell.appendChild(textInput);
 					
 					insertPosition++;
@@ -375,13 +387,14 @@
 		var t_dropdown = document.getElementById(evt.target.id);
 		var t = t_dropdown.options[t_dropdown.selectedIndex].text;
 		var r_value = eventChannelTable.rows[rowI].cells[0].innerHTML;
+		var eventConnectionDescription =eventChannelTable.rows[rowI].cells[2].firstChild.value;
 		
 		if(t!=='---'&& priviousDropDownEntry==='---'){
 			//generate and insert eventconnection into selectedChannel
 			var listener = ACS.event(r_value,'',listenerComponent.getId());
 			var trigger = ACS.event(t,'',triggerComponent.getId());
-			var eventConnectionDescription ='';
-			var eventConnection = {listener,trigger,eventConnectionDescription};
+			var description = eventConnectionDescription;
+			var eventConnection = {listener,trigger,description};
 			selectedChan.eventConnections.splice(insertPosition,0,eventConnection);
 		
 			//generate View for further connections to the same listener
@@ -403,7 +416,6 @@
 			}
 			dropdownList.selectedIndex='0';
 			dropdownList.setAttribute("id",eventTableId+ "/1/"+splitIdTriggerName);//TODO lenght of list;
-			eventTableId=eventTableId+1;
 			dropdownList.addEventListener("change",writeChannel);
 			dropdownList.addEventListener("focus",setPreviousSelected);
 			cell.appendChild(dropdownList);
@@ -414,20 +426,51 @@
 			cell = rowToInsert.insertCell(2);
 			textInput = document.createElement("INPUT");
 			textInput.setAttribute("type", "text"); 
+			textInput.setAttribute("id",eventTableId+ "/2/"+splitIdTriggerName);
+			eventTableId=eventTableId+1;
+			textInput.addEventListener("input",writeChannelDescription);
+			textInput.addEventListener("blur",writeChannelDescription);
 			cell.appendChild(textInput);
 		}else if(t!=='---'&& priviousDropDownEntry!=='---'){
 			selectedChan.eventConnections.splice(insertPosition,1);
 			var listener = ACS.event(r_value,'',listenerComponent.getId());
 			var trigger = ACS.event(t,'',triggerComponent.getId());
-			var eventConnectionDescription ='';
-			var eventConnection = {listener,trigger,eventConnectionDescription};
+			var description = eventConnectionDescription;
+			var eventConnection = {listener,trigger,description};
 			selectedChan.eventConnections.splice(insertPosition,0,eventConnection);
 		}else{
 			eventChannelTable.deleteRow(rowI);
 			selectedChan.eventConnections.splice(insertPosition,1);
 		}
-		priviousDropDownEntry=splitIdTriggerName;
-		
+		priviousDropDownEntry=splitIdTriggerName;	
+	}
+	
+	var writeChannelDescription = function(evt){
+		var selectedChan = actModel.eventChannelList[selectedElement];
+		var listenerComponent=selectedChan.startComponent;
+		var triggerComponent=selectedChan.endComponent;
+		var completeId = evt.target.id;
+		if(completeId){
+			var splitIda = completeId.split("/2/");
+			var splitId = splitIda[0];	
+			var	rowI = document.getElementById(completeId).parentNode.parentNode.rowIndex;
+			var insertPosition = getPositionForChannelEven(rowI);
+			var tableLenght = eventChannelTable.rows.length;
+			var t_dropdown = eventChannelTable.rows[rowI].cells[1].firstChild;
+			console.log(t_dropdown);
+			var t = t_dropdown.options[t_dropdown.selectedIndex].text;
+			var r_value = eventChannelTable.rows[rowI].cells[0].innerHTML;
+			var eventConnectionDescription =eventChannelTable.rows[rowI].cells[2].firstChild.value;	
+			
+			if(t!=="---"){
+				selectedChan.eventConnections.splice(insertPosition,1);
+				var listener = ACS.event(r_value,'',listenerComponent.getId());
+				var trigger = ACS.event(t,'',triggerComponent.getId());
+				var description = eventConnectionDescription;
+				var eventConnection = {listener,trigger,description};
+				selectedChan.eventConnections.splice(insertPosition,0,eventConnection);
+			}
+		}
 	}
 	
 	//class needed methodes helper functions
