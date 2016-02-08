@@ -43,6 +43,8 @@
 	var selectedElement;
 	var flagActiveModelChanged=false;
 	var eventChannelTable=document.createElement('table');; 
+	var priviousDropDownEntry = null; //stores the selected dropdownvalue before entry is changed
+	var eventTableId=0;
 // ***********************************************************************************************************************
 // ************************************************** private methods ****************************************************
 // ***********************************************************************************************************************
@@ -84,13 +86,8 @@
 			generateChannelEventsForChannel();
 		}
 
-		}
-		
-		
-		/*if(actModel.selectedItemsList.length>1){
-		
-		clearPropertyEditor();
-		}*/
+		}	
+
 	}
 	
 		//generate the parts / fields for the properties for the selected component
@@ -235,24 +232,76 @@
 		cell.innerHTML='Description';
 		
 		for(var h = 0; h<endcomp.listenEventList.length; h++){
-				var eventName=endcomp.listenEventList[h].getId();
-				row[h+1] = eventChannelTable.insertRow(-1);
-				cell = row[h+1].insertCell(0);
-				cell.innerHTML = eventName;
+			var eventName=endcomp.listenEventList[h].getId();
+			row[h+1] = eventChannelTable.insertRow(-1);
+			cell = row[h+1].insertCell(0);
+			cell.innerHTML = eventName;
 				
-				cell = row[h+1].insertCell(1);
-				dropdownList = null;
-				dropdownList = document.createElement('select');
-				for(l=0;l<startcomp.triggerEventList.length;l++){
-						dropdownList.appendChild(new Option(startcomp.triggerEventList[l].getId(),l));
+			cell = row[h+1].insertCell(1);
+			dropdownList = null;
+			dropdownList = document.createElement('select');
+			for(var l=0;l<startcomp.triggerEventList.length+1;l++){
+				if(l===0){
+					dropdownList.appendChild(new Option('---',l));
 				}
-				dropdownList.setAttribute("id",h+ "/1/");
-				dropdownList.addEventListener("change",writeChannel);
-				cell.appendChild(dropdownList);
-				cell = row[h+1].insertCell(2);
-				textInput = document.createElement("INPUT");
-				textInput.setAttribute("type", "text"); 
-				cell.appendChild(textInput);
+				else{
+					dropdownList.appendChild(new Option(startcomp.triggerEventList[l-1].getId(),l));
+				}
+			}
+			dropdownList.selectedIndex='0';
+			dropdownList.setAttribute("id",eventTableId+ "/1/"+eventName);
+			eventTableId=eventTableId+1;
+			dropdownList.addEventListener("change",writeChannel);
+			dropdownList.addEventListener("focus",setPreviousSelected);
+			cell.appendChild(dropdownList);
+			cell = row[h+1].insertCell(2);
+			textInput = document.createElement("INPUT");
+			textInput.setAttribute("type", "text"); 
+			cell.appendChild(textInput);
+		}
+		
+		var insertPosition = 1;
+		for(var h = 0; h<endcomp.listenEventList.length; h++){
+			var eventName=endcomp.listenEventList[h].getId();
+			
+			for(var countx = 0; countx<chan.eventConnections.length; countx++){
+				var storedEventName=chan.eventConnections[countx].listener.getId();
+				var storedTriggerEventName=chan.eventConnections[countx].trigger.getId();
+				if(eventName===storedEventName){
+					var rowToInsert = eventChannelTable.insertRow(insertPosition);
+					cell = rowToInsert.insertCell(0);
+					cell.innerHTML = eventName;
+					
+					cell = rowToInsert.insertCell(1);
+					dropdownList = null;
+					dropdownList = document.createElement('select');
+					var selectedEventIndex=0; 
+					for(var l=0;l<startcomp.triggerEventList.length+1;l++){
+						if(l===0){
+							dropdownList.appendChild(new Option('---',l));
+						}else{
+							dropdownList.appendChild(new Option(startcomp.triggerEventList[l-1].getId(),l));
+							if(startcomp.triggerEventList[l-1].getId()===storedTriggerEventName){
+								selectedEventIndex=l;
+							}
+						}
+						
+					}
+					dropdownList.selectedIndex=selectedEventIndex;
+					dropdownList.setAttribute("id",eventTableId+ "/1/"+eventName);
+					eventTableId=eventTableId+1;
+					dropdownList.addEventListener("change",writeChannel);
+					dropdownList.addEventListener("focus",setPreviousSelected);
+					cell.appendChild(dropdownList);
+					cell = rowToInsert.insertCell(2);
+					textInput = document.createElement("INPUT");
+					textInput.setAttribute("type", "text"); 
+					cell.appendChild(textInput);
+					
+					insertPosition++;
+				}
+			}
+			insertPosition++;
 		}
 		
 		
@@ -281,6 +330,7 @@
 			eventChannelTable = document.createElement('table');
 			row = [];
 			cell = null;
+			eventTableId=0;
 		}
 	}
 
@@ -288,11 +338,13 @@
 	//methods handling outgoing events
 	//================================
 	
-	//write the actual input modifiaction to the property
+		//write the actual input modifiaction to the property
 	var writeProperty = function(evt){
+		var t_temp = document.getElementById(evt.target.id);
+		console.info(t_temp);
 		var completeId = evt.target.id;
 		var splitIda = completeId.split("/1/");
-		var splitId = splitIda[0];				
+		var splitId = splitIda[0];		
 		var t = document.getElementById(evt.target.id).value;
 		// toggle t in case of a boolean value
 		if(t==='false'){
@@ -304,32 +356,104 @@
 		document.getElementById(evt.target.id).value='false';}
 		actModel.componentList[selectedElement].propertyList[splitId].setValue(t);
 	}
-	
+		
+		//write the selected element of the Dropdown list to an eventchannel
 	var writeChannel = function(evt){
 		console.log("====Channel Write");
-		console.info(evt);
 		var selectedChan = actModel.eventChannelList[selectedElement];
-		console.info(selectedChan);
 		var listenerComponent=selectedChan.startComponent;
 		var triggerComponent=selectedChan.endComponent;
 		
 		var completeId = evt.target.id;
 		var splitIda = completeId.split("/1/");
-		var splitId = splitIda[0];				
-		var t = document.getElementById(evt.target.id).value;
+		var splitId = splitIda[0];	
+		var splitIdTriggerName = splitIda[1];
+		var	rowI = document.getElementById(completeId).parentNode.parentNode.rowIndex;	
+		var insertPosition = getPositionForChannelEven(rowI);
+		var tableLenght = eventChannelTable.rows.length;
 		
-		var listener = ACS.event(t,'',listenerComponent.getId());
-		var trigger = ACS.event(t,'',triggerComponent.getId());
-		var eventConnectionDescription = '';
-						
-		var eventConnection = {listener,trigger,eventConnectionDescription};
-		selectedChan.eventConnections.push(eventConnection);
-		console.info(selectedChan);
-		//TODO Generate Event and Put it into EventChannel List
+		var t_dropdown = document.getElementById(evt.target.id);
+		var t = t_dropdown.options[t_dropdown.selectedIndex].text;
+		var r_value = eventChannelTable.rows[rowI].cells[0].innerHTML;
+		
+		if(t!=='---'&& priviousDropDownEntry==='---'){
+			//generate and insert eventconnection into selectedChannel
+			var listener = ACS.event(r_value,'',listenerComponent.getId());
+			var trigger = ACS.event(t,'',triggerComponent.getId());
+			var eventConnectionDescription ='';
+			var eventConnection = {listener,trigger,eventConnectionDescription};
+			selectedChan.eventConnections.splice(insertPosition,0,eventConnection);
+		
+			//generate View for further connections to the same listener
+			//var eventName=triggerComponent;
+			var rowToInsert = eventChannelTable.insertRow(rowI+1);
+			cell = rowToInsert.insertCell(0);
+			cell.innerHTML = splitIdTriggerName;
+				
+			cell = rowToInsert.insertCell(1);
+			dropdownList = null;
+			dropdownList = document.createElement('select');
+			for(l=0;l<listenerComponent.triggerEventList.length+1;l++){
+				if(l===0){
+					dropdownList.appendChild(new Option('---',l));
+				}
+				else{
+					dropdownList.appendChild(new Option(listenerComponent.triggerEventList[l-1].getId(),l));
+				}
+			}
+			dropdownList.selectedIndex='0';
+			dropdownList.setAttribute("id",eventTableId+ "/1/"+splitIdTriggerName);//TODO lenght of list;
+			eventTableId=eventTableId+1;
+			dropdownList.addEventListener("change",writeChannel);
+			dropdownList.addEventListener("focus",setPreviousSelected);
+			cell.appendChild(dropdownList);
+			cell = rowToInsert.insertCell(2);
+			textInput = document.createElement("INPUT");
+			textInput.setAttribute("type", "text"); 
+			cell.appendChild(textInput);
+			cell = rowToInsert.insertCell(2);
+			textInput = document.createElement("INPUT");
+			textInput.setAttribute("type", "text"); 
+			cell.appendChild(textInput);
+		}else if(t!=='---'&& priviousDropDownEntry!=='---'){
+			selectedChan.eventConnections.splice(insertPosition,1);
+			var listener = ACS.event(r_value,'',listenerComponent.getId());
+			var trigger = ACS.event(t,'',triggerComponent.getId());
+			var eventConnectionDescription ='';
+			var eventConnection = {listener,trigger,eventConnectionDescription};
+			selectedChan.eventConnections.splice(insertPosition,0,eventConnection);
+		}else{
+			eventChannelTable.deleteRow(rowI);
+			selectedChan.eventConnections.splice(insertPosition,1);
+		}
+		priviousDropDownEntry=splitIdTriggerName;
 		
 	}
 	
-	//class needed methodes
+	//class needed methodes helper functions
+	//======================================
+	
+	//returns the insert position of an event into an event channel based on the row position
+	var getPositionForChannelEven = function(rowInd){
+		var countera = 0;
+		for(var i = 1; i<rowInd; i++){
+			var x = eventChannelTable.rows[i];
+			var y = x.cells[1].childNodes[0].id;
+			var t_dropdown = document.getElementById(y);
+			var t = t_dropdown.options[t_dropdown.selectedIndex].text;
+			if(t!=='---'){
+				countera++;
+			}
+		}
+		console.info(countera);
+		return countera;
+	}
+	
+	var setPreviousSelected = function(evt){
+		console.log("jo wir schaffen das");
+		var t_dropdown = document.getElementById(evt.target.id);
+		priviousDropDownEntry = t_dropdown.options[t_dropdown.selectedIndex].text;		
+	}
 	
 	
 // ********************************************** handlers ***********************************************************
@@ -343,14 +467,12 @@
 		actModel.events.removeHandler('eventChannelAddedEvent',eventChannelAddedEvemtHandler);
 		actModel.events.removeHandler('eventChannelRemovedEvent',eventChannelRemovedEvemtHandler);
 		actModel.events.removeHandler('modelChangedEvent', modelChangedEventHandler);
-			actModel = modelList.getActModel();
+		actModel = modelList.getActModel();
 		actModel.events.registerHandler('componentAddedEvent',componentAddedEventHandler);
 		actModel.events.registerHandler('componentRemovedEvent',removeComponentEventHandler);
 		actModel.events.registerHandler('eventChannelAddedEvent',eventChannelAddedEvemtHandler);
 		actModel.events.registerHandler('eventChannelRemovedEvent',eventChannelRemovedEvemtHandler);
 		actModel.events.registerHandler('modelChangedEvent', modelChangedEventHandler);
-		
-		
 		
 		//clearPropertyEditor();
 		if(actModel.selectedItemsList.length===1){
