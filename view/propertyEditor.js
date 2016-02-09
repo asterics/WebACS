@@ -35,6 +35,9 @@ ACS.propertyEditor = function(modelList) {
 	var actModel = modelList.getActModel();
 	var propertyTable =document.createElement('table');
 	var inputPortTable = document.createElement('table');
+	var outputPortTable = document.createElement('table');
+	var eventTriggerTable = document.createElement('table');
+	var eventListenerTable =document.createElement('table');
 	var row = [];
 	var cell = null;
 	var dropdownList = document.createElement('select');
@@ -79,6 +82,9 @@ ACS.propertyEditor = function(modelList) {
 		if(selectedElementType ==="component"){
 			generatePropertiesForComponent();
 			generateInputPortsForComponent();
+			generateOuputPortsForComponent();
+			generateEventTriggersForComponent();
+			generateEventListenerForComponent();
 		}
 			
 		//Part for Events		
@@ -144,7 +150,6 @@ ACS.propertyEditor = function(modelList) {
 					cell.appendChild(boolInput);
 				}
 					//generate intage field
-					//console.log(typetemp);
 				if(tempStringa === '' && typetemp===4){
 					cell = row[h].insertCell(1);
 					numberInput = null;
@@ -157,7 +162,6 @@ ACS.propertyEditor = function(modelList) {
 					cell.appendChild(numberInput);
 				}
 			
-				//console.log(typetemp);
 				if(tempStringa === '' && typetemp===5){
 					cell = row[h].insertCell(1);
 					numberInput = null;
@@ -206,10 +210,57 @@ ACS.propertyEditor = function(modelList) {
 		document.getElementById('inputPanel').appendChild(inputPortTable);
 	}
 	
+		//generate the parts / fields for the outputs of the selected component
+	var generateOuputPortsForComponent = function(){
+		for(var h=0; h<actModel.componentList[selectedElement].outputPortList.length;h++){
+			var tempStringa=actModel.componentList[selectedElement].outputPortList[h].getId();
+			row[h] = outputPortTable.insertRow(-1);
+			cell = row[h].insertCell(0);
+			cell.innerHTML = tempStringa;
+		}			
+		document.getElementById('outputPanel').appendChild(outputPortTable);
+	}
+	
+	var generateEventTriggersForComponent = function(){
+		eventTriggerTable.innerHTML=actModel.componentList[selectedElement].getId()+':';
+		row[0] =eventTriggerTable.insertRow(-1);
+		cell =row[0].insertCell(0);
+		cell.innerHTML = "<b>Trigger</b>";
+		cell =row[0].insertCell(1);
+		cell.innerHTML = "<b>Description</b>";
+		for(var h=0; h<actModel.componentList[selectedElement].triggerEventList.length;h++){
+			var tempStringa=actModel.componentList[selectedElement].triggerEventList[h].getId();
+			var tempDes = actModel.componentList[selectedElement].triggerEventList[h].getDescription();
+			row[h] = eventTriggerTable.insertRow(-1);
+			cell = row[h].insertCell(0);
+			cell.innerHTML = tempStringa;
+			cell = row[h].insertCell(1);
+			cell.innerHTML = tempDes
+		}			
+		document.getElementById('triggerPanel').appendChild(eventTriggerTable);
+	}
+	
+	var generateEventListenerForComponent = function(){
+		eventListenerTable.innerHTML=actModel.componentList[selectedElement].getId()+':';
+		row[0] =eventListenerTable.insertRow(-1);
+		cell =row[0].insertCell(0);
+		cell.innerHTML = "<b>Listener</b>";
+		cell =row[0].insertCell(1);
+		cell.innerHTML = "<b>Description</b>";
+		for(var h=0; h<actModel.componentList[selectedElement].listenEventList.length;h++){
+			var tempStringa=actModel.componentList[selectedElement].listenEventList[h].getId();
+			var tempDes = actModel.componentList[selectedElement].listenEventList[h].getDescription();
+			row[h] = eventListenerTable.insertRow(-1);
+			cell = row[h].insertCell(0);
+			cell.innerHTML = tempStringa;
+			cell = row[h].insertCell(1);
+			cell.innerHTML = tempDes
+		}			
+		document.getElementById('listenerPanel').appendChild(eventListenerTable);
+	}
+	
 		//generate the event fileds for the channel based on startcompoment and endcomponent
-	var generateChannelEventsForChannel = function(){
-		
-		
+	var generateChannelEventsForChannel = function(){	
 		if(eventChannelTable.parentNode===document.getElementById('propEdPanel')){
 			document.getElementById('propEdPanel').removeChild(eventChannelTable);
 			eventChannelTable=null;
@@ -270,9 +321,7 @@ ACS.propertyEditor = function(modelList) {
 			for(var countx = 0; countx<chan.eventConnections.length; countx++){
 				var storedEventName=chan.eventConnections[countx].listener.getId();
 				var storedTriggerEventName=chan.eventConnections[countx].trigger.getId();
-				console.log(chan.eventConnections[countx]);
-			var eventDescription = chan.eventConnections[countx].description;
-				console.log(eventDescription);
+				var eventDescription = chan.eventConnections[countx].description;
 				if(eventName===storedEventName){
 					var rowToInsert = eventChannelTable.insertRow(insertPosition);
 					cell = rowToInsert.insertCell(0);
@@ -329,10 +378,31 @@ ACS.propertyEditor = function(modelList) {
 			row = [];
 			cell = null;
 		}
+		if(outputPortTable.parentNode===document.getElementById('outputPanel')){
+			document.getElementById('outputPanel').removeChild(outputPortTable);
+			outputPortTable=null;
+			outputPortTable= document.createElement('table');
+			row = [];
+			cell = null;
+		}
 		if(propertyTable.parentNode===document.getElementById('propEdPanel')){
 			document.getElementById('propEdPanel').removeChild(propertyTable);
 			propertyTable=null;
 			propertyTable = document.createElement('table');
+			row = [];
+			cell = null;
+		}
+		if(eventTriggerTable.parentNode===document.getElementById('triggerPanel')){
+			document.getElementById('triggerPanel').removeChild(eventTriggerTable);
+			eventTriggerTable=null;
+			eventTriggerTable = document.createElement('table');
+			row = [];
+			cell = null;
+		}
+		if(eventListenerTable.parentNode===document.getElementById('listenerPanel')){
+			document.getElementById('listenerPanel').removeChild(eventListenerTable);
+			eventListenerTable=null;
+			eventListenerTable = document.createElement('table');
 			row = [];
 			cell = null;
 		}
@@ -353,7 +423,6 @@ ACS.propertyEditor = function(modelList) {
 		//write the actual input modifiaction to the property
 	var writeProperty = function(evt){
 		var t_temp = document.getElementById(evt.target.id);
-		console.info(t_temp);
 		var completeId = evt.target.id;
 		var splitIda = completeId.split("/1/");
 		var splitId = splitIda[0];		
@@ -371,7 +440,6 @@ ACS.propertyEditor = function(modelList) {
 		
 		//write the selected element of the Dropdown list to an eventchannel
 	var writeChannel = function(evt){
-		console.log("====Channel Write");
 		var selectedChan = actModel.eventChannelList[selectedElement];
 		var listenerComponent=selectedChan.startComponent;
 		var triggerComponent=selectedChan.endComponent;
@@ -457,7 +525,6 @@ ACS.propertyEditor = function(modelList) {
 			var insertPosition = getPositionForChannelEven(rowI);
 			var tableLenght = eventChannelTable.rows.length;
 			var t_dropdown = eventChannelTable.rows[rowI].cells[1].firstChild;
-			console.log(t_dropdown);
 			var t = t_dropdown.options[t_dropdown.selectedIndex].text;
 			var r_value = eventChannelTable.rows[rowI].cells[0].innerHTML;
 			var eventConnectionDescription =eventChannelTable.rows[rowI].cells[2].firstChild.value;	
@@ -488,12 +555,10 @@ ACS.propertyEditor = function(modelList) {
 				countera++;
 			}
 		}
-		console.info(countera);
 		return countera;
 	}
 	
 	var setPreviousSelected = function(evt){
-		console.log("jo wir schaffen das");
 		var t_dropdown = document.getElementById(evt.target.id);
 		priviousDropDownEntry = t_dropdown.options[t_dropdown.selectedIndex].text;		
 	}
@@ -629,7 +694,6 @@ ACS.propertyEditor = function(modelList) {
 	li3.setAttribute('role', 'tab');
 	li3.setAttribute('tabindex', -1);
 	li3.textContent = ACS.vConst.PROPERTYEDITOR_OUTPUTHEADER;
-	//li3.textContent='Outputs';
 	document.getElementById(ACS.vConst.PROPERTYEDITOR_TABLIST).appendChild(li3);
 	div = document.createElement('div');
 	div.setAttribute('id', 'outputPanel');
@@ -654,6 +718,22 @@ ACS.propertyEditor = function(modelList) {
 	div.setAttribute('role', 'tabpanel');
 	document.getElementById(ACS.vConst.PROPERTYEDITOR_MOTHERPANEL).appendChild(div);
 	
+	var li5 = document.createElement('li');
+	li5.setAttribute('id', 'propertiesTriggerTab');
+	li5.setAttribute('class', 'tab propEdTab');
+	li5.setAttribute('aria-controls', 'listenerPanel');
+	li5.setAttribute('aria-selected', 'false');
+	li5.setAttribute('role', 'tab');
+	li5.setAttribute('tabindex', -1);
+	li5.textContent = ACS.vConst.PROPERTYEDITOR_LISTENERHEADER;
+	document.getElementById(ACS.vConst.PROPERTYEDITOR_TABLIST).appendChild(li5);
+	div = document.createElement('div');
+	div.setAttribute('id', 'listenerPanel');
+	div.setAttribute('class', 'panel propEdPanel');
+	div.setAttribute('aria-labelledby', 'listenerTab');
+	div.setAttribute('role', 'tabpanel');
+	document.getElementById(ACS.vConst.PROPERTYEDITOR_MOTHERPANEL).appendChild(div);
+	
 	propertiesTabPanel.updatePanel();
 	// activate the propertiesTab (a simple li.click() will not work in safari)
 	var click_ev = document.createEvent("MouseEvents");
@@ -661,13 +741,18 @@ ACS.propertyEditor = function(modelList) {
 	li1.dispatchEvent(click_ev);	
 	
 	document.getElementById('propEdPanel').setAttribute("style","overflow:auto;");
+	document.getElementById('inputPanel').setAttribute("style","overflow:auto;");
+	document.getElementById('outputPanel').setAttribute("style","overflow:auto;");
+	document.getElementById('triggerPanel').setAttribute("style","overflow:auto;");
+	document.getElementById('listenerPanel').setAttribute("style","overflow:auto;");
+	
 	
 	modelList.events.registerHandler('actModelChangedEvent', actModelChangedEventHandler);
 	//modelList.events.registerHandler('modelChangedEvent', modelChangedEventHandler);
 	actModel.events.registerHandler('modelChangedEvent', modelChangedEventHandler);
 	actModel.events.registerHandler('componentAddedEvent',componentAddedEventHandler);
 	actModel.events.registerHandler('componentRemovedEvent',removeComponentEventHandler);
-	actModel.events.registerHandler('componentRemovedEvent',removeComponentEventHandler);
+	//actModel.events.registerHandler('componentRemovedEvent',removeComponentEventHandler);
 	actModel.events.registerHandler('eventChannelAddedEvent',eventChannelAddedEvemtHandler);
 	actModel.events.registerHandler('eventChannelRemovedEvent',eventChannelRemovedEvemtHandler);
 	
