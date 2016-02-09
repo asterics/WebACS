@@ -199,11 +199,47 @@ ACS.propertyEditor = function(modelList) {
 	
 		//generate the parts / fields for the inputs of the selected property
 	var generateInputPortsForComponent = function(){
-
+			inputPortTable.innerHTML=actModel.componentList[selectedElement].getId()+':';
+			row[0] = inputPortTable.insertRow(-1);
+			cell = row[0].insertCell(0);
+			cell.innerHTML='<b>PortLabel </b>';
+			cell = row[0].insertCell(1);
+			cell.innerHTML='<b>PortDataType </b>';
+			cell = row[0].insertCell(2);
+			cell.innerHTML='<b>Synchronize </b>';
+			cell = row[0].insertCell(3);
+			cell.innerHTML='<b>MustBeConnected </b>';
+			cell = row[0].insertCell(4);
+			cell.innerHTML='<b>Description </b>';
 		for(var h=0; h<actModel.componentList[selectedElement].inputPortList.length;h++){
 			var tempStringa=actModel.componentList[selectedElement].inputPortList[h].getId();
-			row[h] = inputPortTable.insertRow(-1);
-			cell = row[h].insertCell(0);
+			row[h+1] = inputPortTable.insertRow(-1);
+			cell = row[h+1].insertCell(0);
+			cell.innerHTML = tempStringa;
+			tempStringa=actModel.componentList[selectedElement].inputPortList[h].getDataType();
+			cell = row[h+1].insertCell(1);
+			cell.innerHTML = stringOfEnum(ACS.dataType,tempStringa);
+			tempStringa=actModel.componentList[selectedElement].inputPortList[h].sync;
+			cell = row[h+1].insertCell(2);
+			boolInput = null;
+			boolInput = document.createElement("INPUT");
+			boolInput.setAttribute("type", "checkbox"); 
+			boolInput.setAttribute("value", tempStringa);
+			if(tempStringa==="true"){boolInput.setAttribute("checked", true);}
+			boolInput.setAttribute("id",h+ "/3/"+ "sync");
+			boolInput.addEventListener("change",writeInputPorts);
+			cell.appendChild(boolInput);
+			tempStringa=actModel.componentList[selectedElement].inputPortList[h].getMustBeConnected();
+			cell = row[h+1].insertCell(3);
+			boolInput = null;
+			boolInput = document.createElement("INPUT");
+			boolInput.setAttribute("type", "checkbox"); 
+			boolInput.setAttribute("value", tempStringa);
+			if(tempStringa==="true"){boolInput.setAttribute("checked", true);}
+			boolInput.setAttribute('disabled', 'disabled');
+			cell.appendChild(boolInput);
+			tempStringa=''; //TODO get description
+			cell = row[h+1].insertCell(4);
 			cell.innerHTML = tempStringa;
 		}
 			
@@ -212,13 +248,28 @@ ACS.propertyEditor = function(modelList) {
 	
 		//generate the parts / fields for the outputs of the selected component
 	var generateOuputPortsForComponent = function(){
+			outputPortTable.innerHTML=actModel.componentList[selectedElement].getId()+':';
+			row[0] = outputPortTable.insertRow(-1);
+			cell = row[0].insertCell(0);
+			cell.innerHTML='<b>Port Label </b>';
+			cell = row[0].insertCell(1);
+			cell.innerHTML='<b>PortDataType </b>';
+			cell = row[0].insertCell(2);
+			cell.innerHTML='<b>Description </b>';
 		for(var h=0; h<actModel.componentList[selectedElement].outputPortList.length;h++){
-			var tempStringa=actModel.componentList[selectedElement].outputPortList[h].getId();
-			row[h] = outputPortTable.insertRow(-1);
-			cell = row[h].insertCell(0);
+			tempStringa=actModel.componentList[selectedElement].outputPortList[h].getId();
+			row[h+1] = outputPortTable.insertRow(-1);
+			cell = row[h+1].insertCell(0);
 			cell.innerHTML = tempStringa;
-		}			
+			tempStringa=actModel.componentList[selectedElement].outputPortList[h].getDataType();
+			cell = row[h+1].insertCell(1);
+			cell.innerHTML = stringOfEnum(ACS.dataType,tempStringa);
+			tempStringa=''; //TODO get description
+			cell = row[h+1].insertCell(2);
+			cell.innerHTML = tempStringa;
+		}	
 		document.getElementById('outputPanel').appendChild(outputPortTable);
+		
 	}
 	
 	var generateEventTriggersForComponent = function(){
@@ -540,6 +591,23 @@ ACS.propertyEditor = function(modelList) {
 		}
 	}
 	
+	var writeInputPorts = function(evt){
+		var t_temp = document.getElementById(evt.target.id);
+		var completeId = evt.target.id;
+		var splitIda = completeId.split("/3/");
+		var splitId = splitIda[0];		
+		var t = document.getElementById(evt.target.id).value;
+		// toggle t in case of a boolean value
+		if(t==='false'){
+		t='true';
+		document.getElementById(evt.target.id).value='true';
+		}
+		else if(t==='true'){
+		t='false';
+		document.getElementById(evt.target.id).value='false';}
+		actModel.componentList[selectedElement].inputPortList[splitId ].sync=t;
+	}
+	
 	//class needed methodes helper functions
 	//======================================
 	
@@ -563,6 +631,10 @@ ACS.propertyEditor = function(modelList) {
 		priviousDropDownEntry = t_dropdown.options[t_dropdown.selectedIndex].text;		
 	}
 	
+	var stringOfEnum = function(enum1,value1){
+		for (var k in enum1) if (enum1[k] == value1) return k;
+		return null;
+	}
 	
 // ********************************************** handlers ***********************************************************
 	
