@@ -538,10 +538,10 @@ ACS.propertyEditor = function(modelList) {
 			dropdownList.addEventListener("change",writeChannel);
 			dropdownList.addEventListener("focus",setPreviousSelected);
 			cell.appendChild(dropdownList);
-			cell = rowToInsert.insertCell(2);
+			/*cell = rowToInsert.insertCell(2);
 			textInput = document.createElement("INPUT");
 			textInput.setAttribute("type", "text"); 
-			cell.appendChild(textInput);
+			cell.appendChild(textInput);*/
 			cell = rowToInsert.insertCell(2);
 			textInput = document.createElement("INPUT");
 			textInput.setAttribute("type", "text"); 
