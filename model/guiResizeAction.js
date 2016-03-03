@@ -26,13 +26,13 @@
  * limitations under the License.
  */
  
-ACS.addEventChannelAction = function(parentModel, // ACS.model
-									 ec) { // ACS.eventChannel
+ACS.guiResizeAction = function(parentModel, 	// ACS.model
+							   gui) {	// ACS.gui
 
 // ***********************************************************************************************************************
 // ************************************************** private variables **************************************************
 // ***********************************************************************************************************************
-			
+
 // ***********************************************************************************************************************
 // ************************************************** private methods ****************************************************
 // ***********************************************************************************************************************
@@ -43,19 +43,31 @@ ACS.addEventChannelAction = function(parentModel, // ACS.model
 	var returnObj = ACS.action(parentModel);
 	
 	returnObj.execute = function() {
-		parentModel.addEventChannel(ec);
-		parentModel.undoStack.push(returnObj);
+		if (!endSize) {
+			// set endSize to current values
+			endSize = {width: gui.getWidth(),
+					   height: gui.getHeight()};
+		} else {
+			// assume that this is a redo and resize the gui
+			gui.setNewSize(endSize);
+		}
+		parentModel.guiUndoStack.push(returnObj);
 	}
 	
 	returnObj.undo = function() {
-		parentModel.removeEventChannel(ec);
-		parentModel.redoStack.push(returnObj);
+		// reset gui to original size
+		gui.setNewSize(startSize);
+		parentModel.guiRedoStack.push(returnObj);
 	}
-	
+
 // ***********************************************************************************************************************
 // ************************************************** constructor code ***************************************************
 // ***********************************************************************************************************************
-	parentModel.redoStack = [];
+	parentModel.guiRedoStack = [];
+	var endSize = null;
+
+	var startSize = {width: gui.getWidth(),
+					 height: gui.getHeight()};
 	
 	return returnObj;
 }

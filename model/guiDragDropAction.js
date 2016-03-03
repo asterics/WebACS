@@ -26,13 +26,13 @@
  * limitations under the License.
  */
  
-ACS.addEventChannelAction = function(parentModel, // ACS.model
-									 ec) { // ACS.eventChannel
+ACS.guiDragDropAction = function(parentModel, 	// ACS.model
+								 guis) {	// Array<ACS.gui>
 
 // ***********************************************************************************************************************
 // ************************************************** private variables **************************************************
 // ***********************************************************************************************************************
-			
+
 // ***********************************************************************************************************************
 // ************************************************** private methods ****************************************************
 // ***********************************************************************************************************************
@@ -43,19 +43,40 @@ ACS.addEventChannelAction = function(parentModel, // ACS.model
 	var returnObj = ACS.action(parentModel);
 	
 	returnObj.execute = function() {
-		parentModel.addEventChannel(ec);
-		parentModel.undoStack.push(returnObj);
+		if (endCoord.length === 0) {
+			// set end coordinates to current values
+			for (var i = 0; i < guis.length; i++) {
+				endCoord[i] = {x: guis[i].getX(),
+							   y: guis[i].getY()};
+			}
+		} else {
+			// assume that this is a redo and reposition the guis
+			for (var i = 0; i < guis.length; i++) {
+				guis[i].setNewPosition(endCoord[i]);
+			}
+		}
+		parentModel.guiUndoStack.push(returnObj);
 	}
 	
 	returnObj.undo = function() {
-		parentModel.removeEventChannel(ec);
-		parentModel.redoStack.push(returnObj);
+		// reset guis to start coordinates
+		for (var i = 0; i <guis.length; i++) {
+			guis[i].setNewPosition(startCoord[i]);
+		}
+		parentModel.guiRedoStack.push(returnObj);
 	}
-	
+
 // ***********************************************************************************************************************
 // ************************************************** constructor code ***************************************************
 // ***********************************************************************************************************************
-	parentModel.redoStack = [];
+	parentModel.guiRedoStack = [];
+	var startCoord = [];
+	var endCoord = [];
+
+	for (var i = 0; i < guis.length; i++) {
+		startCoord[i] = {x: guis[i].getX(),
+						 y: guis[i].getY()};
+	}
 	
 	return returnObj;
 }

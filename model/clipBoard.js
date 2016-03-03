@@ -78,8 +78,8 @@ ACS.clipBoard = function() {
 	
 	var countExtensions = function(id) {
 		var count = 0;
-		var extLength = ACS.mConst.IDEXTENSION.length;
-		while (id.substr(-extLength, extLength) === ACS.mConst.IDEXTENSION) {
+		var extLength = ACS.mConst.CLIPBOARD_IDEXTENSION.length;
+		while (id.substr(-extLength, extLength) === ACS.mConst.CLIPBOARD_IDEXTENSION) {
 			id = id.slice(0, id.length - extLength);
 			count++
 		}
@@ -93,7 +93,7 @@ ACS.clipBoard = function() {
 		while (!newPort && (i < portList.length)) {
 			var ext = '';
 			if (extendId) {
-				ext = ACS.mConst.IDEXTENSION;
+				ext = ACS.mConst.CLIPBOARD_IDEXTENSION;
 			}
 			if ((portList[i].getId() === oldPort.getId()) && (portList[i].getParentComponent().getId() === oldPort.getParentComponent().getId() + ext)) {
 				newPort = portList[i];
@@ -110,7 +110,7 @@ ACS.clipBoard = function() {
 		while (!newEvent && (i < eventList.length)) {
 			var ext = '';
 			if (extendId) {
-				ext = ACS.mConst.IDEXTENSION;
+				ext = ACS.mConst.CLIPBOARD_IDEXTENSION;
 			}
 			if ((eventList[i].getId() === oldEvent.getId()) && (eventList[i].getParentComponent().getId() === oldEvent.getParentComponent().getId() + ext)) {
 				newEvent = eventList[i];
@@ -127,7 +127,7 @@ ACS.clipBoard = function() {
 		while (!newComp && (i < compList.length)) {
 			var ext = '';
 			if (extendId) {
-				ext = ACS.mConst.IDEXTENSION;
+				ext = ACS.mConst.CLIPBOARD_IDEXTENSION;
 			}
 			if (compList[i].getId() === oldComp.getId() + ext) {
 				newComp = compList[i];
@@ -146,7 +146,7 @@ ACS.clipBoard = function() {
 		// decide on extension for id
 		var ext = '';
 		if (extendId) {
-			ext = ACS.mConst.IDEXTENSION;
+			ext = ACS.mConst.CLIPBOARD_IDEXTENSION;
 		}
 		// do the copying
 		for (var i = 0; i < oldList.length; i++) {
@@ -195,7 +195,7 @@ ACS.clipBoard = function() {
 		var newList = [];
 		var ext = '';
 		if (extendId) {
-			ext = ACS.mConst.IDEXTENSION;
+			ext = ACS.mConst.CLIPBOARD_IDEXTENSION;
 		}		
 		for (var i = 0; i < oldList.length; i++) {
 			var channel = ACS.dataChannel(oldList[i].getId().valueOf() + ext);
@@ -215,7 +215,7 @@ ACS.clipBoard = function() {
 		var newList = [];
 		var ext = '';
 		if (extendId) {
-			ext = ACS.mConst.IDEXTENSION;
+			ext = ACS.mConst.CLIPBOARD_IDEXTENSION;
 		}	
 		for (var i = 0; i < oldList.length; i++) {
 			var channel = ACS.eventChannel(oldList[i].getId().valueOf() + ext);
@@ -295,7 +295,7 @@ ACS.clipBoard = function() {
 					var j = 0;
 					while (j < model.componentList.length) {
 						if (model.componentList[j].getId() === pasteComponents[i].getId()) {
-							pasteComponents[i].setId(pasteComponents[i].getId() + ACS.mConst.IDEXTENSION);
+							pasteComponents[i].setId(pasteComponents[i].getId() + ACS.mConst.CLIPBOARD_IDEXTENSION);
 							j = 0; // must start checking from the beginning, since the ID has changed and all components have to be checked for the new ID
 						} else {
 							j++;
@@ -306,7 +306,7 @@ ACS.clipBoard = function() {
 					while (j < pasteComponents.length) {
 						if (j !== i) { // avoid comparing with self
 							if (pasteComponents[j].getId() === pasteComponents[i].getId()) {
-								pasteComponents[i].setId(pasteComponents[i].getId() + ACS.mConst.IDEXTENSION);
+								pasteComponents[i].setId(pasteComponents[i].getId() + ACS.mConst.CLIPBOARD_IDEXTENSION);
 								j = 0; // must start checking from the beginning, since the ID has changed and all components have to be checked for the new ID
 							} else {
 								j++;

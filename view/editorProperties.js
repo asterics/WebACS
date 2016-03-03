@@ -26,36 +26,82 @@
  * limitations under the License.
  */
  
-ACS.addEventChannelAction = function(parentModel, // ACS.model
-									 ec) { // ACS.eventChannel
+ACS.editorProperties = function() {
 
 // ***********************************************************************************************************************
 // ************************************************** private variables **************************************************
 // ***********************************************************************************************************************
-			
+	var enableGrid = ACS.vConst.EDITORPROPERTIES_ENABLEGRID;
+	var showGrid = ACS.vConst.EDITORPROPERTIES_SHOWGRID;
+	var gridSteps = ACS.vConst.EDITORPROPERTIES_GRIDSTEPS;
+	var screenRes = ACS.vConst.EDITORPROPERTIES_SCREENRES;
+	var guiDesignerSize; // Object {width, height}
+
 // ***********************************************************************************************************************
 // ************************************************** private methods ****************************************************
 // ***********************************************************************************************************************
+	var setGuiDesignerSize = function() {
+		switch (screenRes) {
+			case ACS.screenResType.FIVEFOUR:	guiDesignerSize = {width: ACS.vConst.EDITORPROPERTIES_SCREENRESFIVEFOUR_X, height: ACS.vConst.EDITORPROPERTIES_SCREENRESFIVEFOUR_Y};
+												break;
+			case ACS.screenResType.SIXTEENNINE: guiDesignerSize = {width: ACS.vConst.EDITORPROPERTIES_SCREENRESSIXTEENNINE_X, height: ACS.vConst.EDITORPROPERTIES_SCREENRESSIXTEENNINE_Y};
+												break;
+			case ACS.screenResType.FOURTHREE:	guiDesignerSize = {width: ACS.vConst.EDITORPROPERTIES_SCREENRESFOURTHREE_X, height: ACS.vConst.EDITORPROPERTIES_SCREENRESFOURTHREE_Y};
+												break;
+		}
+	}
 	
 // ***********************************************************************************************************************
 // ************************************************** public stuff *******************************************************
 // ***********************************************************************************************************************
-	var returnObj = ACS.action(parentModel);
+	var returnObj = {};
 	
-	returnObj.execute = function() {
-		parentModel.addEventChannel(ec);
-		parentModel.undoStack.push(returnObj);
+	returnObj.events = ACS.eventManager();
+	
+	returnObj.getEnableGrid = function() {
+		return enableGrid;
 	}
 	
-	returnObj.undo = function() {
-		parentModel.removeEventChannel(ec);
-		parentModel.redoStack.push(returnObj);
+	returnObj.setEnableGrid = function(enabled) { // bool
+		enableGrid = enabled;
 	}
 	
+	returnObj.getShowGrid = function() {
+		return showGrid;
+	}
+
+	returnObj.setShowGrid = function(show) { // bool
+		showGrid = show;
+		returnObj.events.fireEvent('showGridChangedEvent');
+	}	
+
+	returnObj.getGridSteps = function() {
+		return gridSteps;
+	}
+	
+	returnObj.setGridSteps = function(newSteps) { // ACS.gridStepType
+		gridSteps = newSteps;
+		returnObj.events.fireEvent('gridStepsChangedEvent');
+	}	
+
+	returnObj.getScreenRes = function() {
+		return screenRes;
+	}
+
+	returnObj.setScreenRes = function(newScreenRes) { // ACS.screenResType
+		screenRes = newScreenRes;
+		setGuiDesignerSize();
+		returnObj.events.fireEvent('screenResChangedEvent');
+	}
+	
+	returnObj.getGuiDesignerSize = function() {
+		return guiDesignerSize;
+	}
+
 // ***********************************************************************************************************************
 // ************************************************** constructor code ***************************************************
 // ***********************************************************************************************************************
-	parentModel.redoStack = [];
+	setGuiDesignerSize();
 	
 	return returnObj;
 }

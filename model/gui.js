@@ -27,10 +27,10 @@
  */
  
  ACS.gui = function(x, // int
-				   y, // int
-				   width, // int
-				   height, // int
-				   isExternal) { // bool
+				    y, // int
+				    width, // int
+				    height, // int
+				    isExternal) { // bool
 
 // ***********************************************************************************************************************
 // ************************************************** private variables **************************************************
@@ -45,14 +45,39 @@
 // ***********************************************************************************************************************
 	var returnObj = {};
 	
-	returnObj.x = x;
-	returnObj.y = y;
-	returnObj.width = width;
-	returnObj.height = height;
+	returnObj.events = ACS.eventManager();
+	
+	returnObj.setNewPosition = function(pos) { // Object {x: int, y: int}
+		x = pos.x;
+		y = pos.y;
+		returnObj.events.fireEvent('guiPositionChangedEvent');
+	}
+	
+	returnObj.setNewSize = function(newSize) { // Object {width: int, height: int}
+		width = newSize.width;
+		height = newSize.height;
+		returnObj.events.fireEvent('guiSizeChangedEvent');
+	}
 	
 	returnObj.getIsExternal = function() {
 		return isExternal;
+	}	
+	
+	returnObj.getX = function() {
+		return x;
 	}
+	
+	returnObj.getY = function() {
+		return y;
+	}
+	
+	returnObj.getWidth = function() {
+		return width;
+	}	
+
+	returnObj.getHeight = function() {
+		return height;
+	}		
 
 // ***********************************************************************************************************************
 // ************************************************** constructor code ***************************************************

@@ -177,7 +177,7 @@
 				if(actModel.componentList[i].getIsSelected()){
 					selectedElement = i;
 				}
-			}	
+			}
 			
 			for(var h=0; h<actModel.componentList[selectedElement].inputPortList.length;h++){
 				var tempStringa=actModel.componentList[selectedElement].inputPortList[h].getId();

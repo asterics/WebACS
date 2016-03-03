@@ -35,6 +35,7 @@
 	var canvasTabPanel = ACS.tabPanel(ACS.vConst.CANVASVIEW_MOTHERPANEL, 'canvasTab', 'canvasPanel');
 	var modelViewList = [];
 	var panelId = 0;
+	var editorProperties = ACS.editorProperties();
 	
 // ***********************************************************************************************************************
 // ************************************************** private methods ****************************************************
@@ -105,7 +106,7 @@
 		div.setAttribute('aria-labelledby', 'tab' + panelId);
 		div.setAttribute('role', 'tabpanel');
 		document.getElementById(ACS.vConst.CANVASVIEW_MOTHERPANEL).appendChild(div);
-		modelViewList[panelId] = ACS.modelView('canvasPanel' + panelId, actModel, clipBoard);
+		modelViewList[panelId] = ACS.modelView('canvasPanel' + panelId, actModel, clipBoard, editorProperties);
 		panelId++;
 		canvasTabPanel.updatePanel();
 		// activate the tab (a simple li.click() will not work in safari)

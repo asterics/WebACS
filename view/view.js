@@ -178,11 +178,35 @@ ACS.view = function(modelList, // ACS.modelList
 	}
 	
 	var undoHandler = function() {
-		if (modelList.getActModel().undoStack.length > 0) modelList.getActModel().undoStack.pop().undo();
+		// find out, if the Model Designer or the GUI Designer is active, then pop from the corresponding stack
+		var modelTabs = null;
+		var canvasPanels = document.getElementsByClassName('canvasPanel');
+		for (var i = 0; i < canvasPanels.length; i++) {
+			if (canvasPanels[i].getAttribute('aria-hidden') === 'false') {
+				modelTabs = document.getElementsByClassName('modelTab');
+			}
+		}
+		if (modelTabs[0].getAttribute('aria-selected') === 'true') {
+			if (modelList.getActModel().undoStack.length > 0) modelList.getActModel().undoStack.pop().undo();
+		} else {
+			if (modelList.getActModel().guiUndoStack.length > 0) modelList.getActModel().guiUndoStack.pop().undo();
+		}
 	}
 	
 	var redoHandler = function() {
-		if (modelList.getActModel().redoStack.length > 0) modelList.getActModel().redoStack.pop().execute();
+		// find out, if the Model Designer or the GUI Designer is active, then pop from the corresponding stack
+		var modelTabs = null;
+		var canvasPanels = document.getElementsByClassName('canvasPanel');
+		for (var i = 0; i < canvasPanels.length; i++) {
+			if (canvasPanels[i].getAttribute('aria-hidden') === 'false') {
+				modelTabs = document.getElementsByClassName('modelTab');
+			}
+		}
+		if (modelTabs[0].getAttribute('aria-selected') === 'true') {
+			if (modelList.getActModel().redoStack.length > 0) modelList.getActModel().redoStack.pop().execute();
+		} else {
+			if (modelList.getActModel().guiRedoStack.length > 0) modelList.getActModel().guiRedoStack.pop().execute();
+		}
 	}
 	
 	var AREStatusChangedEventHandler = function() {

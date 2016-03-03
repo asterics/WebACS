@@ -47,10 +47,13 @@
 // ***********************************************************************************************************************
 	var returnObj = {};
 	
+	returnObj.events = ACS.eventManager();
+	
 	returnObj.areGuiWindow = ACS.gui(ACS.mConst.MODELGUI_AREGUIWINDOW_X, ACS.mConst.MODELGUI_AREGUIWINDOW_Y, ACS.mConst.MODELGUI_AREGUIWINDOW_WIDTH, ACS.mConst.MODELGUI_AREGUIWINDOW_HEIGHT, false);
 	
 	returnObj.setDecoration = function(dec) {
 		decoration = dec;
+		returnObj.events.fireEvent('decorationChangedEvent');
 	}
 	
 	returnObj.getDecoration = function() {
@@ -83,6 +86,7 @@
 
 	returnObj.setShowControlPanel = function(scp) {
 		showControlPanel = scp;
+		returnObj.events.fireEvent('showControlPanelChangedEvent');
 	}
 	
 	returnObj.getShowControlPanel = function() {

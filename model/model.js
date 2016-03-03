@@ -427,6 +427,8 @@
 	returnObj.visualAreaMarkerList = []; // Array<ACS.visualAreaMarker>
 	returnObj.undoStack = []; // Array<ACS.action>
 	returnObj.redoStack = []; // Array<ACS.action>
+	returnObj.guiUndoStack = []; // Array<ACS.action>
+	returnObj.guiRedoStack = []; // Array<ACS.action>
 	returnObj.metaDataList = []; // Array<ACS.metaData>
 	returnObj.events = ACS.eventManager();
 	returnObj.modelName = generateModelName();

@@ -137,8 +137,10 @@
 		modelLayer.draw();
 	});
 	returnObj.line.on('mouseout', function(e) {
-		returnObj.line.strokeWidth(ACS.vConst.CHANNELVIEW_STROKEWIDTH);
-		modelLayer.draw();
+		if (returnObj.line) { // mouseout will fire if channel has already been deleted, when mouse was over the channel at the time of deleting it
+			returnObj.line.strokeWidth(ACS.vConst.CHANNELVIEW_STROKEWIDTH);
+			modelLayer.draw();
+		}
 	});
 	
 	// do the selecting

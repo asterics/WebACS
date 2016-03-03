@@ -56,3 +56,16 @@ ACS.statusType = {
 	STOPPED: 5,
 	CONNECTIONLOST: 6
 };
+
+ACS.gridStepType = {
+	SMALL: 1,
+	MEDIUM: 2,
+	LARGE: 3,
+	HUGE: 4
+}
+
+ACS.screenResType = {
+	FIVEFOUR: 1,
+	SIXTEENNINE: 2,
+	FOURTHREE: 3
+}

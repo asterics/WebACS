@@ -28,7 +28,8 @@
  
  ACS.modelView = function(	modelContainerId, // String
 							model, // ACS.modelList
-							clipBoard) { // ACS.clipBoard
+							clipBoard, // ACS.clipBoard
+							editorProperties) { // ACS.editorProperties
 							
 // ***********************************************************************************************************************
 // ************************************************** private variables **************************************************
@@ -38,10 +39,10 @@
 	var dataChannelViewList = []; // Array<ACS.dataChannelView>
 	var eventChannelViewList = []; // Array<ACS.eventChannelView>
 	var visualAreaMarkerViewList = []; // Array<ACS.visualMarkerView>
+
+	var guiView; // ACS.guiView
 	var modelStage; // Kinetic.Stage
 	var modelLayer; // Kinetic.Layer
-	var guiStage; // Kinetic.Stage
-	var guiLayer; // Kinetic.Layer
 	var focusRect = null; // Kinetic.Rect
 	var dragAct = null; // ACS.dragDropAction
 	var dragging = false; // boolean
@@ -65,7 +66,7 @@
 		var changedComponents = [];
 		for (i = 0; i < model.componentList.length; i++) {
 			if (model.componentList[i].foundInComponentCollection) {
-				componentViewList.push(ACS.componentView(model.componentList[i], model, returnObj, modelLayer, guiLayer));
+				componentViewList.push(ACS.componentView(model.componentList[i], model, returnObj, modelLayer));
 				if (!model.componentList[i].matchesComponentCollection) {
 					changedComponents.push(model.componentList[i]);
 				}
@@ -240,7 +241,7 @@
 	}
 	
 	var componentAddedEventHandler = function() {
-		if (model.componentList.length > 0) componentViewList.push(ACS.componentView(model.componentList[model.componentList.length - 1], model, returnObj, modelLayer, guiLayer));
+		if (model.componentList.length > 0) componentViewList.push(ACS.componentView(model.componentList[model.componentList.length - 1], model, returnObj, modelLayer));
 		modelLayer.draw();
 	}
 	
@@ -378,17 +379,7 @@
 		height: ACS.vConst.MODELVIEW_MODELDESIGNERSIZEY
 	});
 	modelStage.add(modelLayer);
-	guiStage = new Kinetic.Stage({
-		container: 'guiPanel' + modelContainerId,
-		width: ACS.vConst.MODELVIEW_GUIDESIGNERSIZEX,
-		height: ACS.vConst.MODELVIEW_GUIDESIGNERSIZEY
-	});
-	guiLayer = new Kinetic.Layer({
-		width: ACS.vConst.MODELVIEW_GUIDESIGNERSIZEX,
-		height: ACS.vConst.MODELVIEW_GUIDESIGNERSIZEY
-	});
-	guiStage.add(guiLayer);
-	// draw a rectangle over the whole layer - only then mouse-events can be caught with layer.on(...) in KineticJS
+	// draw a rectangle over the whole modelLayer - only then mouse-events can be caught with layer.on(...) in KineticJS
 	var transparentRect = new Kinetic.Rect({
 		x: 0,
 		y: 0,
@@ -546,6 +537,9 @@
 		dragging = false;
 		dragAct.execute();
 	});
+	
+	// instantiate guiView
+	guiView = ACS.guiView(model, modelContainerId, editorProperties);
 	
 	return returnObj;
 }

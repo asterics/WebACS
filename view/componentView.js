@@ -29,8 +29,7 @@
  ACS.componentView = function(	component, // ACS.component
 								model, // ACS.model
 								modelView, // ACS.modelView
-								modelLayer, // Kinetic.Layer
-								guiLayer) { // Kinetic.Layer
+								modelLayer) { // Kinetic.Layer
 								
 // ***********************************************************************************************************************
 // ************************************************** private variables **************************************************
