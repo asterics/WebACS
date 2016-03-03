@@ -26,7 +26,7 @@
  * limitations under the License.
  */
  
- ACS.propertyEditor = function(modelList) {
+ACS.propertyEditor = function(modelList) {
 
 // ***********************************************************************************************************************
 // ************************************************** private variables **************************************************
@@ -35,6 +35,9 @@
 	var actModel = modelList.getActModel();
 	var propertyTable =document.createElement('table');
 	var inputPortTable = document.createElement('table');
+	var outputPortTable = document.createElement('table');
+	var eventTriggerTable = document.createElement('table');
+	var eventListenerTable =document.createElement('table');
 	var row = [];
 	var cell = null;
 	var dropdownList = document.createElement('select');
@@ -42,27 +45,60 @@
 	var textInput;
 	var selectedElement;
 	var flagActiveModelChanged=false;
+	var eventChannelTable=document.createElement('table');; 
+	var priviousDropDownEntry = null; //stores the selected dropdownvalue before entry is changed
+	var eventTableId=0;
 // ***********************************************************************************************************************
 // ************************************************** private methods ****************************************************
 // ***********************************************************************************************************************
 	
 	//methodes handling incoming events
+	//=================================
+		
+		//generate view based on the type eventchannel or coponent and the selected tab 
 	var generateViews = function(){
+		
 		clearPropertyEditor();
-		generatePropertiesForComponent();
-		generateInputPortsForComponent();
-	}
-	
-	var generatePropertiesForComponent = function(){
-
-			if(actModel.selectedItemsList.length===1 || flagActiveModelChanged){//check if only one component is selected
+		var selectedElementType = null;
+		if(actModel.selectedItemsList.length===1 || flagActiveModelChanged){//check if only one component is selected
 			//get selected component
 			for(var i = 0; i<actModel.componentList.length;i++){
 				if(actModel.componentList[i].getIsSelected()){
 					selectedElement = i;
+					selectedElementType = "component";
 				}
 			}
-						
+			
+			for(var i = 0; i<actModel.eventChannelList.length;i++){
+				if(actModel.eventChannelList[i].getIsSelected()){
+					selectedElement = i;
+					selectedElementType = "channel";
+				}
+			}
+		
+
+		
+		//Part for component
+		if(selectedElementType ==="component"){
+			generatePropertiesForComponent();
+			generateInputPortsForComponent();
+			generateOuputPortsForComponent();
+			generateEventTriggersForComponent();
+			generateEventListenerForComponent();
+		}
+			
+		//Part for Events		
+		if(selectedElementType ==="channel"){
+			generateChannelEventsForChannel();
+		}
+
+		}	
+
+	}
+	
+		//generate the parts / fields for the properties for the selected component
+	var generatePropertiesForComponent = function(){
+
 			//if a new element is selected the old propertyEditor has to be removed from the panel
 			if(propertyTable.parentNode===document.getElementById('propEdPanel')){
 			document.getElementById('propEdPanel').removeChild(propertyTable);
@@ -72,6 +108,7 @@
 			row = [];
 			cell = null;
 			}
+			propertyTable.innerHTML=actModel.componentList[selectedElement].getId();
 			
 			//var tempString=actModel.componentList[selectedElement].getId();
 			for(var h=0; h<actModel.componentList[selectedElement].propertyList.length;h++){
@@ -113,7 +150,6 @@
 					cell.appendChild(boolInput);
 				}
 					//generate intage field
-					//console.log(typetemp);
 				if(tempStringa === '' && typetemp===4){
 					cell = row[h].insertCell(1);
 					numberInput = null;
@@ -126,7 +162,6 @@
 					cell.appendChild(numberInput);
 				}
 			
-				//console.log(typetemp);
 				if(tempStringa === '' && typetemp===5){
 					cell = row[h].insertCell(1);
 					numberInput = null;
@@ -151,59 +186,253 @@
 					textInput.addEventListener("input",writeProperty);
 					cell.appendChild(textInput);
 				}
-
-			}
-						
+			
 			//element.setAttribute("type", "button");
 			//element.setAttribute("value", tempString);
-
-			document.getElementById('propEdPanel').appendChild(propertyTable);
-		}
-
-		if(actModel.selectedItemsList.length>1 && !flagActiveModelChanged){
-			//console.info("More than one element selected");
-			if(propertyTable.parentNode==document.getElementById('propEdPanel')){
-			document.getElementById('propEdPanel').removeChild(propertyTable);
 			}
-		}
+			document.getElementById('propEdPanel').appendChild(propertyTable);
+
+
+
 		flagActiveModelChanged=false;
 	}
 	
+		//generate the parts / fields for the inputs of the selected property
 	var generateInputPortsForComponent = function(){
-		var selectedElement;
-		if(actModel.selectedItemsList.length===1){//check if only one component is selected
-			//get selected component
-			for(var i = 0; i<actModel.componentList.length;i++){
-				if(actModel.componentList[i].getIsSelected()){
-					selectedElement = i;
-				}
-			}
-			
-			for(var h=0; h<actModel.componentList[selectedElement].inputPortList.length;h++){
-				var tempStringa=actModel.componentList[selectedElement].inputPortList[h].getId();
-				row[h] = inputPortTable.insertRow(-1);
-				cell = row[h].insertCell(0);
-				cell.innerHTML = tempStringa;
-			}
-			
-			document.getElementById('inputPanel').appendChild(inputPortTable);
-				
+			inputPortTable.innerHTML=actModel.componentList[selectedElement].getId()+':';
+			row[0] = inputPortTable.insertRow(-1);
+			cell = row[0].insertCell(0);
+			cell.innerHTML='<b>PortLabel </b>';
+			cell = row[0].insertCell(1);
+			cell.innerHTML='<b>PortDataType </b>';
+			cell = row[0].insertCell(2);
+			cell.innerHTML='<b>Synchronize </b>';
+			cell = row[0].insertCell(3);
+			cell.innerHTML='<b>MustBeConnected </b>';
+			cell = row[0].insertCell(4);
+			cell.innerHTML='<b>Description </b>';
+		for(var h=0; h<actModel.componentList[selectedElement].inputPortList.length;h++){
+			var tempStringa=actModel.componentList[selectedElement].inputPortList[h].getId();
+			row[h+1] = inputPortTable.insertRow(-1);
+			cell = row[h+1].insertCell(0);
+			cell.innerHTML = tempStringa;
+			tempStringa=actModel.componentList[selectedElement].inputPortList[h].getDataType();
+			cell = row[h+1].insertCell(1);
+			cell.innerHTML = stringOfEnum(ACS.dataType,tempStringa);
+			tempStringa=actModel.componentList[selectedElement].inputPortList[h].sync;
+			cell = row[h+1].insertCell(2);
+			boolInput = null;
+			boolInput = document.createElement("INPUT");
+			boolInput.setAttribute("type", "checkbox"); 
+			boolInput.setAttribute("value", tempStringa);
+			if(tempStringa==="true"){boolInput.setAttribute("checked", true);}
+			boolInput.setAttribute("id",h+ "/3/"+ "sync");
+			boolInput.addEventListener("change",writeInputPorts);
+			cell.appendChild(boolInput);
+			tempStringa=actModel.componentList[selectedElement].inputPortList[h].getMustBeConnected();
+			cell = row[h+1].insertCell(3);
+			boolInput = null;
+			boolInput = document.createElement("INPUT");
+			boolInput.setAttribute("type", "checkbox"); 
+			boolInput.setAttribute("value", tempStringa);
+			if(tempStringa==="true"){boolInput.setAttribute("checked", true);}
+			boolInput.setAttribute('disabled', 'disabled');
+			cell.appendChild(boolInput);
+			tempStringa=''; //TODO get description
+			cell = row[h+1].insertCell(4);
+			cell.innerHTML = tempStringa;
 		}
-		
-		if(actModel.selectedItemsList.length>1){
-			//console.info("More than one element selected");
-			if(inputPortTable.parentNode==document.getElementById('inputPanel')){
-			document.getElementById('inputPanel').removeChild(inputPortTable);
-			}
-		}
+			
+		document.getElementById('inputPanel').appendChild(inputPortTable);
 	}
 	
+		//generate the parts / fields for the outputs of the selected component
+	var generateOuputPortsForComponent = function(){
+			outputPortTable.innerHTML=actModel.componentList[selectedElement].getId()+':';
+			row[0] = outputPortTable.insertRow(-1);
+			cell = row[0].insertCell(0);
+			cell.innerHTML='<b>Port Label </b>';
+			cell = row[0].insertCell(1);
+			cell.innerHTML='<b>PortDataType </b>';
+			cell = row[0].insertCell(2);
+			cell.innerHTML='<b>Description </b>';
+		for(var h=0; h<actModel.componentList[selectedElement].outputPortList.length;h++){
+			tempStringa=actModel.componentList[selectedElement].outputPortList[h].getId();
+			row[h+1] = outputPortTable.insertRow(-1);
+			cell = row[h+1].insertCell(0);
+			cell.innerHTML = tempStringa;
+			tempStringa=actModel.componentList[selectedElement].outputPortList[h].getDataType();
+			cell = row[h+1].insertCell(1);
+			cell.innerHTML = stringOfEnum(ACS.dataType,tempStringa);
+			tempStringa=''; //TODO get description
+			cell = row[h+1].insertCell(2);
+			cell.innerHTML = tempStringa;
+		}	
+		document.getElementById('outputPanel').appendChild(outputPortTable);
+		
+	}
+	
+	var generateEventTriggersForComponent = function(){
+		eventTriggerTable.innerHTML=actModel.componentList[selectedElement].getId()+':';
+		row[0] =eventTriggerTable.insertRow(-1);
+		cell =row[0].insertCell(0);
+		cell.innerHTML = "<b>Trigger</b>";
+		cell =row[0].insertCell(1);
+		cell.innerHTML = "<b>Description</b>";
+		for(var h=0; h<actModel.componentList[selectedElement].triggerEventList.length;h++){
+			var tempStringa=actModel.componentList[selectedElement].triggerEventList[h].getId();
+			var tempDes = actModel.componentList[selectedElement].triggerEventList[h].getDescription();
+			row[h] = eventTriggerTable.insertRow(-1);
+			cell = row[h].insertCell(0);
+			cell.innerHTML = tempStringa;
+			cell = row[h].insertCell(1);
+			cell.innerHTML = tempDes
+		}			
+		document.getElementById('triggerPanel').appendChild(eventTriggerTable);
+	}
+	
+	var generateEventListenerForComponent = function(){
+		eventListenerTable.innerHTML=actModel.componentList[selectedElement].getId()+':';
+		row[0] =eventListenerTable.insertRow(-1);
+		cell =row[0].insertCell(0);
+		cell.innerHTML = "<b>Listener</b>";
+		cell =row[0].insertCell(1);
+		cell.innerHTML = "<b>Description</b>";
+		for(var h=0; h<actModel.componentList[selectedElement].listenEventList.length;h++){
+			var tempStringa=actModel.componentList[selectedElement].listenEventList[h].getId();
+			var tempDes = actModel.componentList[selectedElement].listenEventList[h].getDescription();
+			row[h] = eventListenerTable.insertRow(-1);
+			cell = row[h].insertCell(0);
+			cell.innerHTML = tempStringa;
+			cell = row[h].insertCell(1);
+			cell.innerHTML = tempDes
+		}			
+		document.getElementById('listenerPanel').appendChild(eventListenerTable);
+	}
+	
+		//generate the event fileds for the channel based on startcompoment and endcomponent
+	var generateChannelEventsForChannel = function(){	
+		if(eventChannelTable.parentNode===document.getElementById('propEdPanel')){
+			document.getElementById('propEdPanel').removeChild(eventChannelTable);
+			eventChannelTable=null;
+			eventChannelTable = document.createElement('table');
+			
+			row = [];
+			cell = null;
+		}
+		
+		var chan = actModel.eventChannelList[selectedElement];
+		var startcomp = chan.startComponent;
+		var endcomp = chan.endComponent;
+		
+		row[0] = eventChannelTable.insertRow(-1);
+		cell = row[0].insertCell(0);
+		cell.innerHTML=endcomp.getId();
+		cell = row[0].insertCell(1);
+		cell.innerHTML=startcomp.getId();
+		cell = row[0].insertCell(2);
+		cell.innerHTML='Description';
+		
+		for(var h = 0; h<endcomp.listenEventList.length; h++){
+			var eventName=endcomp.listenEventList[h].getId();
+			row[h+1] = eventChannelTable.insertRow(-1);
+			cell = row[h+1].insertCell(0);
+			cell.innerHTML = eventName;
+				
+			cell = row[h+1].insertCell(1);
+			dropdownList = null;
+			dropdownList = document.createElement('select');
+			for(var l=0;l<startcomp.triggerEventList.length+1;l++){
+				if(l===0){
+					dropdownList.appendChild(new Option('---',l));
+				}
+				else{
+					dropdownList.appendChild(new Option(startcomp.triggerEventList[l-1].getId(),l));
+				}
+			}
+			dropdownList.selectedIndex='0';
+			dropdownList.setAttribute("id",eventTableId+ "/1/"+eventName);
+			dropdownList.addEventListener("change",writeChannel);
+			dropdownList.addEventListener("focus",setPreviousSelected);
+			cell.appendChild(dropdownList);
+			cell = row[h+1].insertCell(2);
+			textInput = document.createElement("INPUT");
+			textInput.setAttribute("type", "text"); 
+			textInput.setAttribute("id",eventTableId+ "/2/"+eventName);
+			eventTableId=eventTableId+1;
+			textInput.addEventListener("input",writeChannelDescription);
+			textInput.addEventListener("blur",writeChannelDescription);
+			cell.appendChild(textInput);
+		}
+		
+		var insertPosition = 1;
+		for(var h = 0; h<endcomp.listenEventList.length; h++){
+			var eventName=endcomp.listenEventList[h].getId();
+			
+			for(var countx = 0; countx<chan.eventConnections.length; countx++){
+				var storedEventName=chan.eventConnections[countx].listener.getId();
+				var storedTriggerEventName=chan.eventConnections[countx].trigger.getId();
+				var eventDescription = chan.eventConnections[countx].description;
+				if(eventName===storedEventName){
+					var rowToInsert = eventChannelTable.insertRow(insertPosition);
+					cell = rowToInsert.insertCell(0);
+					cell.innerHTML = eventName;
+					
+					cell = rowToInsert.insertCell(1);
+					dropdownList = null;
+					dropdownList = document.createElement('select');
+					var selectedEventIndex=0; 
+					for(var l=0;l<startcomp.triggerEventList.length+1;l++){
+						if(l===0){
+							dropdownList.appendChild(new Option('---',l));
+						}else{
+							dropdownList.appendChild(new Option(startcomp.triggerEventList[l-1].getId(),l));
+							if(startcomp.triggerEventList[l-1].getId()===storedTriggerEventName){
+								selectedEventIndex=l;
+							}
+						}		
+					}
+					dropdownList.selectedIndex=selectedEventIndex;
+					dropdownList.setAttribute("id",eventTableId+ "/1/"+eventName);
+					dropdownList.addEventListener("change",writeChannel);
+					dropdownList.addEventListener("focus",setPreviousSelected);
+					cell.appendChild(dropdownList);
+					cell = rowToInsert.insertCell(2);
+					textInput = document.createElement("INPUT");
+					textInput.setAttribute("type", "text"); 
+					textInput.value=eventDescription;
+					if(eventDescription==="undefined"){
+						textInput.value="";
+					}
+					textInput.setAttribute("id",eventTableId+ "/2/"+eventName);
+					textInput.addEventListener("input",writeChannelDescription);
+					textInput.addEventListener("blur",writeChannelDescription);
+					eventTableId=eventTableId+1;
+					cell.appendChild(textInput);
+					
+					insertPosition++;
+				}
+			}
+			insertPosition++;
+		}
+		
+		
+		document.getElementById('propEdPanel').appendChild(eventChannelTable);
+	}	
+	
+		//remove the content of the property editor 
 	var clearPropertyEditor = function(){
-
 		if(inputPortTable.parentNode===document.getElementById('inputPanel')){
 			document.getElementById('inputPanel').removeChild(inputPortTable);
 			inputPortTable=null;
 			inputPortTable= document.createElement('table');
+			row = [];
+			cell = null;
+		}
+		if(outputPortTable.parentNode===document.getElementById('outputPanel')){
+			document.getElementById('outputPanel').removeChild(outputPortTable);
+			outputPortTable=null;
+			outputPortTable= document.createElement('table');
 			row = [];
 			cell = null;
 		}
@@ -214,14 +443,40 @@
 			row = [];
 			cell = null;
 		}
+		if(eventTriggerTable.parentNode===document.getElementById('triggerPanel')){
+			document.getElementById('triggerPanel').removeChild(eventTriggerTable);
+			eventTriggerTable=null;
+			eventTriggerTable = document.createElement('table');
+			row = [];
+			cell = null;
+		}
+		if(eventListenerTable.parentNode===document.getElementById('listenerPanel')){
+			document.getElementById('listenerPanel').removeChild(eventListenerTable);
+			eventListenerTable=null;
+			eventListenerTable = document.createElement('table');
+			row = [];
+			cell = null;
+		}
+		if(eventChannelTable.parentNode===document.getElementById('propEdPanel')){
+			document.getElementById('propEdPanel').removeChild(eventChannelTable);
+			eventChannelTable=null;
+			eventChannelTable = document.createElement('table');
+			row = [];
+			cell = null;
+			eventTableId=0;
+		}
 	}
 
 	
 	//methods handling outgoing events
+	//================================
+	
+		//write the actual input modifiaction to the property
 	var writeProperty = function(evt){
+		var t_temp = document.getElementById(evt.target.id);
 		var completeId = evt.target.id;
 		var splitIda = completeId.split("/1/");
-		var splitId = splitIda[0];				
+		var splitId = splitIda[0];		
 		var t = document.getElementById(evt.target.id).value;
 		// toggle t in case of a boolean value
 		if(t==='false'){
@@ -233,9 +488,153 @@
 		document.getElementById(evt.target.id).value='false';}
 		actModel.componentList[selectedElement].propertyList[splitId].setValue(t);
 	}
+		
+		//write the selected element of the Dropdown list to an eventchannel
+	var writeChannel = function(evt){
+		var selectedChan = actModel.eventChannelList[selectedElement];
+		var listenerComponent=selectedChan.startComponent;
+		var triggerComponent=selectedChan.endComponent;
+		
+		var completeId = evt.target.id;
+		var splitIda = completeId.split("/1/");
+		var splitId = splitIda[0];	
+		var splitIdTriggerName = splitIda[1];
+		var	rowI = document.getElementById(completeId).parentNode.parentNode.rowIndex;	
+		var insertPosition = getPositionForChannelEven(rowI);
+		var tableLenght = eventChannelTable.rows.length;
+		
+		var t_dropdown = document.getElementById(evt.target.id);
+		var t = t_dropdown.options[t_dropdown.selectedIndex].text;
+		var r_value = eventChannelTable.rows[rowI].cells[0].innerHTML;
+		var eventConnectionDescription =eventChannelTable.rows[rowI].cells[2].firstChild.value;
+		
+		if(t!=='---'&& priviousDropDownEntry==='---'){
+			//generate and insert eventconnection into selectedChannel
+			var listener = ACS.event(r_value,'',listenerComponent.getId());
+			var trigger = ACS.event(t,'',triggerComponent.getId());
+			var description = eventConnectionDescription;
+			var eventConnection = {listener,trigger,description};
+			selectedChan.eventConnections.splice(insertPosition,0,eventConnection);
+		
+			//generate View for further connections to the same listener
+			//var eventName=triggerComponent;
+			var rowToInsert = eventChannelTable.insertRow(rowI+1);
+			cell = rowToInsert.insertCell(0);
+			cell.innerHTML = splitIdTriggerName;
+				
+			cell = rowToInsert.insertCell(1);
+			dropdownList = null;
+			dropdownList = document.createElement('select');
+			for(l=0;l<listenerComponent.triggerEventList.length+1;l++){
+				if(l===0){
+					dropdownList.appendChild(new Option('---',l));
+				}
+				else{
+					dropdownList.appendChild(new Option(listenerComponent.triggerEventList[l-1].getId(),l));
+				}
+			}
+			dropdownList.selectedIndex='0';
+			dropdownList.setAttribute("id",eventTableId+ "/1/"+splitIdTriggerName);//TODO lenght of list;
+			dropdownList.addEventListener("change",writeChannel);
+			dropdownList.addEventListener("focus",setPreviousSelected);
+			cell.appendChild(dropdownList);
+			/*cell = rowToInsert.insertCell(2);
+			textInput = document.createElement("INPUT");
+			textInput.setAttribute("type", "text"); 
+			cell.appendChild(textInput);*/
+			cell = rowToInsert.insertCell(2);
+			textInput = document.createElement("INPUT");
+			textInput.setAttribute("type", "text"); 
+			textInput.setAttribute("id",eventTableId+ "/2/"+splitIdTriggerName);
+			eventTableId=eventTableId+1;
+			textInput.addEventListener("input",writeChannelDescription);
+			textInput.addEventListener("blur",writeChannelDescription);
+			cell.appendChild(textInput);
+		}else if(t!=='---'&& priviousDropDownEntry!=='---'){
+			selectedChan.eventConnections.splice(insertPosition,1);
+			var listener = ACS.event(r_value,'',listenerComponent.getId());
+			var trigger = ACS.event(t,'',triggerComponent.getId());
+			var description = eventConnectionDescription;
+			var eventConnection = {listener,trigger,description};
+			selectedChan.eventConnections.splice(insertPosition,0,eventConnection);
+		}else{
+			eventChannelTable.deleteRow(rowI);
+			selectedChan.eventConnections.splice(insertPosition,1);
+		}
+		priviousDropDownEntry=splitIdTriggerName;	
+	}
 	
-	//class needed methodes
+	var writeChannelDescription = function(evt){
+		var selectedChan = actModel.eventChannelList[selectedElement];
+		var listenerComponent=selectedChan.startComponent;
+		var triggerComponent=selectedChan.endComponent;
+		var completeId = evt.target.id;
+		if(completeId){
+			var splitIda = completeId.split("/2/");
+			var splitId = splitIda[0];	
+			var	rowI = document.getElementById(completeId).parentNode.parentNode.rowIndex;
+			var insertPosition = getPositionForChannelEven(rowI);
+			var tableLenght = eventChannelTable.rows.length;
+			var t_dropdown = eventChannelTable.rows[rowI].cells[1].firstChild;
+			var t = t_dropdown.options[t_dropdown.selectedIndex].text;
+			var r_value = eventChannelTable.rows[rowI].cells[0].innerHTML;
+			var eventConnectionDescription =eventChannelTable.rows[rowI].cells[2].firstChild.value;	
+			
+			if(t!=="---"){
+				selectedChan.eventConnections.splice(insertPosition,1);
+				var listener = ACS.event(r_value,'',listenerComponent.getId());
+				var trigger = ACS.event(t,'',triggerComponent.getId());
+				var description = eventConnectionDescription;
+				var eventConnection = {listener,trigger,description};
+				selectedChan.eventConnections.splice(insertPosition,0,eventConnection);
+			}
+		}
+	}
 	
+	var writeInputPorts = function(evt){
+		var t_temp = document.getElementById(evt.target.id);
+		var completeId = evt.target.id;
+		var splitIda = completeId.split("/3/");
+		var splitId = splitIda[0];		
+		var t = document.getElementById(evt.target.id).value;
+		// toggle t in case of a boolean value
+		if(t==='false'){
+		t='true';
+		document.getElementById(evt.target.id).value='true';
+		}
+		else if(t==='true'){
+		t='false';
+		document.getElementById(evt.target.id).value='false';}
+		actModel.componentList[selectedElement].inputPortList[splitId ].sync=t;
+	}
+	
+	//class needed methodes helper functions
+	//======================================
+	
+	//returns the insert position of an event into an event channel based on the row position
+	var getPositionForChannelEven = function(rowInd){
+		var countera = 0;
+		for(var i = 1; i<rowInd; i++){
+			var x = eventChannelTable.rows[i];
+			var y = x.cells[1].childNodes[0].id;
+			var t_dropdown = document.getElementById(y);
+			var t = t_dropdown.options[t_dropdown.selectedIndex].text;
+			if(t!=='---'){
+				countera++;
+			}
+		}
+		return countera;
+	}
+	
+	var setPreviousSelected = function(evt){
+		var t_dropdown = document.getElementById(evt.target.id);
+		priviousDropDownEntry = t_dropdown.options[t_dropdown.selectedIndex].text;		
+	}
+	
+	var stringOfEnum = function(enum1,value1){
+		for (var k in enum1) if (enum1[k] == value1) return k;
+		return null;
+	}
 	
 // ********************************************** handlers ***********************************************************
 	
@@ -244,13 +643,16 @@
 		//TODO mabe find way to listen on another event vor instance creat new model
 				
 		actModel.events.removeHandler('componentAddedEvent',componentAddedEventHandler);
-		actModel.events.removeHandler('modelChangedEvent', modelChangedEventHandler);
 		actModel.events.removeHandler('componentRemovedEvent',removeComponentEventHandler);
-				actModel = modelList.getActModel();
+		actModel.events.removeHandler('eventChannelAddedEvent',eventChannelAddedEvemtHandler);
+		actModel.events.removeHandler('eventChannelRemovedEvent',eventChannelRemovedEvemtHandler);
+		actModel.events.removeHandler('modelChangedEvent', modelChangedEventHandler);
+		actModel = modelList.getActModel();
 		actModel.events.registerHandler('componentAddedEvent',componentAddedEventHandler);
-		actModel.events.registerHandler('modelChangedEvent', modelChangedEventHandler);
 		actModel.events.registerHandler('componentRemovedEvent',removeComponentEventHandler);
-		
+		actModel.events.registerHandler('eventChannelAddedEvent',eventChannelAddedEvemtHandler);
+		actModel.events.registerHandler('eventChannelRemovedEvent',eventChannelRemovedEvemtHandler);
+		actModel.events.registerHandler('modelChangedEvent', modelChangedEventHandler);
 		
 		//clearPropertyEditor();
 		if(actModel.selectedItemsList.length===1){
@@ -266,11 +668,19 @@
 			actModel.componentList[countera].events.removeHandler('selectedEvent',selectedEventHandler);
 			actModel.componentList[countera].events.removeHandler('deSelectedEvent',deSelectedEventHandler);
 			}
+		for(var counterx=0; counterx<=actModel.eventChannelList.length-1; counterx++){
+			actModel.eventChannelList[counterx].events.removeHandler('selectedEvent',selectedEventHandler);
+			actModel.eventChannelList[counterx].events.removeHandler('deSelectedEvent',deSelectedEventHandler);
+		}
 		actModel = modelList.getActModel();
 		//in case that model was loaded select and deselect events must be registered
 		for(var counterb=0; counterb<=actModel.componentList.length-1; counterb++){
 			actModel.componentList[counterb].events.registerHandler('selectedEvent',selectedEventHandler);
 			actModel.componentList[counterb].events.registerHandler('deSelectedEvent',deSelectedEventHandler);
+		}
+		for(var countery=0; countery<=actModel.eventChannelList.length-1; countery++){
+			actModel.eventChannelList[countery].events.registerHandler('selectedEvent',selectedEventHandler);
+			actModel.eventChannelList[countery].events.registerHandler('deSelectedEvent',deSelectedEventHandler);
 		}
 	}
 	
@@ -292,6 +702,14 @@
 		clearPropertyEditor();
 	}
 	
+	var eventChannelAddedEvemtHandler =function(){
+		actModel.eventChannelList[actModel.eventChannelList.length-1].events.registerHandler('selectedEvent',selectedEventHandler);
+		actModel.eventChannelList[actModel.eventChannelList.length-1].events.registerHandler('deSelectedEvent',deSelectedEventHandler);
+	}
+	
+	var eventChannelRemovedEvemtHandler =function(){
+		clearPropertyEditor();
+	}
 	
 // ***********************************************************************************************************************
 // ************************************************** public stuff *******************************************************
@@ -348,7 +766,6 @@
 	li3.setAttribute('role', 'tab');
 	li3.setAttribute('tabindex', -1);
 	li3.textContent = ACS.vConst.PROPERTYEDITOR_OUTPUTHEADER;
-	//li3.textContent='Outputs';
 	document.getElementById(ACS.vConst.PROPERTYEDITOR_TABLIST).appendChild(li3);
 	div = document.createElement('div');
 	div.setAttribute('id', 'outputPanel');
@@ -373,6 +790,22 @@
 	div.setAttribute('role', 'tabpanel');
 	document.getElementById(ACS.vConst.PROPERTYEDITOR_MOTHERPANEL).appendChild(div);
 	
+	var li5 = document.createElement('li');
+	li5.setAttribute('id', 'propertiesTriggerTab');
+	li5.setAttribute('class', 'tab propEdTab');
+	li5.setAttribute('aria-controls', 'listenerPanel');
+	li5.setAttribute('aria-selected', 'false');
+	li5.setAttribute('role', 'tab');
+	li5.setAttribute('tabindex', -1);
+	li5.textContent = ACS.vConst.PROPERTYEDITOR_LISTENERHEADER;
+	document.getElementById(ACS.vConst.PROPERTYEDITOR_TABLIST).appendChild(li5);
+	div = document.createElement('div');
+	div.setAttribute('id', 'listenerPanel');
+	div.setAttribute('class', 'panel propEdPanel');
+	div.setAttribute('aria-labelledby', 'listenerTab');
+	div.setAttribute('role', 'tabpanel');
+	document.getElementById(ACS.vConst.PROPERTYEDITOR_MOTHERPANEL).appendChild(div);
+	
 	propertiesTabPanel.updatePanel();
 	// activate the propertiesTab (a simple li.click() will not work in safari)
 	var click_ev = document.createEvent("MouseEvents");
@@ -380,13 +813,20 @@
 	li1.dispatchEvent(click_ev);	
 	
 	document.getElementById('propEdPanel').setAttribute("style","overflow:auto;");
+	document.getElementById('inputPanel').setAttribute("style","overflow:auto;");
+	document.getElementById('outputPanel').setAttribute("style","overflow:auto;");
+	document.getElementById('triggerPanel').setAttribute("style","overflow:auto;");
+	document.getElementById('listenerPanel').setAttribute("style","overflow:auto;");
+	
 	
 	modelList.events.registerHandler('actModelChangedEvent', actModelChangedEventHandler);
 	//modelList.events.registerHandler('modelChangedEvent', modelChangedEventHandler);
 	actModel.events.registerHandler('modelChangedEvent', modelChangedEventHandler);
 	actModel.events.registerHandler('componentAddedEvent',componentAddedEventHandler);
 	actModel.events.registerHandler('componentRemovedEvent',removeComponentEventHandler);
-
+	//actModel.events.registerHandler('componentRemovedEvent',removeComponentEventHandler);
+	actModel.events.registerHandler('eventChannelAddedEvent',eventChannelAddedEvemtHandler);
+	actModel.events.registerHandler('eventChannelRemovedEvent',eventChannelRemovedEvemtHandler);
 	
 	return returnObj;
 }
