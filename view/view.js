@@ -35,7 +35,7 @@ ACS.view = function(modelList, // ACS.modelList
 // ***********************************************************************************************************************
 	var menu = ACS.menuView(modelList, areStatus);
 	var canvas = ACS.canvasView(modelList, clipBoard);
-	var propertyEditor = ACS.propertyEditor(modelList);
+	var propertyEditor = ACS.propertyEditor(modelList,canvas.getCanvasModelViewList());
 
 // ***********************************************************************************************************************
 // ************************************************** private methods ****************************************************

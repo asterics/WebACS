@@ -26,7 +26,7 @@
  * limitations under the License.
  */
  
-ACS.propertyEditor = function(modelList) {
+ACS.propertyEditor = function(modelList,modelViewListtemp) {
 
 // ***********************************************************************************************************************
 // ************************************************** private variables **************************************************
@@ -38,6 +38,9 @@ ACS.propertyEditor = function(modelList) {
 	var outputPortTable = document.createElement('table');
 	var eventTriggerTable = document.createElement('table');
 	var eventListenerTable =document.createElement('table');
+	var modelViewList = modelViewListtemp;
+	var modelViewAct = modelViewList[0];
+	var modelViewActTabPanel = modelViewList[0].getModelTabPanel();
 	var row = [];
 	var cell = null;
 	var dropdownList = document.createElement('select');
@@ -48,6 +51,7 @@ ACS.propertyEditor = function(modelList) {
 	var eventChannelTable=document.createElement('table');; 
 	var priviousDropDownEntry = null; //stores the selected dropdownvalue before entry is changed
 	var eventTableId=0;
+	var guiEditorOn = false;
 // ***********************************************************************************************************************
 // ************************************************** private methods ****************************************************
 // ***********************************************************************************************************************
@@ -256,20 +260,19 @@ ACS.propertyEditor = function(modelList) {
 			cell.innerHTML='<b>PortDataType </b>';
 			cell = row[0].insertCell(2);
 			cell.innerHTML='<b>Description </b>';
-		for(var h=0; h<actModel.componentList[selectedElement].outputPortList.length;h++){
-			tempStringa=actModel.componentList[selectedElement].outputPortList[h].getId();
-			row[h+1] = outputPortTable.insertRow(-1);
-			cell = row[h+1].insertCell(0);
-			cell.innerHTML = tempStringa;
-			tempStringa=actModel.componentList[selectedElement].outputPortList[h].getDataType();
-			cell = row[h+1].insertCell(1);
-			cell.innerHTML = stringOfEnum(ACS.dataType,tempStringa);
-			tempStringa=''; //TODO get description
-			cell = row[h+1].insertCell(2);
-			cell.innerHTML = tempStringa;
-		}	
+			for(var h=0; h<actModel.componentList[selectedElement].outputPortList.length;h++){
+				tempStringa=actModel.componentList[selectedElement].outputPortList[h].getId();
+				row[h+1] = outputPortTable.insertRow(-1);
+				cell = row[h+1].insertCell(0);
+				cell.innerHTML = tempStringa;
+				tempStringa=actModel.componentList[selectedElement].outputPortList[h].getDataType();
+				cell = row[h+1].insertCell(1);
+				cell.innerHTML = stringOfEnum(ACS.dataType,tempStringa);
+				tempStringa=''; //TODO get description
+				cell = row[h+1].insertCell(2);
+				cell.innerHTML = tempStringa;
+			}	
 		document.getElementById('outputPanel').appendChild(outputPortTable);
-		
 	}
 	
 	var generateEventTriggersForComponent = function(){
@@ -420,6 +423,10 @@ ACS.propertyEditor = function(modelList) {
 		document.getElementById('propEdPanel').appendChild(eventChannelTable);
 	}	
 	
+		//generate the property fields for the gui editor
+	var generaterPropertiesForGUIEditor = function(){
+		
+	}
 		//remove the content of the property editor 
 	var clearPropertyEditor = function(){
 		if(inputPortTable.parentNode===document.getElementById('inputPanel')){
@@ -654,6 +661,14 @@ ACS.propertyEditor = function(modelList) {
 		actModel.events.registerHandler('eventChannelRemovedEvent',eventChannelRemovedEvemtHandler);
 		actModel.events.registerHandler('modelChangedEvent', modelChangedEventHandler);
 		
+		modelViewActTabPanel.events.removeHandler('tabSwitchedEvent',tabSwitchedEventHandler);
+		for (var i = 0; i < modelViewList.length; i++) {
+			if (modelViewList[i] && (modelViewList[i].getModel() === actModel)) {
+			modelViewAct = modelViewList[i];
+			modelViewActTabPanel=modelViewList[i].getModelTabPanel();
+			modelViewActTabPanel.events.registerHandler('tabSwitchedEvent',tabSwitchedEventHandler);
+			}
+		}
 		//clearPropertyEditor();
 		if(actModel.selectedItemsList.length===1){
 			flagActiveModelChanged=true;
@@ -709,6 +724,15 @@ ACS.propertyEditor = function(modelList) {
 	
 	var eventChannelRemovedEvemtHandler =function(){
 		clearPropertyEditor();
+	}
+	
+	var tabSwitchedEventHandler = function(){
+		guiEditorOn = !guiEditorOn;
+		console.log(guiEditorOn);
+		var temp =modelViewAct.getModelContainerId();
+		temp = 'modelPanel'+temp;
+		console.log(document.getElementById(temp));
+			console.log(document.getElementById(temp).getAttribute("aria-hidden"));
 	}
 	
 // ***********************************************************************************************************************
@@ -827,6 +851,8 @@ ACS.propertyEditor = function(modelList) {
 	//actModel.events.registerHandler('componentRemovedEvent',removeComponentEventHandler);
 	actModel.events.registerHandler('eventChannelAddedEvent',eventChannelAddedEvemtHandler);
 	actModel.events.registerHandler('eventChannelRemovedEvent',eventChannelRemovedEvemtHandler);
+	modelViewActTabPanel.events.registerHandler('tabSwitchedEvent',tabSwitchedEventHandler);
+	console.info(modelViewList);
 	
 	return returnObj;
 }
