@@ -61,43 +61,45 @@ ACS.propertyEditor = function(modelList,modelViewListtemp) {
 		
 		//generate view based on the type eventchannel or coponent and the selected tab 
 	var generateViews = function(){
-		
 		clearPropertyEditor();
 		var selectedElementType = null;
-		if(actModel.selectedItemsList.length===1 || flagActiveModelChanged){//check if only one component is selected
+		var containerId =modelViewAct.getModelContainerId();
+		var panelId = 'modelPanel'+containerId;
+		
+		if(document.getElementById(panelId).getAttribute("aria-hidden")==='false'){
+		//render Properties/Inputs... for propPanel
+			if(actModel.selectedItemsList.length===1 || flagActiveModelChanged){//check if only one component is selected
 			//get selected component
-			for(var i = 0; i<actModel.componentList.length;i++){
-				if(actModel.componentList[i].getIsSelected()){
-					selectedElement = i;
-					selectedElementType = "component";
+				for(var i = 0; i<actModel.componentList.length;i++){
+					if(actModel.componentList[i].getIsSelected()){
+						selectedElement = i;
+						selectedElementType = "component";
+					}
 				}
-			}
-			
-			for(var i = 0; i<actModel.eventChannelList.length;i++){
-				if(actModel.eventChannelList[i].getIsSelected()){
-					selectedElement = i;
-					selectedElementType = "channel";
+				for(var i = 0; i<actModel.eventChannelList.length;i++){
+					if(actModel.eventChannelList[i].getIsSelected()){
+						selectedElement = i;
+						selectedElementType = "channel";
+					}
 				}
+			//Part for component
+			if(selectedElementType ==="component"){
+				generatePropertiesForComponent();
+				generateInputPortsForComponent();
+				generateOuputPortsForComponent();
+				generateEventTriggersForComponent();
+				generateEventListenerForComponent();
+			}			
+			//Part for Events		
+			if(selectedElementType ==="channel"){
+				generateChannelEventsForChannel();
 			}
-		
-
-		
-		//Part for component
-		if(selectedElementType ==="component"){
-			generatePropertiesForComponent();
-			generateInputPortsForComponent();
-			generateOuputPortsForComponent();
-			generateEventTriggersForComponent();
-			generateEventListenerForComponent();
+			}	
 		}
-			
-		//Part for Events		
-		if(selectedElementType ==="channel"){
-			generateChannelEventsForChannel();
+		if(document.getElementById(panelId).getAttribute("aria-hidden")==='true'){
+		//Render Properties for Gui Editor
+		
 		}
-
-		}	
-
 	}
 	
 		//generate the parts / fields for the properties for the selected component
@@ -727,12 +729,14 @@ ACS.propertyEditor = function(modelList,modelViewListtemp) {
 	}
 	
 	var tabSwitchedEventHandler = function(){
-		guiEditorOn = !guiEditorOn;
+		generateViews();
+		/*guiEditorOn = !guiEditorOn;
 		console.log(guiEditorOn);
 		var temp =modelViewAct.getModelContainerId();
 		temp = 'modelPanel'+temp;
 		console.log(document.getElementById(temp));
-			console.log(document.getElementById(temp).getAttribute("aria-hidden"));
+		console.log(document.getElementById(temp).getAttribute("aria-hidden"));
+		*/
 	}
 	
 // ***********************************************************************************************************************
