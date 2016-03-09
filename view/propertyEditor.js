@@ -36,6 +36,8 @@ ACS.propertyEditor = function(modelList,modelViewListtemp) {
 	var propertyTable =document.createElement('table');
 	var inputPortTable = document.createElement('table');
 	var outputPortTable = document.createElement('table');
+	var propertiesGuiEditorTable = document.createElement('table');
+	var propertiesGuiEditorTableEditorProperties = document.createElement('table');
 	var eventTriggerTable = document.createElement('table');
 	var eventListenerTable =document.createElement('table');
 	var modelViewList = modelViewListtemp;
@@ -98,7 +100,7 @@ ACS.propertyEditor = function(modelList,modelViewListtemp) {
 		}
 		if(document.getElementById(panelId).getAttribute("aria-hidden")==='true'){
 		//Render Properties for Gui Editor
-		
+			generaterPropertiesForGUIEditor();
 		}
 	}
 	
@@ -427,7 +429,96 @@ ACS.propertyEditor = function(modelList,modelViewListtemp) {
 	
 		//generate the property fields for the gui editor
 	var generaterPropertiesForGUIEditor = function(){
+		propertiesGuiEditorTableEditorProperties=null;
+		propertiesGuiEditorTableEditorProperties = document.createElement('table');
+		propertiesGuiEditorTableEditorProperties.innerHTML = 'Editor Properties';
+		document.getElementById('propEdPanel').appendChild(propertiesGuiEditorTableEditorProperties);
+		var editorProps = modelViewAct.getGuiView().getGuiEditorProperties();
+		console.log(editorProps);
+		for(var h=0; h<4;h++){
+			row[h] = propertiesGuiEditorTableEditorProperties.insertRow(-1);
+			cell = row[h].insertCell(0);
+			if(h===0){cell.innerHTML = 'EnableGrid';tempStringa=editorProps.getEnableGrid();}
+			if(h===1){cell.innerHTML = 'ShowGrid';tempStringa=editorProps.getShowGrid();}
+			if(h===2){cell.innerHTML = 'GridSteps';tempStringa=editorProps.getGridSteps();}
+			if(h===3){cell.innerHTML = 'ScreenRes';tempStringa=editorProps.getScreenRes();}
+			cell = row[h].insertCell(1);
+			if(h===0){
+				boolInput = null;
+				boolInput = document.createElement("INPUT");
+				boolInput.setAttribute("type", "checkbox"); 
+				if(tempStringa){boolInput.setAttribute("checked", true);}
+				boolInput.setAttribute("value", tempStringa);
+				boolInput.setAttribute("id",10+h+"/4/"+ "enablegrid");
+				boolInput.addEventListener("change",writeGuiEditorProperties);
+				cell.appendChild(boolInput);
+			}
+			if(h===1){
+				boolInput = null;
+				boolInput = document.createElement("INPUT");
+				boolInput.setAttribute("type", "checkbox"); 
+				if(tempStringa){boolInput.setAttribute("checked", true);}
+				boolInput.setAttribute("value", tempStringa);
+				boolInput.setAttribute("id",10+h+"/4/"+ "showgrid");
+				boolInput.addEventListener("change",writeGuiEditorProperties);
+				cell.appendChild(boolInput);
+			}
+			if(h===2){
+				dropdownList = null;
+				dropdownList = document.createElement('select');
+				for(l=0;l<3;l++){
+					if(l===0){dropdownList.appendChild(new Option('small',l));}
+					if(l===1){dropdownList.appendChild(new Option('medium',l));}
+					if(l===2){dropdownList.appendChild(new Option('large',l));}
+					if(l===3){dropdownList.appendChild(new Option('huge',l));}
+				}
+				dropdownList.selectedIndex=tempStringa;
+				dropdownList.setAttribute("id",10+h+ "/4/"+"gridsteps");
+				dropdownList.addEventListener("change",writeGuiEditorProperties);
+				cell.appendChild(dropdownList);
+			}
+			if(h===3){
+				dropdownList = null;
+				dropdownList = document.createElement('select');
+				for(l=0;l<3;l++){
+					if(l===0){dropdownList.appendChild(new Option('FiveFour',l));}
+					if(l===1){dropdownList.appendChild(new Option('SixteenNine',l));}
+					if(l===2){dropdownList.appendChild(new Option('FourThree',l));}
+				}
+				dropdownList.selectedIndex=tempStringa;
+				dropdownList.setAttribute("id",10+h+ "/4/"+"gridsteps");
+				dropdownList.addEventListener("change",writeGuiEditorProperties);
+				cell.appendChild(dropdownList);
+			}
+		}
 		
+		propertiesGuiEditorTable=null;
+		propertiesGuiEditorTable = document.createElement('table');
+		propertiesGuiEditorTable.innerHTML = 'ARE Properties';
+		for(var h = 0; h<5; h++){
+			row[h] = propertiesGuiEditorTable.insertRow(-1);
+			cell = row[h].insertCell(0);
+			if(h===0){cell.innerHTML = 'Decoration';tempStringa=actModel.modelGui.getDecoration();	}
+			if(h===1){cell.innerHTML = 'FullScreen';	tempStringa=actModel.modelGui.getFullScreen();}
+			if(h===2){cell.innerHTML = 'AlwaysOnTop';tempStringa=actModel.modelGui.getAlwaysOnTop();	}
+			if(h===3){cell.innerHTML = 'ToSystemTray';	tempStringa=actModel.modelGui.getToSystemTray();}
+			if(h===4){cell.innerHTML = 'ShowControlPanel';	tempStringa=actModel.modelGui.getShowControlPanel();}
+			cell = row[h].insertCell(1);
+			boolInput = null;
+			boolInput = document.createElement("INPUT");
+			boolInput.setAttribute("type", "checkbox"); 
+			boolInput.setAttribute("value", tempStringa);
+			if(tempStringa){boolInput.setAttribute("checked", true);}
+			if(h===0){boolInput.setAttribute("id",h+"/4/"+ "decoration");}
+			if(h===1){boolInput.setAttribute("id",h+"/4/"+ "fullscreen");}
+			if(h===2){boolInput.setAttribute("id",h+"/4/"+ "alwaysontop");}
+			if(h===3){boolInput.setAttribute("id",h+"/4/"+ "tosystemtray");}
+			if(h===4){boolInput.setAttribute("id",h+"/4/"+ "showcontrolpanel");}
+			
+			boolInput.addEventListener("change",writeGuiEditorProperties);
+			cell.appendChild(boolInput);
+		}
+		document.getElementById('propEdPanel').appendChild(propertiesGuiEditorTable);
 	}
 		//remove the content of the property editor 
 	var clearPropertyEditor = function(){
@@ -473,6 +564,20 @@ ACS.propertyEditor = function(modelList,modelViewListtemp) {
 			row = [];
 			cell = null;
 			eventTableId=0;
+		}
+		if(propertiesGuiEditorTable.parentNode===document.getElementById('propEdPanel')){
+			document.getElementById('propEdPanel').removeChild(propertiesGuiEditorTable);
+			propertiesGuiEditorTable=null;
+			propertiesGuiEditorTable = document.createElement('table');
+			row = [];
+			cell = null;
+		}
+		if(propertiesGuiEditorTableEditorProperties.parentNode===document.getElementById('propEdPanel')){
+			document.getElementById('propEdPanel').removeChild(propertiesGuiEditorTableEditorProperties);
+			propertiesGuiEditorTableEditorProperties=null;
+			propertiesGuiEditorTableEditorProperties = document.createElement('table');
+			row = [];
+			cell = null;
 		}
 	}
 
@@ -617,6 +722,8 @@ ACS.propertyEditor = function(modelList,modelViewListtemp) {
 		actModel.componentList[selectedElement].inputPortList[splitId ].sync=t;
 	}
 	
+	var writeGuiEditorProperties = function(evt){		
+	}
 	//class needed methodes helper functions
 	//======================================
 	
@@ -730,13 +837,6 @@ ACS.propertyEditor = function(modelList,modelViewListtemp) {
 	
 	var tabSwitchedEventHandler = function(){
 		generateViews();
-		/*guiEditorOn = !guiEditorOn;
-		console.log(guiEditorOn);
-		var temp =modelViewAct.getModelContainerId();
-		temp = 'modelPanel'+temp;
-		console.log(document.getElementById(temp));
-		console.log(document.getElementById(temp).getAttribute("aria-hidden"));
-		*/
 	}
 	
 // ***********************************************************************************************************************

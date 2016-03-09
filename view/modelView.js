@@ -545,5 +545,9 @@
 	// instantiate guiView
 	guiView = ACS.guiView(model, modelContainerId, editorProperties);
 	
+	returnObj.getGuiView = function(){
+		return guiView;
+	}
+	
 	return returnObj;
 }
