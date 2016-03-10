@@ -26,7 +26,7 @@
  * limitations under the License.
  */
  
-ACS.propertyEditor = function(modelList,modelViewListtemp) {
+ACS.propertyEditor = function(modelList,modelViewListtemp,editorPropsTemp) {
 
 // ***********************************************************************************************************************
 // ************************************************** private variables **************************************************
@@ -43,6 +43,7 @@ ACS.propertyEditor = function(modelList,modelViewListtemp) {
 	var modelViewList = modelViewListtemp;
 	var modelViewAct = modelViewList[0];
 	var modelViewActTabPanel = modelViewList[0].getModelTabPanel();
+	var editorProps = editorPropsTemp;
 	var row = [];
 	var cell = null;
 	var dropdownList = document.createElement('select');
@@ -433,8 +434,6 @@ ACS.propertyEditor = function(modelList,modelViewListtemp) {
 		propertiesGuiEditorTableEditorProperties = document.createElement('table');
 		propertiesGuiEditorTableEditorProperties.innerHTML = 'Editor Properties';
 		document.getElementById('propEdPanel').appendChild(propertiesGuiEditorTableEditorProperties);
-		var editorProps = modelViewAct.getGuiView().getGuiEditorProperties();
-		console.log(editorProps);
 		for(var h=0; h<4;h++){
 			row[h] = propertiesGuiEditorTableEditorProperties.insertRow(-1);
 			cell = row[h].insertCell(0);
@@ -725,7 +724,6 @@ ACS.propertyEditor = function(modelList,modelViewListtemp) {
 	var writeGuiEditorProperties = function(evt){		
 		var idString=evt.target.id;
 		if(idString.indexOf('/4/') > -1){
-			var editorProps = modelViewAct.getGuiView().getGuiEditorProperties();
 			var idStringSplita = idString.split('/4/');
 			var idStringSplit = idStringSplita[0];
 			if(idStringSplit==='0'){
