@@ -293,7 +293,7 @@ ACS.propertyEditor = function(modelList,modelViewListtemp) {
 			cell = row[h].insertCell(0);
 			cell.innerHTML = tempStringa;
 			cell = row[h].insertCell(1);
-			cell.innerHTML = tempDes
+			cell.innerHTML = tempDes;
 		}			
 		document.getElementById('triggerPanel').appendChild(eventTriggerTable);
 	}
@@ -449,7 +449,7 @@ ACS.propertyEditor = function(modelList,modelViewListtemp) {
 				boolInput.setAttribute("type", "checkbox"); 
 				if(tempStringa){boolInput.setAttribute("checked", true);}
 				boolInput.setAttribute("value", tempStringa);
-				boolInput.setAttribute("id",10+h+"/4/"+ "enablegrid");
+				boolInput.setAttribute("id",h+"/4/"+ "enablegrid");
 				boolInput.addEventListener("change",writeGuiEditorProperties);
 				cell.appendChild(boolInput);
 			}
@@ -459,7 +459,7 @@ ACS.propertyEditor = function(modelList,modelViewListtemp) {
 				boolInput.setAttribute("type", "checkbox"); 
 				if(tempStringa){boolInput.setAttribute("checked", true);}
 				boolInput.setAttribute("value", tempStringa);
-				boolInput.setAttribute("id",10+h+"/4/"+ "showgrid");
+				boolInput.setAttribute("id",h+"/4/"+ "showgrid");
 				boolInput.addEventListener("change",writeGuiEditorProperties);
 				cell.appendChild(boolInput);
 			}
@@ -473,7 +473,7 @@ ACS.propertyEditor = function(modelList,modelViewListtemp) {
 					if(l===3){dropdownList.appendChild(new Option('huge',l));}
 				}
 				dropdownList.selectedIndex=tempStringa;
-				dropdownList.setAttribute("id",10+h+ "/4/"+"gridsteps");
+				dropdownList.setAttribute("id",h+ "/4/"+"gridsteps");
 				dropdownList.addEventListener("change",writeGuiEditorProperties);
 				cell.appendChild(dropdownList);
 			}
@@ -486,7 +486,7 @@ ACS.propertyEditor = function(modelList,modelViewListtemp) {
 					if(l===2){dropdownList.appendChild(new Option('FourThree',l));}
 				}
 				dropdownList.selectedIndex=tempStringa;
-				dropdownList.setAttribute("id",10+h+ "/4/"+"gridsteps");
+				dropdownList.setAttribute("id",h+ "/4/"+"gridsteps");
 				dropdownList.addEventListener("change",writeGuiEditorProperties);
 				cell.appendChild(dropdownList);
 			}
@@ -509,11 +509,11 @@ ACS.propertyEditor = function(modelList,modelViewListtemp) {
 			boolInput.setAttribute("type", "checkbox"); 
 			boolInput.setAttribute("value", tempStringa);
 			if(tempStringa){boolInput.setAttribute("checked", true);}
-			if(h===0){boolInput.setAttribute("id",h+"/4/"+ "decoration");}
-			if(h===1){boolInput.setAttribute("id",h+"/4/"+ "fullscreen");}
-			if(h===2){boolInput.setAttribute("id",h+"/4/"+ "alwaysontop");}
-			if(h===3){boolInput.setAttribute("id",h+"/4/"+ "tosystemtray");}
-			if(h===4){boolInput.setAttribute("id",h+"/4/"+ "showcontrolpanel");}
+			if(h===0){boolInput.setAttribute("id",h+"/5/"+ "decoration");}
+			if(h===1){boolInput.setAttribute("id",h+"/5/"+ "fullscreen");}
+			if(h===2){boolInput.setAttribute("id",h+"/5/"+ "alwaysontop");}
+			if(h===3){boolInput.setAttribute("id",h+"/5/"+ "tosystemtray");}
+			if(h===4){boolInput.setAttribute("id",h+"/5/"+ "showcontrolpanel");}
 			
 			boolInput.addEventListener("change",writeGuiEditorProperties);
 			cell.appendChild(boolInput);
@@ -723,6 +723,52 @@ ACS.propertyEditor = function(modelList,modelViewListtemp) {
 	}
 	
 	var writeGuiEditorProperties = function(evt){		
+		var idString=evt.target.id;
+		if(idString.indexOf('/4/') > -1){
+			var editorProps = modelViewAct.getGuiView().getGuiEditorProperties();
+			var idStringSplita = idString.split('/4/');
+			var idStringSplit = idStringSplita[0];
+			if(idStringSplit==='0'){
+				var tempbool= editorProps.getEnableGrid();
+				editorProps.setEnableGrid(!tempbool);
+			}
+			if(idStringSplit==='1'){
+				var tempbool= editorProps.getShowGrid();
+				editorProps.setShowGrid(!tempbool);
+			}
+			if(idStringSplit==='2'){
+				var t = document.getElementById(evt.target.id).value;
+				editorProps.setGridSteps(t);
+			}
+			if(idStringSplit==='3'){
+				var t = document.getElementById(evt.target.id).value;
+				editorProps.setScreenRes(t);
+			}
+		}
+		if(idString.indexOf('/5/') > -1){
+			var idStringSplita = idString.split('/5/');
+			var idStringSplit = idStringSplita[0];
+			if(idStringSplit==='0'){
+				var tempbool= actModel.modelGui.getDecoration();
+				actModel.modelGui.setDecoration(!tempbool);
+			}
+			if(idStringSplit==='1'){
+				var tempbool= actModel.modelGui.getFullScreen();
+				actModel.modelGui.setFullScreen(!tempbool);
+			}
+			if(idStringSplit==='2'){
+				var tempbool= actModel.modelGui.getAlwaysOnTop();
+				actModel.modelGui.setAlwaysOnTop(!tempbool);
+			}
+			if(idStringSplit==='3'){
+				var tempbool= actModel.modelGui.getToSystemTray();
+				actModel.modelGui.setToSystemTray(!tempbool);
+			}
+			if(idStringSplit==='4'){
+				var tempbool= actModel.modelGui.getShowControlPanel();
+				actModel.modelGui.setShowControlPanel(!tempbool);
+			}
+		}
 	}
 	//class needed methodes helper functions
 	//======================================
