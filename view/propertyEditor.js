@@ -68,7 +68,6 @@ ACS.propertyEditor = function(modelList,modelViewListtemp,editorPropsTemp) {
 		var selectedElementType = null;
 		var containerId =modelViewAct.getModelContainerId();
 		var panelId = 'modelPanel'+containerId;
-		
 		if(document.getElementById(panelId).getAttribute("aria-hidden")==='false'){
 		//render Properties/Inputs... for propPanel
 			if(actModel.selectedItemsList.length===1 || flagActiveModelChanged){//check if only one component is selected
@@ -823,7 +822,9 @@ ACS.propertyEditor = function(modelList,modelViewListtemp,editorPropsTemp) {
 			}
 		}
 		//clearPropertyEditor();
-		if(actModel.selectedItemsList.length===1){
+		var containerId =modelViewAct.getModelContainerId();
+		var panelId = 'modelPanel'+containerId;
+		if(actModel.selectedItemsList.length===1 || document.getElementById(panelId).getAttribute("aria-hidden")==='true'){
 			flagActiveModelChanged=true;
 			generateViews();
 		}
@@ -1000,7 +1001,6 @@ ACS.propertyEditor = function(modelList,modelViewListtemp,editorPropsTemp) {
 	actModel.events.registerHandler('eventChannelAddedEvent',eventChannelAddedEvemtHandler);
 	actModel.events.registerHandler('eventChannelRemovedEvent',eventChannelRemovedEvemtHandler);
 	modelViewActTabPanel.events.registerHandler('tabSwitchedEvent',tabSwitchedEventHandler);
-	console.info(modelViewList);
 	
 	return returnObj;
 }
