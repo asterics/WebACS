@@ -42,7 +42,7 @@
 		var httpRequest = new XMLHttpRequest();
 		httpRequest.onreadystatechange = function() {
 			if (httpRequest.readyState === 4 && httpRequest.status === 200) {
-				xmlObj = httpRequest.responseXML;
+				xmlObj = $.parseXML(httpRequest.responseText);
 			}
 		}
 		httpRequest.open('GET', ACS.mConst.MODEL_DEFAULTCOMPONENTCOLLECTION, false);
@@ -525,19 +525,19 @@
 		xmlString += '\t<modelDescription>\r';
 		var mdi = metaDataIndexOfKey('shortDescription');
 		if (mdi > -1) {
-			xmlString += '\t\t<shortDescription>' + returnObj.metaDataList[mdi].value + '</shortDescription>\r';
+			xmlString += '\t\t<shortDescription>' + returnObj.metaDataList[mdi].value.replace(/"/g, '&quot;') + '</shortDescription>\r';
 		} else {
 			xmlString += '\t\t<shortDescription></shortDescription>\r';
 		}
 		var mdi = metaDataIndexOfKey('requirements');
 		if (mdi > -1) {
-			xmlString += '\t\t<requirements>' + returnObj.metaDataList[mdi].value + '</requirements>\r';
+			xmlString += '\t\t<requirements>' + returnObj.metaDataList[mdi].value.replace(/"/g, '&quot;') + '</requirements>\r';
 		} else {
 			xmlString += '\t\t<requirements></requirements>\r';
 		}
 		var mdi = metaDataIndexOfKey('description');
 		if (mdi > -1) {
-			xmlString += '\t\t<description>' + returnObj.metaDataList[mdi].value + '</description>\r';
+			xmlString += '\t\t<description>' + returnObj.metaDataList[mdi].value.replace(/"/g, '&quot;') + '</description>\r';
 		} else {
 			xmlString += '\t\t<description></description>\r';
 		}
@@ -546,7 +546,7 @@
 		xmlString += '\t<components>\r';
 		for (var i = 0; i < returnObj.componentList.length; i++) {
 			xmlString += '\t\t<component id="' + returnObj.componentList[i].getId() + '" type_id="' + returnObj.componentList[i].getComponentTypeId() + '">\r';
-			if (returnObj.componentList[i].getDescription()) xmlString += '\t\t\t<description>' + returnObj.componentList[i].getDescription() + '</description>\r';
+			if (returnObj.componentList[i].getDescription()) xmlString += '\t\t\t<description>' + returnObj.componentList[i].getDescription().replace(/"/g, '&quot;') + '</description>\r';
 			// add the ports
 			if ((returnObj.componentList[i].inputPortList.length > 0) || (returnObj.componentList[i].outputPortList.length > 0)) {
 				xmlString += '\t\t\t<ports>\r';
@@ -556,7 +556,7 @@
 					if (returnObj.componentList[i].inputPortList[j].propertyList.length > 0) {
 						xmlString += '\t\t\t\t\t<properties>\r';
 						for (var k = 0; k < returnObj.componentList[i].inputPortList[j].propertyList.length; k++) {
-							xmlString += '\t\t\t\t\t\t<property name="' + returnObj.componentList[i].inputPortList[j].propertyList[k].getKey() + '" value="' + returnObj.componentList[i].inputPortList[j].propertyList[k].value + '" />\r';
+							xmlString += '\t\t\t\t\t\t<property name="' + returnObj.componentList[i].inputPortList[j].propertyList[k].getKey() + '" value="' + returnObj.componentList[i].inputPortList[j].propertyList[k].value.replace(/"/g, '&quot;') + '" />\r';
 						}
 						xmlString += '\t\t\t\t\t</properties>\r';
 					} else {
@@ -570,7 +570,7 @@
 					if (returnObj.componentList[i].outputPortList[j].propertyList.length > 0) {
 						xmlString += '\t\t\t\t\t<properties>\r';
 						for (var k = 0; k < returnObj.componentList[i].outputPortList[j].propertyList.length; k++) {
-							xmlString += '\t\t\t\t\t\t<property name="' + returnObj.componentList[i].outputPortList[j].propertyList[k].getKey() + '" value="' + returnObj.componentList[i].outputPortList[j].propertyList[k].value + '" />\r';
+							xmlString += '\t\t\t\t\t\t<property name="' + returnObj.componentList[i].outputPortList[j].propertyList[k].getKey() + '" value="' + returnObj.componentList[i].outputPortList[j].propertyList[k].value.replace(/"/g, '&quot;') + '" />\r';
 						}
 						xmlString += '\t\t\t\t\t</properties>\r';
 					} else {
@@ -586,7 +586,7 @@
 			if (returnObj.componentList[i].propertyList.length > 0) {
 				xmlString += '\t\t\t<properties>\r';
 				for (var j = 0; j < returnObj.componentList[i].propertyList.length; j++) {
-					xmlString += '\t\t\t\t<property name="' + returnObj.componentList[i].propertyList[j].getKey() + '" value="' + returnObj.componentList[i].propertyList[j].value + '" />\r';
+					xmlString += '\t\t\t\t<property name="' + returnObj.componentList[i].propertyList[j].getKey() + '" value="' + returnObj.componentList[i].propertyList[j].value.replace(/"/g, '&quot;') + '" />\r';
 				}
 				xmlString += '\t\t\t</properties>\r';
 			}
@@ -598,10 +598,10 @@
 			// add the GUI
 			if (returnObj.componentList[i].gui) {
 				xmlString += '\t\t\t<gui>\r';
-				xmlString += '\t\t\t\t<posX>' + returnObj.componentList[i].gui.x + '</posX>\r';
-				xmlString += '\t\t\t\t<posY>' + returnObj.componentList[i].gui.y + '</posY>\r';
-				xmlString += '\t\t\t\t<width>' + returnObj.componentList[i].gui.width + '</width>\r';
-				xmlString += '\t\t\t\t<height>' + returnObj.componentList[i].gui.height + '</height>\r';
+				xmlString += '\t\t\t\t<posX>' + returnObj.componentList[i].gui.getX() + '</posX>\r';
+				xmlString += '\t\t\t\t<posY>' + returnObj.componentList[i].gui.getY() + '</posY>\r';
+				xmlString += '\t\t\t\t<width>' + returnObj.componentList[i].gui.getWidth() + '</width>\r';
+				xmlString += '\t\t\t\t<height>' + returnObj.componentList[i].gui.getHeight() + '</height>\r';
 				xmlString += '\t\t\t</gui>\r';
 			}
 			xmlString += '\t\t</component>\r';
@@ -613,7 +613,7 @@
 			for (var i = 0; i < returnObj.dataChannelList.length; i++) {
 				if (returnObj.dataChannelList[i].getInputPort()) { // avoids adding unfinished channels
 					xmlString += '\t\t<channel id="' + returnObj.dataChannelList[i].getId() + '">\r';
-					if (returnObj.dataChannelList[i].description !== '') xmlString += '\t\t\t<description>' + returnObj.dataChannelList[i].description + '</description>\r';
+					if (returnObj.dataChannelList[i].description !== '') xmlString += '\t\t\t<description>' + returnObj.dataChannelList[i].description.replace(/"/g, '&quot;') + '</description>\r';
 					xmlString += '\t\t\t<source>\r';
 					xmlString += '\t\t\t\t<component id="' + returnObj.dataChannelList[i].getOutputPort().getParentComponent().getId() + '" />\r';
 					xmlString += '\t\t\t\t<port id="' + returnObj.dataChannelList[i].getOutputPort().getId() + '" />\r';
@@ -633,7 +633,7 @@
 			for (var i = 0; i < returnObj.eventChannelList.length; i++) {
 				for (var j = 0; j < returnObj.eventChannelList[i].eventConnections.length; j++) {
 					xmlString += '\t\t<eventChannel id="' + returnObj.eventChannelList[i].eventConnections[j].trigger.getId() + '_' + returnObj.eventChannelList[i].eventConnections[j].listener.getId() + '">\r';
-					if (returnObj.eventChannelList[i].eventConnections[j].description !== '') xmlString += '\t\t\t<description>' + returnObj.eventChannelList[i].eventConnections[j].description + '</description>\r';
+					if (returnObj.eventChannelList[i].eventConnections[j].description !== '') xmlString += '\t\t\t<description>' + returnObj.eventChannelList[i].eventConnections[j].description.replace(/"/g, '&quot;') + '</description>\r';
 					xmlString += '\t\t\t<sources>\r';
 					xmlString += '\t\t\t\t<source>\r';
 					xmlString += '\t\t\t\t\t<component id="' + returnObj.eventChannelList[i].startComponent.getId() + '" />\r';
@@ -660,10 +660,10 @@
 		xmlString += '\t\t<ToSystemTray>' + returnObj.modelGui.getToSystemTray() + '</ToSystemTray>\r';
 		xmlString += '\t\t<ShopControlPanel>' + returnObj.modelGui.getShowControlPanel() + '</ShopControlPanel>\r'; // TODO: correct to "ShowcontrolPanel", when corrected in XML
 		xmlString += '\t\t<AREGUIWindow>\r';
-		xmlString += '\t\t\t<posX>' + returnObj.modelGui.areGuiWindow.x + '</posX>\r';
-		xmlString += '\t\t\t<posY>' + returnObj.modelGui.areGuiWindow.y + '</posY>\r';
-		xmlString += '\t\t\t<width>' + returnObj.modelGui.areGuiWindow.width + '</width>\r';
-		xmlString += '\t\t\t<height>' + returnObj.modelGui.areGuiWindow.height + '</height>\r';
+		xmlString += '\t\t\t<posX>' + returnObj.modelGui.areGuiWindow.getX() + '</posX>\r';
+		xmlString += '\t\t\t<posY>' + returnObj.modelGui.areGuiWindow.getY() + '</posY>\r';
+		xmlString += '\t\t\t<width>' + returnObj.modelGui.areGuiWindow.getWidth() + '</width>\r';
+		xmlString += '\t\t\t<height>' + returnObj.modelGui.areGuiWindow.getHeight() + '</height>\r';
 		xmlString += '\t\t</AREGUIWindow>\r';
 		xmlString += '\t</modelGUI>\r';
 		xmlString += '</model>';

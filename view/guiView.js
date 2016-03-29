@@ -181,7 +181,7 @@
 		for (var i = 0; i < model.componentList.length; i++) {
 			addComponent(model.componentList[i]);
 		}
-		guiLayer.draw();		
+		guiLayer.draw();
 	}
 	
 	var showGridChangedEventHandler = function() {

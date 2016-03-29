@@ -32,7 +32,7 @@
 // ************************************************** private variables **************************************************
 // ***********************************************************************************************************************
 	var status = ACS.statusType.DISCONNECTED;
-	var synchronised = false;
+	var synchronised = undefined;
 
 // ***********************************************************************************************************************
 // ************************************************** private methods ****************************************************
@@ -49,7 +49,7 @@
 	returnObj.events = ACS.eventManager();
 	
 	returnObj.checkAndSetSynchronisation = function() {
-		if (status != ACS.statusType.DISCONNECTED) {
+		if ((status != ACS.statusType.DISCONNECTED) && (status != ACS.statusType.CONNECTIONLOST) && (status != ACS.statusType.CONNECTING)) {
 						
 			function DDM_successCallback(data, HTTPstatus) {
 				var newSync;
@@ -67,7 +67,9 @@
 			}
 			
 			function DDM_errorCallback(HTTPstatus, AREerrorMessage) {
-				alert(AREerrorMessage);
+				if (AREerrorMessage != '') alert(AREerrorMessage);
+				synchronised = undefined;
+				returnObj.events.fireEvent('ARESynchronisationChangedEvent');
 			}
 			
 			// get currently deployed model from the ARE

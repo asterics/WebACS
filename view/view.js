@@ -211,33 +211,31 @@ ACS.view = function(modelList, // ACS.modelList
 	
 	var AREStatusChangedEventHandler = function() {
 		switch (areStatus.getStatus()) {
-			case ACS.statusType.DISCONNECTED: 
-				document.getElementById('AREstatus').textContent = 'Disconnected'; 
-				document.getElementById('synchronisationStatus').textContent = '';
-				break;
-			case ACS.statusType.CONNECTED: 
-				document.getElementById('AREstatus').textContent = 'Connected'; 
-				if (areStatus.getSynchronised()) {
-					document.getElementById('synchronisationStatus').textContent = ' and synchronised';
-				} else {
-					document.getElementById('synchronisationStatus').textContent = ' but NOT synchronised';
-				}
-				break;
-			case ACS.statusType.STARTED: document.getElementById('AREstatus').textContent = 'Started'; break;
-			case ACS.statusType.PAUSED: document.getElementById('AREstatus').textContent = 'Paused'; break;
-			case ACS.statusType.STOPPED: document.getElementById('AREstatus').textContent = 'Stopped'; break;
+			case ACS.statusType.DISCONNECTED: document.getElementById('AREstatus').textContent = 'Disconnected'; break;
+			case ACS.statusType.CONNECTING:	document.getElementById('AREstatus').textContent = 'Trying to connect'; break;
+			case ACS.statusType.CONNECTED: document.getElementById('AREstatus').textContent = 'Connected'; break;
+			case ACS.statusType.STARTING: document.getElementById('AREstatus').textContent = 'Attempting to start model'; break;
+			case ACS.statusType.STARTED: document.getElementById('AREstatus').textContent = 'Model running'; break;
+			case ACS.statusType.PAUSING: document.getElementById('AREstatus').textContent = 'Attempting to pause model'; break;
+			case ACS.statusType.PAUSED: document.getElementById('AREstatus').textContent = 'Model paused'; break;
+			case ACS.statusType.RESUMING: document.getElementById('AREstatus').textContent = 'Attempting to resume model'; break;
+			case ACS.statusType.STOPPING: document.getElementById('AREstatus').textContent = 'Attempting to stop model'; break;
+			case ACS.statusType.STOPPED: document.getElementById('AREstatus').textContent = 'Model stopped'; break;
 			case ACS.statusType.CONNECTIONLOST: document.getElementById('AREstatus').textContent = 'Connection lost'; break;
 		}
 	}
 	
 	var ARESynchronisationChangedEventHandler = function() {
-		if ((areStatus.getStatus() === ACS.statusType.DISCONNECTED) || (areStatus.getStatus() === ACS.statusType.CONNECTIONLOST)) {
+		if ((areStatus.getStatus() === ACS.statusType.DISCONNECTED) || (areStatus.getStatus() === ACS.statusType.CONNECTIONLOST) || (areStatus.getStatus() === ACS.statusType.CONNECTING)) {
 			document.getElementById('synchronisationStatus').textContent = '';
 		} else {
-			if (areStatus.getSynchronised()) {
-				document.getElementById('synchronisationStatus').textContent = ' and synchronised';
-			} else {
-				document.getElementById('synchronisationStatus').textContent = ' but NOT synchronised';
+			switch (areStatus.getSynchronised()) {
+				case true: document.getElementById('synchronisationStatus').textContent = ' / synchronised';
+						   break;
+				case false: document.getElementById('synchronisationStatus').textContent = ' / NOT synchronised';
+						   break;
+				case undefined: document.getElementById('synchronisationStatus').textContent = ' / synchronisation status unknown';
+						   break;						   
 			}
 		}
 	}
