@@ -26,7 +26,7 @@
  * limitations under the License.
  */
  
-ACS.propertyEditor = function(modelList) {
+ACS.propertyEditor = function(modelList,modelViewListtemp,editorPropsTemp) {
 
 // ***********************************************************************************************************************
 // ************************************************** private variables **************************************************
@@ -36,8 +36,14 @@ ACS.propertyEditor = function(modelList) {
 	var propertyTable =document.createElement('table');
 	var inputPortTable = document.createElement('table');
 	var outputPortTable = document.createElement('table');
+	var propertiesGuiEditorTable = document.createElement('table');
+	var propertiesGuiEditorTableEditorProperties = document.createElement('table');
 	var eventTriggerTable = document.createElement('table');
 	var eventListenerTable =document.createElement('table');
+	var modelViewList = modelViewListtemp;
+	var modelViewAct = modelViewList[0];
+	var modelViewActTabPanel = modelViewList[0].getModelTabPanel();
+	var editorProps = editorPropsTemp;
 	var row = [];
 	var cell = null;
 	var dropdownList = document.createElement('select');
@@ -48,6 +54,7 @@ ACS.propertyEditor = function(modelList) {
 	var eventChannelTable=document.createElement('table');; 
 	var priviousDropDownEntry = null; //stores the selected dropdownvalue before entry is changed
 	var eventTableId=0;
+	var guiEditorOn = false;
 // ***********************************************************************************************************************
 // ************************************************** private methods ****************************************************
 // ***********************************************************************************************************************
@@ -57,43 +64,44 @@ ACS.propertyEditor = function(modelList) {
 		
 		//generate view based on the type eventchannel or coponent and the selected tab 
 	var generateViews = function(){
-		
 		clearPropertyEditor();
 		var selectedElementType = null;
-		if(actModel.selectedItemsList.length===1 || flagActiveModelChanged){//check if only one component is selected
+		var containerId =modelViewAct.getModelContainerId();
+		var panelId = 'modelPanel'+containerId;
+		if(document.getElementById(panelId).getAttribute("aria-hidden")==='false'){
+		//render Properties/Inputs... for propPanel
+			if(actModel.selectedItemsList.length===1 || flagActiveModelChanged){//check if only one component is selected
 			//get selected component
-			for(var i = 0; i<actModel.componentList.length;i++){
-				if(actModel.componentList[i].getIsSelected()){
-					selectedElement = i;
-					selectedElementType = "component";
+				for(var i = 0; i<actModel.componentList.length;i++){
+					if(actModel.componentList[i].getIsSelected()){
+						selectedElement = i;
+						selectedElementType = "component";
+					}
 				}
-			}
-			
-			for(var i = 0; i<actModel.eventChannelList.length;i++){
-				if(actModel.eventChannelList[i].getIsSelected()){
-					selectedElement = i;
-					selectedElementType = "channel";
+				for(var i = 0; i<actModel.eventChannelList.length;i++){
+					if(actModel.eventChannelList[i].getIsSelected()){
+						selectedElement = i;
+						selectedElementType = "channel";
+					}
 				}
+			//Part for component
+			if(selectedElementType ==="component"){
+				generatePropertiesForComponent();
+				generateInputPortsForComponent();
+				generateOuputPortsForComponent();
+				generateEventTriggersForComponent();
+				generateEventListenerForComponent();
+			}			
+			//Part for Events		
+			if(selectedElementType ==="channel"){
+				generateChannelEventsForChannel();
 			}
-		
-
-		
-		//Part for component
-		if(selectedElementType ==="component"){
-			generatePropertiesForComponent();
-			generateInputPortsForComponent();
-			generateOuputPortsForComponent();
-			generateEventTriggersForComponent();
-			generateEventListenerForComponent();
+			}	
 		}
-			
-		//Part for Events		
-		if(selectedElementType ==="channel"){
-			generateChannelEventsForChannel();
+		if(document.getElementById(panelId).getAttribute("aria-hidden")==='true'){
+		//Render Properties for Gui Editor
+			generaterPropertiesForGUIEditor();
 		}
-
-		}	
-
 	}
 	
 		//generate the parts / fields for the properties for the selected component
@@ -256,20 +264,19 @@ ACS.propertyEditor = function(modelList) {
 			cell.innerHTML='<b>PortDataType </b>';
 			cell = row[0].insertCell(2);
 			cell.innerHTML='<b>Description </b>';
-		for(var h=0; h<actModel.componentList[selectedElement].outputPortList.length;h++){
-			tempStringa=actModel.componentList[selectedElement].outputPortList[h].getId();
-			row[h+1] = outputPortTable.insertRow(-1);
-			cell = row[h+1].insertCell(0);
-			cell.innerHTML = tempStringa;
-			tempStringa=actModel.componentList[selectedElement].outputPortList[h].getDataType();
-			cell = row[h+1].insertCell(1);
-			cell.innerHTML = stringOfEnum(ACS.dataType,tempStringa);
-			tempStringa=''; //TODO get description
-			cell = row[h+1].insertCell(2);
-			cell.innerHTML = tempStringa;
-		}	
+			for(var h=0; h<actModel.componentList[selectedElement].outputPortList.length;h++){
+				tempStringa=actModel.componentList[selectedElement].outputPortList[h].getId();
+				row[h+1] = outputPortTable.insertRow(-1);
+				cell = row[h+1].insertCell(0);
+				cell.innerHTML = tempStringa;
+				tempStringa=actModel.componentList[selectedElement].outputPortList[h].getDataType();
+				cell = row[h+1].insertCell(1);
+				cell.innerHTML = stringOfEnum(ACS.dataType,tempStringa);
+				tempStringa=''; //TODO get description
+				cell = row[h+1].insertCell(2);
+				cell.innerHTML = tempStringa;
+			}	
 		document.getElementById('outputPanel').appendChild(outputPortTable);
-		
 	}
 	
 	var generateEventTriggersForComponent = function(){
@@ -286,7 +293,7 @@ ACS.propertyEditor = function(modelList) {
 			cell = row[h].insertCell(0);
 			cell.innerHTML = tempStringa;
 			cell = row[h].insertCell(1);
-			cell.innerHTML = tempDes
+			cell.innerHTML = tempDes;
 		}			
 		document.getElementById('triggerPanel').appendChild(eventTriggerTable);
 	}
@@ -420,6 +427,97 @@ ACS.propertyEditor = function(modelList) {
 		document.getElementById('propEdPanel').appendChild(eventChannelTable);
 	}	
 	
+		//generate the property fields for the gui editor
+	var generaterPropertiesForGUIEditor = function(){
+		propertiesGuiEditorTableEditorProperties=null;
+		propertiesGuiEditorTableEditorProperties = document.createElement('table');
+		propertiesGuiEditorTableEditorProperties.innerHTML = 'Editor Properties';
+		document.getElementById('propEdPanel').appendChild(propertiesGuiEditorTableEditorProperties);
+		for(var h=0; h<4;h++){
+			row[h] = propertiesGuiEditorTableEditorProperties.insertRow(-1);
+			cell = row[h].insertCell(0);
+			if(h===0){cell.innerHTML = 'EnableGrid';tempStringa=editorProps.getEnableGrid();}
+			if(h===1){cell.innerHTML = 'ShowGrid';tempStringa=editorProps.getShowGrid();}
+			if(h===2){cell.innerHTML = 'GridSteps';tempStringa=editorProps.getGridSteps();}
+			if(h===3){cell.innerHTML = 'ScreenRes';tempStringa=editorProps.getScreenRes();}
+			cell = row[h].insertCell(1);
+			if(h===0){
+				boolInput = null;
+				boolInput = document.createElement("INPUT");
+				boolInput.setAttribute("type", "checkbox"); 
+				if(tempStringa){boolInput.setAttribute("checked", true);}
+				boolInput.setAttribute("value", tempStringa);
+				boolInput.setAttribute("id",h+"/4/"+ "enablegrid");
+				boolInput.addEventListener("change",writeGuiEditorProperties);
+				cell.appendChild(boolInput);
+			}
+			if(h===1){
+				boolInput = null;
+				boolInput = document.createElement("INPUT");
+				boolInput.setAttribute("type", "checkbox"); 
+				if(tempStringa){boolInput.setAttribute("checked", true);}
+				boolInput.setAttribute("value", tempStringa);
+				boolInput.setAttribute("id",h+"/4/"+ "showgrid");
+				boolInput.addEventListener("change",writeGuiEditorProperties);
+				cell.appendChild(boolInput);
+			}
+			if(h===2){
+				dropdownList = null;
+				dropdownList = document.createElement('select');
+				for(l=0;l<3;l++){
+					if(l===0){dropdownList.appendChild(new Option('small',l));}
+					if(l===1){dropdownList.appendChild(new Option('medium',l));}
+					if(l===2){dropdownList.appendChild(new Option('large',l));}
+					if(l===3){dropdownList.appendChild(new Option('huge',l));}
+				}
+				dropdownList.selectedIndex=tempStringa;
+				dropdownList.setAttribute("id",h+ "/4/"+"gridsteps");
+				dropdownList.addEventListener("change",writeGuiEditorProperties);
+				cell.appendChild(dropdownList);
+			}
+			if(h===3){
+				dropdownList = null;
+				dropdownList = document.createElement('select');
+				for(l=0;l<3;l++){
+					if(l===0){dropdownList.appendChild(new Option('FiveFour',l));}
+					if(l===1){dropdownList.appendChild(new Option('SixteenNine',l));}
+					if(l===2){dropdownList.appendChild(new Option('FourThree',l));}
+				}
+				dropdownList.selectedIndex=tempStringa;
+				dropdownList.setAttribute("id",h+ "/4/"+"gridsteps");
+				dropdownList.addEventListener("change",writeGuiEditorProperties);
+				cell.appendChild(dropdownList);
+			}
+		}
+		
+		propertiesGuiEditorTable=null;
+		propertiesGuiEditorTable = document.createElement('table');
+		propertiesGuiEditorTable.innerHTML = 'ARE Properties';
+		for(var h = 0; h<5; h++){
+			row[h] = propertiesGuiEditorTable.insertRow(-1);
+			cell = row[h].insertCell(0);
+			if(h===0){cell.innerHTML = 'Decoration';tempStringa=actModel.modelGui.getDecoration();	}
+			if(h===1){cell.innerHTML = 'FullScreen';	tempStringa=actModel.modelGui.getFullScreen();}
+			if(h===2){cell.innerHTML = 'AlwaysOnTop';tempStringa=actModel.modelGui.getAlwaysOnTop();	}
+			if(h===3){cell.innerHTML = 'ToSystemTray';	tempStringa=actModel.modelGui.getToSystemTray();}
+			if(h===4){cell.innerHTML = 'ShowControlPanel';	tempStringa=actModel.modelGui.getShowControlPanel();}
+			cell = row[h].insertCell(1);
+			boolInput = null;
+			boolInput = document.createElement("INPUT");
+			boolInput.setAttribute("type", "checkbox"); 
+			boolInput.setAttribute("value", tempStringa);
+			if(tempStringa){boolInput.setAttribute("checked", true);}
+			if(h===0){boolInput.setAttribute("id",h+"/5/"+ "decoration");}
+			if(h===1){boolInput.setAttribute("id",h+"/5/"+ "fullscreen");}
+			if(h===2){boolInput.setAttribute("id",h+"/5/"+ "alwaysontop");}
+			if(h===3){boolInput.setAttribute("id",h+"/5/"+ "tosystemtray");}
+			if(h===4){boolInput.setAttribute("id",h+"/5/"+ "showcontrolpanel");}
+			
+			boolInput.addEventListener("change",writeGuiEditorProperties);
+			cell.appendChild(boolInput);
+		}
+		document.getElementById('propEdPanel').appendChild(propertiesGuiEditorTable);
+	}
 		//remove the content of the property editor 
 	var clearPropertyEditor = function(){
 		if(inputPortTable.parentNode===document.getElementById('inputPanel')){
@@ -464,6 +562,20 @@ ACS.propertyEditor = function(modelList) {
 			row = [];
 			cell = null;
 			eventTableId=0;
+		}
+		if(propertiesGuiEditorTable.parentNode===document.getElementById('propEdPanel')){
+			document.getElementById('propEdPanel').removeChild(propertiesGuiEditorTable);
+			propertiesGuiEditorTable=null;
+			propertiesGuiEditorTable = document.createElement('table');
+			row = [];
+			cell = null;
+		}
+		if(propertiesGuiEditorTableEditorProperties.parentNode===document.getElementById('propEdPanel')){
+			document.getElementById('propEdPanel').removeChild(propertiesGuiEditorTableEditorProperties);
+			propertiesGuiEditorTableEditorProperties=null;
+			propertiesGuiEditorTableEditorProperties = document.createElement('table');
+			row = [];
+			cell = null;
 		}
 	}
 
@@ -608,6 +720,53 @@ ACS.propertyEditor = function(modelList) {
 		actModel.componentList[selectedElement].inputPortList[splitId ].sync=t;
 	}
 	
+	var writeGuiEditorProperties = function(evt){		
+		var idString=evt.target.id;
+		if(idString.indexOf('/4/') > -1){
+			var idStringSplita = idString.split('/4/');
+			var idStringSplit = idStringSplita[0];
+			if(idStringSplit==='0'){
+				var tempbool= editorProps.getEnableGrid();
+				editorProps.setEnableGrid(!tempbool);
+			}
+			if(idStringSplit==='1'){
+				var tempbool= editorProps.getShowGrid();
+				editorProps.setShowGrid(!tempbool);
+			}
+			if(idStringSplit==='2'){
+				var t = document.getElementById(evt.target.id).value;
+				editorProps.setGridSteps(t);
+			}
+			if(idStringSplit==='3'){
+				var t = document.getElementById(evt.target.id).value;
+				editorProps.setScreenRes(t);
+			}
+		}
+		if(idString.indexOf('/5/') > -1){
+			var idStringSplita = idString.split('/5/');
+			var idStringSplit = idStringSplita[0];
+			if(idStringSplit==='0'){
+				var tempbool= actModel.modelGui.getDecoration();
+				actModel.modelGui.setDecoration(!tempbool);
+			}
+			if(idStringSplit==='1'){
+				var tempbool= actModel.modelGui.getFullScreen();
+				actModel.modelGui.setFullScreen(!tempbool);
+			}
+			if(idStringSplit==='2'){
+				var tempbool= actModel.modelGui.getAlwaysOnTop();
+				actModel.modelGui.setAlwaysOnTop(!tempbool);
+			}
+			if(idStringSplit==='3'){
+				var tempbool= actModel.modelGui.getToSystemTray();
+				actModel.modelGui.setToSystemTray(!tempbool);
+			}
+			if(idStringSplit==='4'){
+				var tempbool= actModel.modelGui.getShowControlPanel();
+				actModel.modelGui.setShowControlPanel(!tempbool);
+			}
+		}
+	}
 	//class needed methodes helper functions
 	//======================================
 	
@@ -654,8 +813,18 @@ ACS.propertyEditor = function(modelList) {
 		actModel.events.registerHandler('eventChannelRemovedEvent',eventChannelRemovedEvemtHandler);
 		actModel.events.registerHandler('modelChangedEvent', modelChangedEventHandler);
 		
+		modelViewActTabPanel.events.removeHandler('tabSwitchedEvent',tabSwitchedEventHandler);
+		for (var i = 0; i < modelViewList.length; i++) {
+			if (modelViewList[i] && (modelViewList[i].getModel() === actModel)) {
+			modelViewAct = modelViewList[i];
+			modelViewActTabPanel=modelViewList[i].getModelTabPanel();
+			modelViewActTabPanel.events.registerHandler('tabSwitchedEvent',tabSwitchedEventHandler);
+			}
+		}
 		//clearPropertyEditor();
-		if(actModel.selectedItemsList.length===1){
+		var containerId =modelViewAct.getModelContainerId();
+		var panelId = 'modelPanel'+containerId;
+		if(actModel.selectedItemsList.length===1 || document.getElementById(panelId).getAttribute("aria-hidden")==='true'){
 			flagActiveModelChanged=true;
 			generateViews();
 		}
@@ -709,6 +878,10 @@ ACS.propertyEditor = function(modelList) {
 	
 	var eventChannelRemovedEvemtHandler =function(){
 		clearPropertyEditor();
+	}
+	
+	var tabSwitchedEventHandler = function(){
+		generateViews();
 	}
 	
 // ***********************************************************************************************************************
@@ -827,6 +1000,7 @@ ACS.propertyEditor = function(modelList) {
 	//actModel.events.registerHandler('componentRemovedEvent',removeComponentEventHandler);
 	actModel.events.registerHandler('eventChannelAddedEvent',eventChannelAddedEvemtHandler);
 	actModel.events.registerHandler('eventChannelRemovedEvent',eventChannelRemovedEvemtHandler);
+	modelViewActTabPanel.events.registerHandler('tabSwitchedEvent',tabSwitchedEventHandler);
 	
 	return returnObj;
 }

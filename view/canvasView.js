@@ -119,6 +119,12 @@
 			log.info('new filename: ' + actModel.getFilename());
 		});
 	}
+	returnObj.getCanvasModelViewList = function(){
+		return modelViewList;
+	}
+	returnObj.getGuiEditorProperties = function(){
+		return editorProperties;
+	}
 	
 // ***********************************************************************************************************************
 // ************************************************** constructor code ***************************************************

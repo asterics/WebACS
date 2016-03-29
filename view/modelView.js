@@ -538,6 +538,10 @@
 		dragAct.execute();
 	});
 	
+	returnObj.getModelTabPanel = function(){
+		return modelTabPanel;
+	}
+	
 	// instantiate guiView
 	guiView = ACS.guiView(model, modelContainerId, editorProperties);
 	
