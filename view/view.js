@@ -48,7 +48,8 @@ ACS.view = function(modelList, // ACS.modelList
 		}
 		if (e.preventDefault) e.preventDefault();
 	}
-
+	
+	// ********************************************** handlers ***********************************************************
 	var handleKeydown = function(e) {
 		// catch Del to delete selected items
 		if (e.keyCode === 46) { // Del can't be caught by keyPress for not all browsers act consistently (see: http://unixpapa.com/js/key.html)

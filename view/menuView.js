@@ -32,12 +32,7 @@
 // ***********************************************************************************************************************
 // ************************************************** private variables **************************************************
 // ***********************************************************************************************************************
-	var menuPanel = ACS.tabPanel(ACS.vConst.MENUVIEW_MENUMOTHERPANEL, 'tab', 'panel');
-	var activeLevel1Timer = null;
-	var activeLevel2Timer = null;
-	var cameFromElement = null;
-	var activeButtonList = '';
-	var quickselectForm = document.getElementById('quickselectForm');
+	var menuPanel = ACS.tabPanel(ACS.vConst.MENUVIEW_MENUMOTHERPANEL, ACS.vConst.MENUVIEW_CLASSOFTAB, ACS.vConst.MENUVIEW_CLASSOFPANEL);
 	
 // ***********************************************************************************************************************
 // ************************************************** private methods ****************************************************

@@ -67,10 +67,25 @@ ACS.gridStepType = {
 	MEDIUM: 2,
 	LARGE: 3,
 	HUGE: 4
-}
+};
 
 ACS.screenResType = {
 	FIVEFOUR: 1,
 	SIXTEENNINE: 2,
 	FOURTHREE: 3
-}
+};
+
+ ACS.tabPanelKeyCodes = {
+  TAB: 9,
+  ENTER: 13,
+  ESC: 27,
+  SPACE: 32,
+  PGUP: 33,
+  PGDOWN: 34,
+  END: 35,
+  POS1: 36,
+  LEFT: 37,
+  UP: 38,
+  RIGHT: 39,
+  DOWN: 40
+};

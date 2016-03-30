@@ -38,8 +38,11 @@
 // ***********************************************************************************************************************
 // ************************************************** private variables **************************************************
 // ***********************************************************************************************************************
+	var sizeBoundsMin = {width: 30, height: 30};
 	var sizeBoundsMax;
 	var dragBounds;
+	var children = []; // Array<guiViewElement>
+	var parent = null; // guiViewElement
 	var mainRect = null;
 	var nameText = null;
 	var anchor = null;
@@ -48,9 +51,6 @@
 	var decoration = null;
 	var decorHeight;
 	var controlWidth;
-	var sizeBoundsMin = {width: 30, height: 30};
-	var children = [];
-	var parent = null;
 	var resizeAct = null; // ACS.guiResizeAction
 	var dragAct = null; // ACS.guiDragDropAction
 	var dragOffsetX = null;

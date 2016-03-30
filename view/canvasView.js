@@ -32,7 +32,7 @@
 // ***********************************************************************************************************************
 // ************************************************** private variables **************************************************
 // ***********************************************************************************************************************
-	var canvasTabPanel = ACS.tabPanel(ACS.vConst.CANVASVIEW_MOTHERPANEL, 'canvasTab', 'canvasPanel');
+	var canvasTabPanel = ACS.tabPanel(ACS.vConst.CANVASVIEW_MOTHERPANEL, ACS.vConst.CANVASVIEW_CLASSOFTAB, ACS.vConst.CANVASVIEW_CLASSOFPANEL);
 	var modelViewList = [];
 	var panelId = 0;
 	var editorProperties = ACS.editorProperties();
@@ -42,7 +42,7 @@
 // ***********************************************************************************************************************
 	// ********************************************** handlers ***********************************************************
 	
-	// filenameBeingChangedEventHandler is defined in addActModelToView
+	// filenameBeingChangedEventHandler is defined in function addActModelToView
 	
 	var newModelAddedEventHandler = function() {
 		returnObj.addActModelToView();
@@ -119,9 +119,11 @@
 			log.info('new filename: ' + actModel.getFilename());
 		});
 	}
+	
 	returnObj.getCanvasModelViewList = function(){
 		return modelViewList;
 	}
+	
 	returnObj.getGuiEditorProperties = function(){
 		return editorProperties;
 	}

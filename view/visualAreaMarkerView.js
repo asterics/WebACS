@@ -27,7 +27,7 @@
  */
  
  ACS.visualAreaMarkerView = function(vaMarker, // ACS.visualAreaMarker
-									modelLayer) { // Kinetic.Layer
+									 modelLayer) { // Kinetic.Layer
 									
 // ***********************************************************************************************************************
 // ************************************************** private variables **************************************************

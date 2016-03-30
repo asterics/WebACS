@@ -26,12 +26,14 @@
  * limitations under the License.
  */
  
-ACS.propertyEditor = function(modelList,modelViewListtemp,editorPropsTemp) {
+ACS.propertyEditor = function(modelList, // ACS.modelList
+							  modelViewListtemp, // Array<modelView>
+							  editorPropsTemp) { // editorProperties
 
 // ***********************************************************************************************************************
 // ************************************************** private variables **************************************************
 // ***********************************************************************************************************************
-	var propertiesTabPanel = ACS.tabPanel(ACS.vConst.PROPERTYEDITOR_MOTHERPANEL, 'propEdTab', 'propEdPanel');
+	var propertiesTabPanel = ACS.tabPanel(ACS.vConst.PROPERTYEDITOR_MOTHERPANEL, ACS.vConst.PROPERTYEDITOR_CLASSOFTAB, ACS.vConst.PROPERTYEDITOR_CLASSOFPANEL);
 	var actModel = modelList.getActModel();
 	var propertyTable =document.createElement('table');
 	var inputPortTable = document.createElement('table');
@@ -52,9 +54,10 @@ ACS.propertyEditor = function(modelList,modelViewListtemp,editorPropsTemp) {
 	var selectedElement;
 	var flagActiveModelChanged=false;
 	var eventChannelTable=document.createElement('table');; 
-	var priviousDropDownEntry = null; //stores the selected dropdownvalue before entry is changed
+	var previousDropDownEntry = null; //stores the selected dropdownvalue before entry is changed
 	var eventTableId=0;
 	var guiEditorOn = false;
+	
 // ***********************************************************************************************************************
 // ************************************************** private methods ****************************************************
 // ***********************************************************************************************************************
@@ -620,7 +623,7 @@ ACS.propertyEditor = function(modelList,modelViewListtemp,editorPropsTemp) {
 		var r_value = eventChannelTable.rows[rowI].cells[0].innerHTML;
 		var eventConnectionDescription =eventChannelTable.rows[rowI].cells[2].firstChild.value;
 		
-		if(t!=='---'&& priviousDropDownEntry==='---'){
+		if(t!=='---'&& previousDropDownEntry==='---'){
 			//generate and insert eventconnection into selectedChannel
 			var listener = ACS.event(r_value,'',listenerComponent.getId());
 			var trigger = ACS.event(t,'',triggerComponent.getId());
@@ -662,7 +665,7 @@ ACS.propertyEditor = function(modelList,modelViewListtemp,editorPropsTemp) {
 			textInput.addEventListener("input",writeChannelDescription);
 			textInput.addEventListener("blur",writeChannelDescription);
 			cell.appendChild(textInput);
-		}else if(t!=='---'&& priviousDropDownEntry!=='---'){
+		}else if(t!=='---'&& previousDropDownEntry!=='---'){
 			selectedChan.eventConnections.splice(insertPosition,1);
 			var listener = ACS.event(r_value,'',listenerComponent.getId());
 			var trigger = ACS.event(t,'',triggerComponent.getId());
@@ -673,7 +676,7 @@ ACS.propertyEditor = function(modelList,modelViewListtemp,editorPropsTemp) {
 			eventChannelTable.deleteRow(rowI);
 			selectedChan.eventConnections.splice(insertPosition,1);
 		}
-		priviousDropDownEntry=splitIdTriggerName;	
+		previousDropDownEntry=splitIdTriggerName;	
 	}
 	
 	var writeChannelDescription = function(evt){
@@ -787,7 +790,7 @@ ACS.propertyEditor = function(modelList,modelViewListtemp,editorPropsTemp) {
 	
 	var setPreviousSelected = function(evt){
 		var t_dropdown = document.getElementById(evt.target.id);
-		priviousDropDownEntry = t_dropdown.options[t_dropdown.selectedIndex].text;		
+		previousDropDownEntry = t_dropdown.options[t_dropdown.selectedIndex].text;		
 	}
 	
 	var stringOfEnum = function(enum1,value1){
@@ -803,14 +806,14 @@ ACS.propertyEditor = function(modelList,modelViewListtemp,editorPropsTemp) {
 				
 		actModel.events.removeHandler('componentAddedEvent',componentAddedEventHandler);
 		actModel.events.removeHandler('componentRemovedEvent',removeComponentEventHandler);
-		actModel.events.removeHandler('eventChannelAddedEvent',eventChannelAddedEvemtHandler);
-		actModel.events.removeHandler('eventChannelRemovedEvent',eventChannelRemovedEvemtHandler);
+		actModel.events.removeHandler('eventChannelAddedEvent',eventChannelAddedEventHandler);
+		actModel.events.removeHandler('eventChannelRemovedEvent',eventChannelRemovedEventHandler);
 		actModel.events.removeHandler('modelChangedEvent', modelChangedEventHandler);
 		actModel = modelList.getActModel();
 		actModel.events.registerHandler('componentAddedEvent',componentAddedEventHandler);
 		actModel.events.registerHandler('componentRemovedEvent',removeComponentEventHandler);
-		actModel.events.registerHandler('eventChannelAddedEvent',eventChannelAddedEvemtHandler);
-		actModel.events.registerHandler('eventChannelRemovedEvent',eventChannelRemovedEvemtHandler);
+		actModel.events.registerHandler('eventChannelAddedEvent',eventChannelAddedEventHandler);
+		actModel.events.registerHandler('eventChannelRemovedEvent',eventChannelRemovedEventHandler);
 		actModel.events.registerHandler('modelChangedEvent', modelChangedEventHandler);
 		
 		modelViewActTabPanel.events.removeHandler('tabSwitchedEvent',tabSwitchedEventHandler);
@@ -871,12 +874,12 @@ ACS.propertyEditor = function(modelList,modelViewListtemp,editorPropsTemp) {
 		clearPropertyEditor();
 	}
 	
-	var eventChannelAddedEvemtHandler =function(){
+	var eventChannelAddedEventHandler = function(){
 		actModel.eventChannelList[actModel.eventChannelList.length-1].events.registerHandler('selectedEvent',selectedEventHandler);
 		actModel.eventChannelList[actModel.eventChannelList.length-1].events.registerHandler('deSelectedEvent',deSelectedEventHandler);
 	}
 	
-	var eventChannelRemovedEvemtHandler =function(){
+	var eventChannelRemovedEventHandler = function(){
 		clearPropertyEditor();
 	}
 	
@@ -998,8 +1001,8 @@ ACS.propertyEditor = function(modelList,modelViewListtemp,editorPropsTemp) {
 	actModel.events.registerHandler('componentAddedEvent',componentAddedEventHandler);
 	actModel.events.registerHandler('componentRemovedEvent',removeComponentEventHandler);
 	//actModel.events.registerHandler('componentRemovedEvent',removeComponentEventHandler);
-	actModel.events.registerHandler('eventChannelAddedEvent',eventChannelAddedEvemtHandler);
-	actModel.events.registerHandler('eventChannelRemovedEvent',eventChannelRemovedEvemtHandler);
+	actModel.events.registerHandler('eventChannelAddedEvent',eventChannelAddedEventHandler);
+	actModel.events.registerHandler('eventChannelRemovedEvent',eventChannelRemovedEventHandler);
 	modelViewActTabPanel.events.registerHandler('tabSwitchedEvent',tabSwitchedEventHandler);
 	
 	return returnObj;

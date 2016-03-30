@@ -42,6 +42,10 @@
 		if ((filenameCounter - 1) + '' === actNumber) filenameCounter--;
 	}
 	
+	var filenameBeingChangedEventHandler = function() {
+		removeSubstituteFilename();
+	}
+	
 // ***********************************************************************************************************************
 // ************************************************** public stuff *******************************************************
 // ***********************************************************************************************************************
@@ -55,7 +59,7 @@
 		filenameCounter++;
 		this.events.fireEvent('actModelChangedEvent');
 		this.events.fireEvent('newModelAddedEvent');
-		list[this.actIndex].events.registerHandler('filenameBeingChangedEvent', removeSubstituteFilename);
+		list[this.actIndex].events.registerHandler('filenameBeingChangedEvent', filenameBeingChangedEventHandler);
 	}
 	
 	returnObj.getActModel = function() {

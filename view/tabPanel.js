@@ -25,26 +25,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- 
- ACS.tabPanelKeyCodes = {
-  TAB: 9,
-  ENTER: 13,
-  ESC: 27,
-  SPACE: 32,
-  PGUP: 33,
-  PGDOWN: 34,
-  END: 35,
-  POS1: 36,
-  LEFT: 37,
-  UP: 38,
-  RIGHT: 39,
-  DOWN: 40
-};
 
-// for the tabPanel to work
-// - all tabs need to be of class "tab"
-// - all panels need to be of class "panel"
-ACS.tabPanel = function(id, tab, panel) { // String; the id of the div-container holding the tabPanel
+ACS.tabPanel = function(id, // String; the id of the div-container holding the tabPanel
+						tab, // String; class of the elements that are supposed to become tabs
+						panel) { // String; class of the elements that are supposed to become panels
 
 // ***********************************************************************************************************************
 // ************************************************** private variables **************************************************
@@ -382,6 +366,8 @@ ACS.tabPanel = function(id, tab, panel) { // String; the id of the div-container
 // ***********************************************************************************************************************
 	var returnObj = {};
 	
+	returnObj.events = ACS.eventManager();
+	
 	returnObj.updatePanel = function() {
 		$panel = $('#' + id);  // the jQuery object for the panel
 		$tabs = $panel.find('.' + tab); // Array of panel tabs.
@@ -389,8 +375,6 @@ ACS.tabPanel = function(id, tab, panel) { // String; the id of the div-container
 		bindEventHandlers(); 
 		initPanel();
 	}
-	
-	returnObj.events = ACS.eventManager();
 
 // ***********************************************************************************************************************
 // *********************************************** constructor code ***************************************************

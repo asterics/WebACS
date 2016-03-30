@@ -27,6 +27,7 @@
  */
  
  ACS.groupComponentView = function(	gc, // ACS.groupComponent
+									model, // ACS.model
 									modelView, // ACS.modelView
 									modelLayer) { // Kinetic.Layer
 									
@@ -41,7 +42,7 @@
 // ***********************************************************************************************************************
 // ************************************************** public stuff *******************************************************
 // ***********************************************************************************************************************
-	var returnObj = ACS.componentView(gc, modelView, modelLayer);
+	var returnObj = ACS.componentView(gc, model, modelView, modelLayer);
 
 	returnObj.destroy = function() {
 		// TODO

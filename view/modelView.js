@@ -34,12 +34,11 @@
 // ***********************************************************************************************************************
 // ************************************************** private variables **************************************************
 // ***********************************************************************************************************************
-	var modelTabPanel = ACS.tabPanel(modelContainerId, 'modelTab', 'modelPanel');
+	var modelTabPanel = ACS.tabPanel(modelContainerId, ACS.vConst.MODELVIEW_CLASSOFTAB, ACS.vConst.MODELVIEW_CLASSOFPANEL);
 	var componentViewList = []; // Array<ACS.componentView>
 	var dataChannelViewList = []; // Array<ACS.dataChannelView>
 	var eventChannelViewList = []; // Array<ACS.eventChannelView>
 	var visualAreaMarkerViewList = []; // Array<ACS.visualMarkerView>
-
 	var guiView; // ACS.guiView
 	var modelStage; // Kinetic.Stage
 	var modelLayer; // Kinetic.Layer
@@ -322,7 +321,11 @@
 	
 	returnObj.isDragging = function() {
 		return dragging;
-	}	
+	}
+	
+	returnObj.getModelTabPanel = function(){
+		return modelTabPanel;
+	}
 	
 // ***********************************************************************************************************************
 // ************************************************** constructor code ***************************************************
@@ -537,10 +540,6 @@
 		dragging = false;
 		dragAct.execute();
 	});
-	
-	returnObj.getModelTabPanel = function(){
-		return modelTabPanel;
-	}
 	
 	// instantiate guiView
 	guiView = ACS.guiView(model, modelContainerId, editorProperties);

@@ -43,8 +43,8 @@
 // ***********************************************************************************************************************
 	var returnObj = {};
 	
-	returnObj.description = '';
 	returnObj.value = value;
+	returnObj.description = '';
 	returnObj.combobox = '';
 	returnObj.getStringList = false; // used for dynamic properties: values are suggested when ARE is in synced state
 	
