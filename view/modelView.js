@@ -93,6 +93,7 @@
 	}
 	
 	var selectInFocusRect = function() {
+		//insert so that blur 
 		model.deSelectAll(); // clears all earlier selections
 		var focusRectCorners = sortCorners(focusRect); // Object defining the corners of the focusRect: tl: top-left, tr: top-right, br: bottom-right, bl: bottom-left	
 		// check all components for intersection with focusRect
@@ -483,6 +484,8 @@
 	});
 	
 	modelLayer.on('mousedown', function() {
+		var focusid='modelPanel'+modelContainerId;
+		document.getElementById(focusid).focus();
 		if (!((model.dataChannelList.length > 0) && (!model.dataChannelList[model.dataChannelList.length - 1].getInputPort()))) {
 			var mousePos = modelStage.getPointerPosition();
 			if (focusRect) focusRect.destroy();

@@ -57,7 +57,7 @@ ACS.propertyEditor = function(modelList, // ACS.modelList
 	var previousDropDownEntry = null; //stores the selected dropdownvalue before entry is changed
 	var eventTableId=0;
 	var guiEditorOn = false;
-	
+
 // ***********************************************************************************************************************
 // ************************************************** private methods ****************************************************
 // ***********************************************************************************************************************
@@ -169,7 +169,7 @@ ACS.propertyEditor = function(modelList, // ACS.modelList
 					numberInput.setAttribute("value", valtemp); 
 					numberInput.setAttribute("id",h+ "/1/"+ valtemp);
 					numberInput.addEventListener("change",writeProperty);
-					numberInput.addEventListener("input",writeProperty);
+					//numberInput.addEventListener("input",writeProperty);
 					cell.appendChild(numberInput);
 				}
 			
@@ -181,7 +181,7 @@ ACS.propertyEditor = function(modelList, // ACS.modelList
 					numberInput.setAttribute("value", valtemp); 
 					numberInput.setAttribute("id",h+ "/1/"+ valtemp);
 					numberInput.addEventListener("change",writeProperty);
-					numberInput.addEventListener("input",writeProperty);
+					//numberInput.addEventListener("input",writeProperty);
 					cell.appendChild(numberInput);
 				}
 			
@@ -194,7 +194,7 @@ ACS.propertyEditor = function(modelList, // ACS.modelList
 					textInput.setAttribute("value", valtemp); 
 					textInput.setAttribute("id",h+ "/1/"+ valtemp); 
 					textInput.addEventListener("blur", writeProperty);
-					textInput.addEventListener("input",writeProperty);
+					//CHANGEDtextInput.addEventListener("input",writeProperty);
 					cell.appendChild(textInput);
 				}
 			
@@ -370,7 +370,7 @@ ACS.propertyEditor = function(modelList, // ACS.modelList
 			textInput.setAttribute("type", "text"); 
 			textInput.setAttribute("id",eventTableId+ "/2/"+eventName);
 			eventTableId=eventTableId+1;
-			textInput.addEventListener("input",writeChannelDescription);
+			//textInput.addEventListener("input",writeChannelDescription);
 			textInput.addEventListener("blur",writeChannelDescription);
 			cell.appendChild(textInput);
 		}
@@ -415,7 +415,7 @@ ACS.propertyEditor = function(modelList, // ACS.modelList
 						textInput.value="";
 					}
 					textInput.setAttribute("id",eventTableId+ "/2/"+eventName);
-					textInput.addEventListener("input",writeChannelDescription);
+					//textInput.addEventListener("input",writeChannelDescription);
 					textInput.addEventListener("blur",writeChannelDescription);
 					eventTableId=eventTableId+1;
 					cell.appendChild(textInput);
@@ -662,7 +662,7 @@ ACS.propertyEditor = function(modelList, // ACS.modelList
 			textInput.setAttribute("type", "text"); 
 			textInput.setAttribute("id",eventTableId+ "/2/"+splitIdTriggerName);
 			eventTableId=eventTableId+1;
-			textInput.addEventListener("input",writeChannelDescription);
+			//textInput.addEventListener("input",writeChannelDescription);
 			textInput.addEventListener("blur",writeChannelDescription);
 			cell.appendChild(textInput);
 		}else if(t!=='---'&& previousDropDownEntry!=='---'){
