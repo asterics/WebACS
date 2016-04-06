@@ -39,6 +39,7 @@
 	var componentGUIs = []; // Array<Object {component, guiViewElement}>
 	var gridLines = []; // Array<Kinetic.Line>
 	var img = null; // Image
+	var guiDesignerFrame; // Kinetic.Rect
 	
 // ***********************************************************************************************************************
 // ************************************************** private methods ****************************************************
@@ -113,18 +114,19 @@
 		// add the lines to the layer
 		for (var i = 0; i < gridLines.length; i++) {
 			guiLayer.add(gridLines[i]);
+			gridLines[i].moveToBottom();
 		}
 	}
 	
 	var showGrid = function(show) {
 		for (var i = 0; i < gridLines.length; i++) {
-			gridLine[i].visible(show);
+			gridLines[i].visible(show);
 		}
 	}
 	
 	var killGrid = function() {
 		for (var i = 0; i < gridLines.length; i++) {
-			gridLine[i].destroy();
+			gridLines[i].destroy();
 		}
 		gridLines = [];
 	}
@@ -191,6 +193,8 @@
 	var gridStepsChangedEventHandler = function() {
 		killGrid();
 		makeGrid();
+		switchGrid(editorProperties.getShowGrid());
+		guiLayer.draw();
 	}
 	
 	var screenResChangedEventHandler = function() {
@@ -198,6 +202,12 @@
 		guiStage.height(editorProperties.getGuiDesignerSize().height);
 		guiLayer.width(editorProperties.getGuiDesignerSize().width);
 		guiLayer.height(editorProperties.getGuiDesignerSize().height);
+		guiDesignerFrame.width(editorProperties.getGuiDesignerSize().width);
+		guiDesignerFrame.height(editorProperties.getGuiDesignerSize().height);
+		killGrid();
+		makeGrid();
+		switchGrid(editorProperties.getShowGrid());
+		guiLayer.draw();		
 		areGUI.setSizeBoundsMax({width: ACS.vConst.GUIVIEWELEMENT_NORMSCREENRES_X - model.modelGui.areGuiWindow.getX(), height: ACS.vConst.GUIVIEWELEMENT_NORMSCREENRES_Y - model.modelGui.areGuiWindow.getY()});
 		areGUI.setDragBounds({left: 0, right: ACS.vConst.GUIVIEWELEMENT_NORMSCREENRES_X, upper: 0, lower: ACS.vConst.GUIVIEWELEMENT_NORMSCREENRES_Y});
 		for (var i = 0; i < componentGUIs.length; i++) {
@@ -236,11 +246,11 @@
 	});
 	guiStage.add(guiLayer);
 	
-	var guiDesignerFrame = new Kinetic.Rect({x: 0, 
-											 y: 0, 
-											 width: editorProperties.getGuiDesignerSize().width,
-											 height: editorProperties.getGuiDesignerSize().height,
-											 stroke: 'black'});
+	guiDesignerFrame = new Kinetic.Rect({x: 0,
+										 y: 0, 
+										 width: editorProperties.getGuiDesignerSize().width,
+										 height: editorProperties.getGuiDesignerSize().height,
+										 stroke: 'black'});
 	guiLayer.add(guiDesignerFrame);
 	
 	switchGrid(editorProperties.getShowGrid());

@@ -467,13 +467,13 @@ ACS.propertyEditor = function(modelList, // ACS.modelList
 			if(h===2){
 				dropdownList = null;
 				dropdownList = document.createElement('select');
-				for(l=0;l<3;l++){
+				for(l=0;l<4;l++){
 					if(l===0){dropdownList.appendChild(new Option('small',l));}
 					if(l===1){dropdownList.appendChild(new Option('medium',l));}
 					if(l===2){dropdownList.appendChild(new Option('large',l));}
 					if(l===3){dropdownList.appendChild(new Option('huge',l));}
 				}
-				dropdownList.selectedIndex=tempStringa;
+				dropdownList.selectedIndex=tempStringa - 1;
 				dropdownList.setAttribute("id",h+ "/4/"+"gridsteps");
 				dropdownList.addEventListener("change",writeGuiEditorProperties);
 				cell.appendChild(dropdownList);
@@ -486,7 +486,7 @@ ACS.propertyEditor = function(modelList, // ACS.modelList
 					if(l===1){dropdownList.appendChild(new Option('SixteenNine',l));}
 					if(l===2){dropdownList.appendChild(new Option('FourThree',l));}
 				}
-				dropdownList.selectedIndex=tempStringa;
+				dropdownList.selectedIndex=tempStringa - 1;
 				dropdownList.setAttribute("id",h+ "/4/"+"gridsteps");
 				dropdownList.addEventListener("change",writeGuiEditorProperties);
 				cell.appendChild(dropdownList);
@@ -737,11 +737,11 @@ ACS.propertyEditor = function(modelList, // ACS.modelList
 				editorProps.setShowGrid(!tempbool);
 			}
 			if(idStringSplit==='2'){
-				var t = document.getElementById(evt.target.id).value;
+				var t = document.getElementById(evt.target.id).selectedIndex + 1;
 				editorProps.setGridSteps(t);
 			}
 			if(idStringSplit==='3'){
-				var t = document.getElementById(evt.target.id).value;
+				var t = document.getElementById(evt.target.id).selectedIndex + 1;
 				editorProps.setScreenRes(t);
 			}
 		}
