@@ -211,9 +211,9 @@
 		areGUI.setSizeBoundsMax({width: ACS.vConst.GUIVIEWELEMENT_NORMSCREENRES_X - model.modelGui.areGuiWindow.getX(), height: ACS.vConst.GUIVIEWELEMENT_NORMSCREENRES_Y - model.modelGui.areGuiWindow.getY()});
 		areGUI.setDragBounds({left: 0, right: ACS.vConst.GUIVIEWELEMENT_NORMSCREENRES_X, upper: 0, lower: ACS.vConst.GUIVIEWELEMENT_NORMSCREENRES_Y});
 		for (var i = 0; i < componentGUIs.length; i++) {
-			if (componentGUIs[i].getGui().getIsExternal()) {
-				componentGUIs[i].setSizeBoundsMax({width: ACS.vConst.GUIVIEWELEMENT_NORMSCREENRES_X - componentGUIs[i].getX(), height: ACS.vConst.GUIVIEWELEMENT_NORMSCREENRES_Y - componentGUIs[i].getY()});
-				componentGUIs[i].setDragBounds({left: 0, right: ACS.vConst.GUIVIEWELEMENT_NORMSCREENRES_X, upper: 0, lower: ACS.vConst.GUIVIEWELEMENT_NORMSCREENRES_Y});
+			if (componentGUIs[i].guiViewElement.getGui().getIsExternal()) {
+				componentGUIs[i].guiViewElement.setSizeBoundsMax({width: ACS.vConst.GUIVIEWELEMENT_NORMSCREENRES_X - componentGUIs[i].guiViewElement.getX(), height: ACS.vConst.GUIVIEWELEMENT_NORMSCREENRES_Y - componentGUIs[i].guiViewElement.getY()});
+				componentGUIs[i].guiViewElement.setDragBounds({left: 0, right: ACS.vConst.GUIVIEWELEMENT_NORMSCREENRES_X, upper: 0, lower: ACS.vConst.GUIVIEWELEMENT_NORMSCREENRES_Y});
 			}
 		}
 	}

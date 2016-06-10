@@ -155,15 +155,15 @@
 	// ********************************************** handlers ***********************************************************
 	var guiPositionChangedEventHandler = function() {
 		mainRect.setAbsolutePosition({x: xToScreenRes(gui.getX()),
-									  y: yToScreenRes(gui.getY())});
+									  y: yToScreenRes(gui.getY())});								  
 		nameText.setAbsolutePosition({x: xToScreenRes(gui.getX()),
-									  y: yToScreenRes(gui.getY()) + yToScreenRes(gui.getHeight())/2 - 5});
+									  y: yToScreenRes(gui.getY()) + yToScreenRes(gui.getHeight())/2 - 5});								  
 		anchor.setAbsolutePosition({x: xToScreenRes(gui.getX()) + xToScreenRes(gui.getWidth()),
 									y: yToScreenRes(gui.getY()) + yToScreenRes(gui.getHeight())});
 		if (decoration) {
 			decoration.setAbsolutePosition({x: xToScreenRes(gui.getX()) + 1,
 											y: yToScreenRes(gui.getY()) + 1});
-		}
+		}	
 		if (controls) {
 			controls.getChildren()[0].setAbsolutePosition({x: xToScreenRes(gui.getX()) + xToScreenRes(gui.getWidth()) - controlWidth,
 														   y: yToScreenRes(gui.getY())});
@@ -174,6 +174,12 @@
 	}
 	
 	var guiSizeChangedEventHandler = function() {
+		setNewSize(xToScreenRes(gui.getWidth()), yToScreenRes(gui.getHeight()));
+		guiLayer.draw();
+	}
+	
+	var screenResChangedEventHandler = function() {
+		guiPositionChangedEventHandler();
 		setNewSize(xToScreenRes(gui.getWidth()), yToScreenRes(gui.getHeight()));
 		guiLayer.draw();
 	}
@@ -255,7 +261,6 @@
 					  right: xToScreenRes(bounds.right),
 					  upper: yToScreenRes(bounds.upper),
 					  lower: yToScreenRes(bounds.lower)};
-		// TODO when there is time: if element is outside the bounds now, try moving it inside (if necessary by first resizing it or even first resizing its children)
 	}
 	
 	returnObj.setName = function(newName) { // String
@@ -499,6 +504,7 @@
 	
 	gui.events.registerHandler('guiPositionChangedEvent', guiPositionChangedEventHandler);
 	gui.events.registerHandler('guiSizeChangedEvent', guiSizeChangedEventHandler);
+	editorProperties.events.registerHandler('screenResChangedEvent', screenResChangedEventHandler);
 	
 	return returnObj;
 }
