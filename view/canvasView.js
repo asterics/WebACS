@@ -124,7 +124,7 @@
 		return modelViewList;
 	}
 	
-	returnObj.getGuiEditorProperties = function(){
+	returnObj.getEditorProperties = function(){
 		return editorProperties;
 	}
 	

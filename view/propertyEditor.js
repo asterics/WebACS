@@ -27,8 +27,9 @@
  */
  
 ACS.propertyEditor = function(modelList, // ACS.modelList
-							  modelViewListtemp, // Array<modelView>
-							  editorPropsTemp) { // editorProperties
+							  modelViewListtemp, // Array<ACS.modelView>
+							  editorPropsTemp, // ACS.editorProperties
+							  areStatus) { // ACS.areStatus
 
 // ***********************************************************************************************************************
 // ************************************************** private variables **************************************************
@@ -53,7 +54,7 @@ ACS.propertyEditor = function(modelList, // ACS.modelList
 	var textInput;
 	var selectedElement;
 	var flagActiveModelChanged=false;
-	var eventChannelTable=document.createElement('table');; 
+	var eventChannelTable=document.createElement('table');
 	var previousDropDownEntry = null; //stores the selected dropdownvalue before entry is changed
 	var eventTableId=0;
 	var guiEditorOn = false;
@@ -586,7 +587,7 @@ ACS.propertyEditor = function(modelList, // ACS.modelList
 	//methods handling outgoing events
 	//================================
 	
-		//write the actual input modifiaction to the property
+		//write the actual input modification to the property
 	var writeProperty = function(evt){
 		var t_temp = document.getElementById(evt.target.id);
 		var completeId = evt.target.id;
@@ -595,13 +596,23 @@ ACS.propertyEditor = function(modelList, // ACS.modelList
 		var t = document.getElementById(evt.target.id).value;
 		// toggle t in case of a boolean value
 		if(t==='false'){
-		t='true';
-		document.getElementById(evt.target.id).value='true';
+			t='true';
+			document.getElementById(evt.target.id).value='true';
 		}
 		else if(t==='true'){
-		t='false';
-		document.getElementById(evt.target.id).value='false';}
+			t='false';
+			document.getElementById(evt.target.id).value='false';}
 		actModel.componentList[selectedElement].propertyList[splitId].setValue(t);
+		// if ARE is connected and synchronised, write value directly to ARE via REST
+		if ((areStatus.getStatus != ACS.statusType.DISCONNECTED) && 
+			(areStatus.getStatus != ACS.statusType.CONNECTING) && 
+			(areStatus.getStatus != ACS.statusType.CONNECTIONLOST) &&
+			areStatus.getSynchronised()) {
+				setRuntimeComponentProperty(SRCP_successCallback, SRCP_errorCallback, actModel.componentList[selectedElement].getId(), actModel.componentList[selectedElement].propertyList[splitId].getKey(), t);
+				
+				function SRCP_successCallback(data, HTTPstatus) { log.debug('property successfully updated on ARE'); }
+				function SRCP_errorCallback(HTTPstatus, AREerrorMessage) { alert(AREerrorMessage); }
+			}
 	}
 		
 		//write the selected element of the Dropdown list to an eventchannel
