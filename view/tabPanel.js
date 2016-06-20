@@ -43,8 +43,8 @@ ACS.tabPanel = function(id, // String; the id of the div-container holding the t
 	var initPanel = function() {
 		var $tab; // the selected tab
 
-		// add aria attributes to the panels
-		$panels.attr('aria-hidden', 'true');
+		// add aria-hidden attribute and displayNone-class to the panels
+		$panels.attr('aria-hidden', 'true').addClass('displayNone');
 		// get the selected tab
 		$tab = $tabs.filter('[aria-selected="true"]');
 		// set to first tab, in case none is selected yet
@@ -52,8 +52,8 @@ ACS.tabPanel = function(id, // String; the id of the div-container holding the t
 			$tab = $tabs.first();
 		}
 
-		// show the panel that the selected tab controls and set aria-hidden to false
-		$panel.find('#' + $tab.attr('aria-controls')).attr('aria-hidden', 'false');		
+		// show the panel that the selected tab controls, set aria-hidden to false and eliminate class displayNone
+		$panel.find('#' + $tab.attr('aria-controls')).attr('aria-hidden', 'false').removeClass('displayNone');		
 	}
 	
 	var switchTabs = function($curTab, // jQuery object of the currently selected tab
@@ -64,10 +64,10 @@ ACS.tabPanel = function(id, // String; the id of the div-container holding the t
 		// Highlight the new tab and update its aria-selected attribute
 		$newTab.attr('aria-selected', 'true');
 		// swap displayed tabs:
-		// hide the current tab panel and set aria-hidden to true
-		$panel.find('#' + $curTab.attr('aria-controls')).attr('aria-hidden', 'true');
-		// show the new tab panel and set aria-hidden to false
-		$panel.find('#' + $newTab.attr('aria-controls')).attr('aria-hidden', 'false');
+		// hide the current tab panel
+		$panel.find('#' + $curTab.attr('aria-controls')).attr('aria-hidden', 'true').addClass('displayNone');
+		// show the new tab panel
+		$panel.find('#' + $newTab.attr('aria-controls')).attr('aria-hidden', 'false').removeClass('displayNone');
 
 		// Make new tab navigable
 		$newTab.attr('tabindex', '0');
@@ -219,13 +219,13 @@ ACS.tabPanel = function(id, // String; the id of the div-container holding the t
 	var handleTabClick = function($tab, // jQuery object of the tab being processed
 								  e) { // the associated event object
 		// hide the panels
-		$panels.attr('aria-hidden', 'true');
+		$panels.attr('aria-hidden', 'true').addClass('displayNone');
 		// remove all tabs from the tab order and reset their aria-selected attribute
 		$tabs.attr('tabindex', '-1').attr('aria-selected', 'false');
 		// Update the selected tab's aria-selected attribute
 		$tab.attr('aria-selected', 'true');
 		// show the clicked tab panel
-		$panel.find('#' + $tab.attr('aria-controls')).attr('aria-hidden', 'false');
+		$panel.find('#' + $tab.attr('aria-controls')).attr('aria-hidden', 'false').removeClass('displayNone');
 		// make clicked tab navigable
 		$tab.attr('tabindex', '0');
 		// give the tab focus
@@ -377,7 +377,7 @@ ACS.tabPanel = function(id, // String; the id of the div-container holding the t
 	}
 
 // ***********************************************************************************************************************
-// *********************************************** constructor code ***************************************************
+// *********************************************** constructor code ******************************************************
 // ***********************************************************************************************************************
 	bindEventHandlers(); 
 	initPanel();

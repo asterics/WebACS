@@ -65,11 +65,29 @@
 	<script type="text/javascript" language="javascript" src="view/canvasView.js"></script>
 	<script type="text/javascript" language="javascript" src="view/propertyEditor.js"></script>
 	<script type="text/javascript" language="javascript" src="view/editorProperties.js"></script>
+	<script type="text/javascript" language="javascript" src="view/blindComponentView.js"></script>
+	<script type="text/javascript" language="javascript" src="view/blindChannelView.js"></script>
+	<script type="text/javascript" language="javascript" src="view/blindEventChannelView.js"></script>
+	<script type="text/javascript" language="javascript" src="view/blindDataChannelView.js"></script>
+	<script type="text/javascript" language="javascript" src="view/blindModelView.js"></script>	
+	
 	<!-- main script: -->
     <script type="text/javascript" language="javascript" src="webACS.js"></script>	
   </head>
 
   <body>
+  <!-- ****************************************************** keyboard shortcuts *********************************************************** -->
+	<div id="pageAreas">
+		<div id="pageAreasHeader">Shortcuts:</div>
+		<ul>
+			<li>menu: CTRL-0</li>
+			<li>model panel: CTRL-1</li>
+			<li id="AKmodelDesigner">model designer: CTRL-2</li>
+			<li id="AKguiDesigner">gui designer: CTRL-3</li>
+			<li>property editor: CTRL-4</li>
+			<li>toggle blind mode: CTRL-9</li>
+		</ul>
+	</div>
   <!-- ****************************************************** menu panel *********************************************************** -->
     <div id="menuPanel">
 		<h1 class="menu_header">AsTeRICS Configuration Suite</h1>

@@ -44,8 +44,8 @@ ACS.propertyEditor = function(modelList, // ACS.modelList
 	var eventTriggerTable = document.createElement('table');
 	var eventListenerTable =document.createElement('table');
 	var modelViewList = modelViewListtemp;
-	var modelViewAct = modelViewList[0];
-	var modelViewActTabPanel = modelViewList[0].getModelTabPanel();
+	var modelViewAct = modelViewList[0].modelView;
+	var modelViewActTabPanel = modelViewList[0].modelView.getModelTabPanel();
 	var editorProps = editorPropsTemp;
 	var row = [];
 	var cell = null;
@@ -58,6 +58,7 @@ ACS.propertyEditor = function(modelList, // ACS.modelList
 	var previousDropDownEntry = null; //stores the selected dropdownvalue before entry is changed
 	var eventTableId=0;
 	var guiEditorOn = false;
+	var blindMode = false;
 
 // ***********************************************************************************************************************
 // ************************************************** private methods ****************************************************
@@ -829,9 +830,9 @@ ACS.propertyEditor = function(modelList, // ACS.modelList
 		
 		modelViewActTabPanel.events.removeHandler('tabSwitchedEvent',tabSwitchedEventHandler);
 		for (var i = 0; i < modelViewList.length; i++) {
-			if (modelViewList[i] && (modelViewList[i].getModel() === actModel)) {
-			modelViewAct = modelViewList[i];
-			modelViewActTabPanel=modelViewList[i].getModelTabPanel();
+			if (modelViewList[i] && (modelViewList[i].modelView.getModel() === actModel)) {
+			modelViewAct = modelViewList[i].modelView;
+			modelViewActTabPanel=modelViewList[i].modelView.getModelTabPanel();
 			modelViewActTabPanel.events.registerHandler('tabSwitchedEvent',tabSwitchedEventHandler);
 			}
 		}
@@ -902,6 +903,12 @@ ACS.propertyEditor = function(modelList, // ACS.modelList
 // ************************************************** public stuff *******************************************************
 // ***********************************************************************************************************************
 	var returnObj = {};
+	
+	returnObj.toggleBlindMode = function() {
+		// need an additional view, that will show ARE-properties, when "ARE-properties" is selected in the blindView; 
+		// editor-properties shall not be shown, because they make no sense for the blind
+		blindMode = !blindMode;
+	}
 
 // ***********************************************************************************************************************
 // ************************************************** constructor code ***************************************************

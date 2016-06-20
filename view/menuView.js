@@ -752,7 +752,7 @@
 // ***********************************************************************************************************************
 	var fileSelector = document.createElement('input'); // create "hidden" input element for choosing file
 	fileSelector.setAttribute('type', 'file');
-	fileSelector.setAttribute('class', 'hidden'); // must be added to DOM in order for the click event to work in IE
+	fileSelector.setAttribute('class', 'displayNone'); // must be added to DOM in order for the click event to work in IE
 	document.getElementById('mainMenuPanel').appendChild(fileSelector);
 	
 	// register handlers

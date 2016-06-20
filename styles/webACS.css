@@ -30,18 +30,53 @@ body {
 	font-family: Arial, Verdana, Helvetica, sans-serif;
 	font-size: 100%;
 	background-color: #dfe9f5;
+	margin: 0;
+	padding: 0;
+}
+
+#pageAreas {
+	font-size: 0.7em;
+	overflow: hidden;
+	padding: 0 0 0 1.5em;
+	border-bottom: 1px solid black;
+	margin-bottom: 1em;
+	background-color: #ECE9D8;
+}
+
+#pageAreasHeader {
+	float: left;
+	padding: 0.2em 0.5em 0.2em 0.5em;
+	border-left: 1px solid black;
+	border-right: 1px solid black;
+	font-weight: bold;
+}
+
+#pageAreas ul {
+	position: relative;
+	margin: 0;
+}
+
+#pageAreas li {
+	list-style: none;
+	float: left;
+	border-right: 1px solid black;
+	padding: 0.2em 0.5em 0.2em 0.5em;
+	font-weight: bold;
+}
+
+#menuPanel {
+	padding: 0 0 0.5em 1em;
 }
 
 .menu_header {
   text-align: left;
   background-color: #dfe9f5;
   color: black;
-  padding-left: 0.3em;
   margin: 0;
 }
 
 .tabpanel {
-  padding: 0.5em;
+  padding-top: 0.5em;
   background-color: #dfe9f5;
   height: 1%; /* IE fix for float bug */
 }
@@ -71,6 +106,22 @@ body {
   line-height: 1em;
   border-top-left-radius: 5px;
   border-top-right-radius: 5px;
+}
+
+.menuTab:focus {
+	border: 1px dotted black;
+}
+
+.canvasTab:focus {
+	border: 1px dotted black;
+}
+
+.modelTab:focus {
+	border: 1px dotted black;
+}
+
+.propEdTab:focus {
+	border: 1px dotted black;
 }
 
 .canvasTab {
@@ -124,7 +175,14 @@ body {
   height: 37em;
   width: 70em;
   padding: 3px 4px 1px 2px;
-  background-color: #d1e5fd;
+}
+
+.canvasPanelColor {
+	background-color: #d1e5fd;
+}
+
+.canvasPanelBlindModeColor {
+	background-color: white;
 }
 
 .modelPanel {
@@ -269,12 +327,8 @@ li[aria-selected='true'] {
 	background-color: #afdef8;
 }
 
-div[aria-hidden='true'] {
-   display: none;
-}
-
 #canvasMotherPanel {
-  padding: 0 0.5em 0.5em 0.5em;
+  padding: 0 0.5em 0.5em 1em;
   background-color: #dfe9f5;
   float: left;
 }
@@ -295,7 +349,7 @@ div[aria-hidden='true'] {
 #statusAndZoomBar {
 	clear: left;
 	font-size: 0.8em;
-	padding-left: 1em;
+	padding-left: 1.5em;
 }
 
 #statusBar {
@@ -312,8 +366,7 @@ div[aria-hidden='true'] {
 
 .hidden {
   position: absolute;
-  left: -300em;
-  top: -300em;
+  left: -3000em;
 }
 
 .displayNone {
