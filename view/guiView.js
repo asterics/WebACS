@@ -27,7 +27,7 @@
  */
  
  ACS.guiView = function(model, // ACS.model
-						modelContainerId, // String
+						containerId, // String
 						editorProperties) { // ACS.editorProperties
 						
 // ***********************************************************************************************************************
@@ -236,7 +236,7 @@
 // ************************************************** constructor code ***************************************************
 // ***********************************************************************************************************************
 	guiStage = new Kinetic.Stage({
-		container: 'guiPanel' + modelContainerId,
+		container: containerId,
 		width: editorProperties.getGuiDesignerSize().width,
 		height: editorProperties.getGuiDesignerSize().height
 	});

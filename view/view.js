@@ -92,7 +92,7 @@ ACS.view = function(modelList, // ACS.modelList
 						if (tablist.item(i).attributes.getNamedItem('aria-selected').value === 'true') {
 							var panelId = tablist.item(i).attributes.getNamedItem('id').value;
 							panelId = panelId.slice(9, panelId.length); // get rid of the word "canvasTab"
-							var tab = document.getElementById('modelTabcanvasContainer' + panelId);
+							var tab = document.getElementById('modelTabcanvasPanel' + panelId);
 							if (tab) tab.click();
 						}
 					}
@@ -107,7 +107,7 @@ ACS.view = function(modelList, // ACS.modelList
 						if (tablist.item(i).attributes.getNamedItem('aria-selected').value === 'true') {
 							var panelId = tablist.item(i).attributes.getNamedItem('id').value;
 							panelId = panelId.slice(9, panelId.length); // get rid of the word "canvasTab"
-							var tab = document.getElementById('guiTabcanvasContainer' + panelId);
+							var tab = document.getElementById('guiTabcanvasPanel' + panelId);
 							if (tab) tab.click();
 						}
 					}
@@ -115,7 +115,22 @@ ACS.view = function(modelList, // ACS.modelList
 					return false;
 				}
 				break;
-			case 52: // Ctrl-4 for property editor
+			case 52: // CTRL-4 for list view
+				if (e.ctrlKey) {
+					var tablist = document.getElementById(ACS.vConst.CANVASVIEW_TABLIST).getElementsByClassName('tab');
+					for (var i = 0; i < tablist.length; i++) {
+						if (tablist.item(i).attributes.getNamedItem('aria-selected').value === 'true') {
+							var panelId = tablist.item(i).attributes.getNamedItem('id').value;
+							panelId = panelId.slice(9, panelId.length); // get rid of the word "canvasTab"
+							var tab = document.getElementById('listTabcanvasPanel' + panelId);
+							if (tab) tab.click();
+						}
+					}
+					stopEvent(e);
+					return false;
+				}
+				break;								
+			case 53: // Ctrl-5 for property editor
 				if (e.ctrlKey) {
 					var tablist = document.getElementById('propertyEditorTabList').getElementsByClassName('tab');
 					for (var i = 0; i < tablist.length; i++) {
@@ -127,22 +142,6 @@ ACS.view = function(modelList, // ACS.modelList
 					return false;
 				}
 				break;
-			case 57: // CTRL-9 for toggle blind mode
-				if (e.ctrlKey) {
-					// change keycode-menu at the top of the page
-					if ($('#AKmodelDesigner').hasClass('displayNone')) {
-						$('#AKmodelDesigner').removeClass('displayNone');
-						$('#AKguiDesigner').removeClass('displayNone');
-					} else {
-						$('#AKmodelDesigner').addClass('displayNone');
-						$('#AKguiDesigner').addClass('displayNone');
-					}
-					canvas.toggleBlindMode();
-					propertyEditor.toggleBlindMode();
-					stopEvent(e);
-					return false;
-				}
-				break;				
 			case 120: // Ctrl-x for cut
 				if (e.ctrlKey) {
 					cutHandler();

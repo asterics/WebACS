@@ -26,25 +26,38 @@
  * limitations under the License.
  */
  
- ACS.blindModelView = function(	modelContainerId, // String
-								model, // ACS.modelList
-								clipBoard) { // ACS.clipBoard
+ ACS.listView = function(	containerId, // String
+							model, // ACS.model
+							clipBoard) { // ACS.clipBoard
 							
 // ***********************************************************************************************************************
 // ************************************************** private variables **************************************************
 // ***********************************************************************************************************************
-	var blindComponentViewList = []; // Array<ACS.componentView>
-	var blindDataChannelViewList = []; // Array<ACS.dataChannelView>
-	var blindEventChannelViewList = []; // Array<ACS.eventChannelView>
+	var listComponentViewList = []; // Array<ACS.listComponentView>
+	var mainList = document.createElement('ul');	
 	
 // ***********************************************************************************************************************
 // ************************************************** private methods ****************************************************
 // ***********************************************************************************************************************
-
+	var reloadListView = function() {
+		// remove old content
+		listComponentViewList = [];
+		$(mainList).empty();
+		// load all components to list (first sensors, then processors, then actuators, to give the list-user a clearer idea of the dataflow)
+		for (var i = 0; i < model.componentList.length; i++) {
+			if (model.componentList[i].getType() === ACS.componentType.SENSOR) listComponentViewList.push(ACS.listComponentView(mainList, model.componentList[i], model));
+		}
+		for (var i = 0; i < model.componentList.length; i++) {
+			if (model.componentList[i].getType() === ACS.componentType.PROCESSOR) listComponentViewList.push(ACS.listComponentView(mainList, model.componentList[i], model));
+		}
+		for (var i = 0; i < model.componentList.length; i++) {
+			if (model.componentList[i].getType() === ACS.componentType.ACTUATOR) listComponentViewList.push(ACS.listComponentView(mainList, model.componentList[i], model));
+		}		
+	}
 	
 	// ********************************************** handlers ***********************************************************
 	var modelChangedEventHandler = function() {
-
+		reloadListView();
 	}
 	
 	var componentAddedEventHandler = function() {
@@ -84,15 +97,19 @@
 		return model;
 	}
 	
-	returnObj.getModelContainerId = function() {
-		return modelContainerId;
+	returnObj.getContainerId = function() {
+		return containerId;
 	}
 	
 // ***********************************************************************************************************************
 // ************************************************** constructor code ***************************************************
 // ***********************************************************************************************************************
-
-
+	$('#' + containerId).append('<h1>List of components:</h1>');
+	$(mainList).attr('id', 'componentList');
+	$('#' + containerId).append(mainList);
+	$('#' + containerId).append('<div id="arePropertyDiv">ARE properties (see property editor for details)</div>');
+	$('#arePropertyDiv').attr('tabindex', '0');
+	reloadListView();
 
 	// register event-handlers
 	model.events.registerHandler('modelChangedEvent', modelChangedEventHandler);

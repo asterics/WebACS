@@ -172,17 +172,10 @@ body {
 }
 
 .canvasPanel {
-  height: 37em;
-  width: 70em;
-  padding: 3px 4px 1px 2px;
-}
-
-.canvasPanelColor {
+	height: 37em;
+	width: 70em;
+	padding: 3px 4px 1px 2px;
 	background-color: #d1e5fd;
-}
-
-.canvasPanelBlindModeColor {
-	background-color: white;
 }
 
 .modelPanel {
@@ -190,6 +183,14 @@ body {
   width: 69em;
   padding: 0.3em 0.5em;  
   overflow: scroll;
+}
+
+.listPanel li:focus {
+	background-color: #d1e511;
+}
+
+#arePropertyDiv:focus {
+	background-color: #d1e511;
 }
 
 .propEdPanel {

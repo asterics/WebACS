@@ -33,7 +33,7 @@
 // ************************************************** private variables **************************************************
 // ***********************************************************************************************************************
 	var canvasTabPanel = ACS.tabPanel(ACS.vConst.CANVASVIEW_MOTHERPANEL, ACS.vConst.CANVASVIEW_CLASSOFTAB, ACS.vConst.CANVASVIEW_CLASSOFPANEL);
-	var modelViewList = []; // Array<Object(modelView, blindModelView)>
+	var modelViewList = []; // Array<modelView>
 	var panelId = 0;
 	var editorProperties = ACS.editorProperties();
 	var blindMode = false;
@@ -53,14 +53,14 @@
 		var removePanel = ''; // for the id of the panel that needs to be removed
 		// remove the modelView from the list:
 		for (var i = 0; i < modelViewList.length; i++) {
-			if (modelViewList[i] && (modelViewList[i].modelView.getModel() === modelList.getActModel())) {
-				removePanel = modelViewList[i].modelView.getModelContainerId();
+			if (modelViewList[i] && (modelViewList[i].getModel() === modelList.getActModel())) {
+				removePanel = modelViewList[i].getModelContainerId();
 				modelViewList.splice(i, 1);
 			}
 		}
 		// remove the tab from the DOM:
-		document.getElementById(ACS.vConst.CANVASVIEW_TABLIST).removeChild(document.getElementById(removePanel.replace('Container', 'Tab')));
-		document.getElementById(ACS.vConst.CANVASVIEW_MOTHERPANEL).removeChild(document.getElementById(removePanel.replace('Container', 'Panel')));
+		document.getElementById(ACS.vConst.CANVASVIEW_TABLIST).removeChild(document.getElementById(removePanel.replace('Panel', 'Tab')));
+		document.getElementById(ACS.vConst.CANVASVIEW_MOTHERPANEL).removeChild(document.getElementById(removePanel));
 		// update the tabPanel:
 		canvasTabPanel.updatePanel();
 	}
@@ -77,9 +77,9 @@
 	var actModelChangedEventHandler = function() {
 		// seek the panel matching the actModel:
 		for (var i = 0; i < modelViewList.length; i++) {
-			if (modelViewList[i] && (modelViewList[i].modelView.getModel() === modelList.getActModel())) {
+			if (modelViewList[i] && (modelViewList[i].getModel() === modelList.getActModel())) {
 				// activate the tab
-				var tabId = modelViewList[i].modelView.getModelContainerId().replace('Container', 'Tab');
+				var tabId = modelViewList[i].getModelContainerId().replace('Panel', 'Tab');
 				document.getElementById(tabId).click();
 			}
 		}	
@@ -106,23 +106,8 @@
 		div.setAttribute('class', 'panel canvasPanel');
 		div.setAttribute('aria-labelledby', 'tab' + panelId);
 		div.setAttribute('role', 'tabpanel');
-		if (blindMode) {
-			$(div).addClass('canvasPanelBlindModeColor');
-		} else {
-			$(div).addClass('canvasPanelColor');
-		}
-		var containerDiv = document.createElement('div');
-		containerDiv.setAttribute('id', 'canvasContainer' + panelId);
-		if (blindMode) containerDiv.setAttribute('class', 'displayNone');
-		div.appendChild(containerDiv);
-		containerDiv = document.createElement('div');
-		containerDiv.setAttribute('id', 'blindModeContainer' + panelId);
-		if (!blindMode) containerDiv.setAttribute('class', 'displayNone');
-		containerDiv.textContent = 'This is a test of blind-mode';
-		div.appendChild(containerDiv);
 		document.getElementById(ACS.vConst.CANVASVIEW_MOTHERPANEL).appendChild(div);
-		modelViewList[panelId] = {modelView: ACS.modelView('canvasContainer' + panelId, actModel, clipBoard, editorProperties),
-								  blindModelView: ACS.blindModelView('canvasContainer' + panelId, actModel, clipBoard)};
+		modelViewList[panelId] = ACS.modelView('canvasPanel' + panelId, actModel, clipBoard, editorProperties);
 		panelId++;
 		canvasTabPanel.updatePanel();
 		// activate the tab (a simple li.click() will not work in safari)
@@ -134,22 +119,6 @@
 			li.textContent = actModel.getFilename();
 			log.info('new filename: ' + actModel.getFilename());
 		});
-	}
-	
-	returnObj.toggleBlindMode = function() {
-		for (var i = 0; i < modelViewList.length; i++) {
-			var containerId = modelViewList[i].modelView.getModelContainerId();
-			if (blindMode) {
-				$('#' + containerId).removeClass('displayNone');
-				$('#' + containerId.replace('canvas', 'blindMode')).addClass('displayNone');
-				$('#' + containerId.replace('Container', 'Panel')).switchClass('canvasPanelBlindModeColor', 'canvasPanelColor',1);
-			} else {
-				$('#' + containerId).addClass('displayNone');
-				$('#' + containerId.replace('canvas', 'blindMode')).removeClass('displayNone');
-				$('#' + containerId.replace('Container', 'Panel')).switchClass('canvasPanelColor', 'canvasPanelBlindModeColor',1);
-			}
-		}
-		blindMode = !blindMode;
 	}
 	
 	returnObj.getCanvasModelViewList = function(){

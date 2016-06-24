@@ -27,7 +27,7 @@
  */
  
  ACS.modelView = function(	modelContainerId, // String
-							model, // ACS.modelList
+							model, // ACS.model
 							clipBoard, // ACS.clipBoard
 							editorProperties) { // ACS.editorProperties
 							
@@ -40,6 +40,7 @@
 	var eventChannelViewList = []; // Array<ACS.eventChannelView>
 	var visualAreaMarkerViewList = []; // Array<ACS.visualMarkerView>
 	var guiView; // ACS.guiView
+	var listView; // ACS.listView
 	var modelStage; // Kinetic.Stage
 	var modelLayer; // Kinetic.Layer
 	var focusRect = null; // Kinetic.Rect
@@ -367,6 +368,21 @@
 	div.setAttribute('aria-labelledby', 'guiTab' + modelContainerId);
 	div.setAttribute('role', 'tabpanel');
 	document.getElementById(modelContainerId).appendChild(div);
+	var li3 = document.createElement('li');
+	li3.setAttribute('id', 'listTab' + modelContainerId);
+	li3.setAttribute('class', 'tab modelTab');
+	li3.setAttribute('aria-controls', 'listPanel' + modelContainerId);
+	li3.setAttribute('aria-selected', 'false');
+	li3.setAttribute('role', 'tab');
+	li3.setAttribute('tabindex', -1);
+	li3.textContent = ACS.vConst.MODELVIEW_LISTVIEWHEADER;
+	document.getElementById(modelContainerId + 'TabList').appendChild(li3);
+	div = document.createElement('div');
+	div.setAttribute('id', 'listPanel' + modelContainerId);
+	div.setAttribute('class', 'panel modelPanel listPanel');
+	div.setAttribute('aria-labelledby', 'listTab' + modelContainerId);
+	div.setAttribute('role', 'tabpanel');
+	document.getElementById(modelContainerId).appendChild(div);
 	modelTabPanel.updatePanel();
 	// activate the modelTab (a simple li1.click() will not work in safari)
 	var click_ev = document.createEvent("MouseEvents");
@@ -544,8 +560,9 @@
 		dragAct.execute();
 	});
 	
-	// instantiate guiView
-	guiView = ACS.guiView(model, modelContainerId, editorProperties);
+	// instantiate guiView and listView
+	guiView = ACS.guiView(model, 'guiPanel' + modelContainerId, editorProperties);
+	listView = ACS.listView('listPanel' + modelContainerId, model, clipBoard);
 	
 	return returnObj;
 }
