@@ -562,7 +562,7 @@
 	
 	// instantiate guiView and listView
 	guiView = ACS.guiView(model, 'guiPanel' + modelContainerId, editorProperties);
-	listView = ACS.listView('listPanel' + modelContainerId, model, clipBoard);
+	listView = ACS.listView('listPanel' + modelContainerId, model, clipBoard, 'listTab' + modelContainerId, modelTabPanel);
 	
 	return returnObj;
 }

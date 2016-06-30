@@ -28,7 +28,9 @@
  
  ACS.listView = function(	containerId, // String
 							model, // ACS.model
-							clipBoard) { // ACS.clipBoard
+							clipBoard, // ACS.clipBoard
+							tabId, // String
+							modelTabPanel) { // ACS.tabPanel
 							
 // ***********************************************************************************************************************
 // ************************************************** private variables **************************************************
@@ -54,6 +56,29 @@
 			if (model.componentList[i].getType() === ACS.componentType.ACTUATOR) listComponentViewList.push(ACS.listComponentView(mainList, model.componentList[i], model));
 		}		
 	}
+	
+	var focusSelectedItem = function() {
+		// select the selected item; if more than one item is selected, select only the first one in the list; 
+		// in the case of a channel, select the outport of the "left" component;
+		if (model.selectedItemsList.length > 0)	{
+			if (typeof(model.selectedItemsList[0].getComponentTypeId) !== 'undefined') {
+				// must be a component
+				for (var i = 0; i < listComponentViewList.length; i++) {
+					if (listComponentViewList[i].getComponent() === model.selectedItemsList[0]) listComponentViewList[i].focusComponent();
+				}
+			} else if (typeof(model.selectedItemsList[0].startComponent) !== 'undefined') {
+					// must be an eventChannel
+					for (var i = 0; i < listComponentViewList.length; i++) {
+						if (listComponentViewList[i].getComponent() === model.selectedItemsList[0].startComponent) listComponentViewList[i].focusOutgoingEventConnection(model.selectedItemsList[0]);
+					}
+			} else if (typeof(model.selectedItemsList[0].getInputPort) !== 'undefined') {
+					// must be a dataChannel
+					for (var i = 0; i < listComponentViewList.length; i++) {
+						if (listComponentViewList[i].getComponent() === model.selectedItemsList[0].getOutputPort().getParentComponent()) listComponentViewList[i].focusOutgoingDataChannel(model.selectedItemsList[0]);
+					}
+			}
+		}
+	}	
 	
 	// ********************************************** handlers ***********************************************************
 	var modelChangedEventHandler = function() {
@@ -88,6 +113,10 @@
 
 	}
 	
+	var tabSwitchedEventHandler = function() {
+		if ($('#' + tabId).attr('aria-selected')) focusSelectedItem();
+	}
+	
 // ***********************************************************************************************************************
 // ************************************************** public stuff *******************************************************
 // ***********************************************************************************************************************
@@ -120,6 +149,7 @@
 	model.events.registerHandler('eventChannelAddedEvent', eventChannelAddedEventHandler);
 	model.events.registerHandler('eventChannelRemovedEvent', eventChannelRemovedEventHandler);
 	model.events.registerHandler('alertUserOfComponentCollectionMismatchEvent', alertUserOfComponentCollectionMismatchEventHandler);
+	modelTabPanel.events.registerHandler('tabSwitchedEvent', tabSwitchedEventHandler);
 	
 
 	
