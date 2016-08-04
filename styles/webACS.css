@@ -418,3 +418,7 @@ li[aria-selected='true'] {
 	margin: 0px 0px 4px 0px;
 	display: inline-block;
 }
+.alertDialog{
+	font-family: Arial, Verdana, Helvetica, sans-serif;
+	font-size: 0.9em;
+}
