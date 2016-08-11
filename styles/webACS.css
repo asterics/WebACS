@@ -421,4 +421,5 @@ li[aria-selected='true'] {
 .alertDialog{
 	font-family: Arial, Verdana, Helvetica, sans-serif;
 	font-size: 0.9em;
+	display: none;
 }

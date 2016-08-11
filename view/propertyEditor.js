@@ -970,6 +970,7 @@ ACS.propertyEditor = function (modelList, // ACS.modelList
 			$( function() {
 				$( "#alertPanel" ).dialog(	
 				{
+				modal:true,
 				closeOnEscape: false,
 				open: function(event, ui) {
 				$(".ui-dialog-titlebar-close", ui.dialog | ui).hide();
@@ -1245,11 +1246,10 @@ ACS.propertyEditor = function (modelList, // ACS.modelList
 		if(actModel.componentList.length>0){
 		actModelOld.deSelectAll();
 		}
-		actModelOld.addItemToSelection(actModelOld.componentList[tempId]);
 		$('#alertPanel').dialog('close');	
-		if(document.getElementById(lastEditFieldId) !== null){
+		setTimeout(function(){ actModelOld.addItemToSelection(actModelOld.componentList[tempId]);if(document.getElementById(lastEditFieldId) !== null){
 		document.getElementById(lastEditFieldId).select();
-		}
+		}}, 50);	
 	}
 	
 	// ********************************************** handlers ***********************************************************
@@ -1465,17 +1465,16 @@ ACS.propertyEditor = function (modelList, // ACS.modelList
 	document.getElementById(ACS.vConst.PROPERTYEDITOR_MOTHERPANEL).appendChild(div);
 
 	//alert div
-	div = document.createElement('div');
-	div.setAttribute('id', 'alertPanel');
-	div.setAttribute('title','Invalid Input');
-	div.setAttribute('class','alertDialog');
-	div.innerHTML = "Old value will be restored!<br>";
+	var divAlert = document.createElement('div');
+	divAlert.setAttribute('id', 'alertPanel');
+	divAlert.setAttribute('title','Invalid Input');
+	divAlert.setAttribute('class','alertDialog');
+	divAlert.innerHTML = "Old value will be restored!<br>";
 	var but1 = document.createElement('BUTTON'); //call the alert reset function to reset input value
 	but1.innerHTML="Ok";
 	but1.addEventListener('click',alertReset);
-	div.appendChild(but1);
-	document.getElementById(ACS.vConst.PROPERTYEDITOR_MOTHERPANEL).appendChild(div);
-
+	divAlert.appendChild(but1);
+	document.getElementById(ACS.vConst.PROPERTYEDITOR_MOTHERPANEL).appendChild(divAlert);
 	
 	propertiesTabPanel.updatePanel();
 
