@@ -48,8 +48,71 @@ ACS.view = function(modelList, // ACS.modelList
 		}
 		if (e.preventDefault) e.preventDefault();
 	}
+
+	// ********************************************** handlers ***********************************************************	
+	var handleMenuShortcutClick = function() {
+		var tablist = document.getElementById('mainMenuTablist').getElementsByClassName('tab');
+		for (var i = 0; i < tablist.length; i++) {
+			if (tablist.item(i).attributes.getNamedItem('aria-selected').value === 'true') {
+				tablist.item(i).focus();
+			}
+		}		
+	}
 	
-	// ********************************************** handlers ***********************************************************
+	var handleModelPanelShortcutClick = function() {
+		var tablist = document.getElementById(ACS.vConst.CANVASVIEW_TABLIST).getElementsByClassName('tab');
+		for (var i = 0; i < tablist.length; i++) {
+			if (tablist.item(i).attributes.getNamedItem('aria-selected').value === 'true') {
+				tablist.item(i).focus();
+			}
+		}		
+	}
+	
+	var handleModelDesignerShortcutClick = function() {
+		var tablist = document.getElementById(ACS.vConst.CANVASVIEW_TABLIST).getElementsByClassName('tab');
+		for (var i = 0; i < tablist.length; i++) {
+			if (tablist.item(i).attributes.getNamedItem('aria-selected').value === 'true') {
+				var panelId = tablist.item(i).attributes.getNamedItem('id').value;
+				panelId = panelId.slice(9, panelId.length); // get rid of the word "canvasTab"
+				var tab = document.getElementById('modelTabcanvasPanel' + panelId);
+				if (tab) tab.click();
+			}
+		}		
+	}
+	
+	var handleGuiDesignerShortcutClick = function() {
+		var tablist = document.getElementById(ACS.vConst.CANVASVIEW_TABLIST).getElementsByClassName('tab');
+		for (var i = 0; i < tablist.length; i++) {
+			if (tablist.item(i).attributes.getNamedItem('aria-selected').value === 'true') {
+				var panelId = tablist.item(i).attributes.getNamedItem('id').value;
+				panelId = panelId.slice(9, panelId.length); // get rid of the word "canvasTab"
+				var tab = document.getElementById('guiTabcanvasPanel' + panelId);
+				if (tab) tab.click();
+			}
+		}		
+	}
+	
+	var handleListViewShortcutClick = function() {
+		var tablist = document.getElementById(ACS.vConst.CANVASVIEW_TABLIST).getElementsByClassName('tab');
+		for (var i = 0; i < tablist.length; i++) {
+			if (tablist.item(i).attributes.getNamedItem('aria-selected').value === 'true') {
+				var panelId = tablist.item(i).attributes.getNamedItem('id').value;
+				panelId = panelId.slice(9, panelId.length); // get rid of the word "canvasTab"
+				var tab = document.getElementById('listTabcanvasPanel' + panelId);
+				if (tab) tab.click();
+			}
+		}		
+	}
+	
+	var handlePropertyEditorShortcutClick = function() {
+		var tablist = document.getElementById('propertyEditorTabList').getElementsByClassName('tab');
+		for (var i = 0; i < tablist.length; i++) {
+			if (tablist.item(i).attributes.getNamedItem('aria-selected').value === 'true') {
+				tablist.item(i).focus();
+			}
+		}		
+	}
+	
 	var handleKeydown = function(e) {
 		// catch Del to delete selected items
 		if (e.keyCode === 46) { // Del can't be caught by keyPress for not all browsers act consistently (see: http://unixpapa.com/js/key.html)
@@ -63,81 +126,42 @@ ACS.view = function(modelList, // ACS.modelList
 		switch (e.charCode) {
 			case 48: // Ctrl-0 for menu
 				if (e.ctrlKey) {
-					var tablist = document.getElementById('mainMenuTablist').getElementsByClassName('tab');
-					for (var i = 0; i < tablist.length; i++) {
-						if (tablist.item(i).attributes.getNamedItem('aria-selected').value === 'true') {
-							tablist.item(i).focus();
-						}
-					}
+					handleMenuShortcutClick();
 					stopEvent(e);
 					return false;
 				}
 				break;
 			case 49: // Ctrl-1 for model panel (file)
 				if (e.ctrlKey) {
-					var tablist = document.getElementById(ACS.vConst.CANVASVIEW_TABLIST).getElementsByClassName('tab');
-					for (var i = 0; i < tablist.length; i++) {
-						if (tablist.item(i).attributes.getNamedItem('aria-selected').value === 'true') {
-							tablist.item(i).focus();
-						}
-					}
+					handleModelPanelShortcutClick();
 					stopEvent(e);
 					return false;
 				}
 				break;
 			case 50: // Ctrl-2 for model designer
 				if (e.ctrlKey) {
-					var tablist = document.getElementById(ACS.vConst.CANVASVIEW_TABLIST).getElementsByClassName('tab');
-					for (var i = 0; i < tablist.length; i++) {
-						if (tablist.item(i).attributes.getNamedItem('aria-selected').value === 'true') {
-							var panelId = tablist.item(i).attributes.getNamedItem('id').value;
-							panelId = panelId.slice(9, panelId.length); // get rid of the word "canvasTab"
-							var tab = document.getElementById('modelTabcanvasPanel' + panelId);
-							if (tab) tab.click();
-						}
-					}
+					handleModelDesignerShortcutClick();
 					stopEvent(e);
 					return false;
 				}
 				break;				
 			case 51: // Ctrl-3 for gui designer
 				if (e.ctrlKey) {
-					var tablist = document.getElementById(ACS.vConst.CANVASVIEW_TABLIST).getElementsByClassName('tab');
-					for (var i = 0; i < tablist.length; i++) {
-						if (tablist.item(i).attributes.getNamedItem('aria-selected').value === 'true') {
-							var panelId = tablist.item(i).attributes.getNamedItem('id').value;
-							panelId = panelId.slice(9, panelId.length); // get rid of the word "canvasTab"
-							var tab = document.getElementById('guiTabcanvasPanel' + panelId);
-							if (tab) tab.click();
-						}
-					}
+					handleGuiDesignerShortcutClick();
 					stopEvent(e);
 					return false;
 				}
 				break;
 			case 52: // CTRL-4 for list view
 				if (e.ctrlKey) {
-					var tablist = document.getElementById(ACS.vConst.CANVASVIEW_TABLIST).getElementsByClassName('tab');
-					for (var i = 0; i < tablist.length; i++) {
-						if (tablist.item(i).attributes.getNamedItem('aria-selected').value === 'true') {
-							var panelId = tablist.item(i).attributes.getNamedItem('id').value;
-							panelId = panelId.slice(9, panelId.length); // get rid of the word "canvasTab"
-							var tab = document.getElementById('listTabcanvasPanel' + panelId);
-							if (tab) tab.click();
-						}
-					}
+					handleListViewShortcutClick();
 					stopEvent(e);
 					return false;
 				}
 				break;								
 			case 53: // Ctrl-5 for property editor
 				if (e.ctrlKey) {
-					var tablist = document.getElementById('propertyEditorTabList').getElementsByClassName('tab');
-					for (var i = 0; i < tablist.length; i++) {
-						if (tablist.item(i).attributes.getNamedItem('aria-selected').value === 'true') {
-							tablist.item(i).focus();
-						}
-					}
+					handlePropertyEditorShortcutClick();
 					stopEvent(e);
 					return false;
 				}
@@ -202,10 +226,10 @@ ACS.view = function(modelList, // ACS.modelList
 				modelTabs = document.getElementsByClassName('modelTab');
 			}
 		}
-		if (modelTabs[0].getAttribute('aria-selected') === 'true') {
-			if (modelList.getActModel().undoStack.length > 0) modelList.getActModel().undoStack.pop().undo();
-		} else {
+		if (modelTabs[1].getAttribute('aria-selected') === 'true') {
 			if (modelList.getActModel().guiUndoStack.length > 0) modelList.getActModel().guiUndoStack.pop().undo();
+		} else {
+			if (modelList.getActModel().undoStack.length > 0) modelList.getActModel().undoStack.pop().undo();
 		}
 	}
 	
@@ -218,10 +242,10 @@ ACS.view = function(modelList, // ACS.modelList
 				modelTabs = document.getElementsByClassName('modelTab');
 			}
 		}
-		if (modelTabs[0].getAttribute('aria-selected') === 'true') {
-			if (modelList.getActModel().redoStack.length > 0) modelList.getActModel().redoStack.pop().execute();
-		} else {
+		if (modelTabs[1].getAttribute('aria-selected') === 'true') {
 			if (modelList.getActModel().guiRedoStack.length > 0) modelList.getActModel().guiRedoStack.pop().execute();
+		} else {
+			if (modelList.getActModel().redoStack.length > 0) modelList.getActModel().redoStack.pop().execute();
 		}
 	}
 	
@@ -278,6 +302,13 @@ ACS.view = function(modelList, // ACS.modelList
 	// register handlers for areStatus events
 	areStatus.events.registerHandler('AREStatusChangedEvent', AREStatusChangedEventHandler);
 	areStatus.events.registerHandler('ARESynchronisationChangedEvent', ARESynchronisationChangedEventHandler);
+	// register handlers for shortcuts
+	$('#AKmenu').click(handleMenuShortcutClick).keypress(function(e) {if (e.keyCode === 13) handleMenuShortcutClick();});
+	$('#AKactModelPanel').click(handleModelPanelShortcutClick).keypress(function(e) {if (e.keyCode === 13) handleModelPanelShortcutClick();});
+	$('#AKmodelDesigner').click(handleModelDesignerShortcutClick).keypress(function(e) {if (e.keyCode === 13) handleModelDesignerShortcutClick();});
+	$('#AKguiDesigner').click(handleGuiDesignerShortcutClick).keypress(function(e) {if (e.keyCode === 13) handleGuiDesignerShortcutClick();});
+	$('#AKlistView').click(handleListViewShortcutClick).keypress(function(e) {if (e.keyCode === 13) handleListViewShortcutClick();});
+	$('#AKPropertyEditor').click(handlePropertyEditorShortcutClick).keypress(function(e) {if (e.keyCode === 13) handlePropertyEditorShortcutClick();});
 
 	return returnObj;
 }

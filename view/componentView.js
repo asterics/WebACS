@@ -53,6 +53,13 @@
 		return false;
 	}
 	
+	var eventChannelAlreadyExists = function(startComp, endComp) {
+		for (var i = 0; i < model.eventChannelList.length; i++) {
+			if ((model.eventChannelList[i].startComponent === startComp) && (model.eventChannelList[i].endComponent === endComp)) return true;
+		}
+		return false;
+	}
+	
 	var buildView = function() {
 		// determine height of the element, depending on the amount of input- and/or output-ports
 		if ((component.outputPortList.length > 3) || (component.inputPortList.length > 3)) {
@@ -180,8 +187,7 @@
 					log.debug('clicked outputport');
 					if (!((model.dataChannelList.length > 0) && (!model.dataChannelList[model.dataChannelList.length - 1].getInputPort()))) {
 						evt.cancelBubble = true;
-						var ch = ACS.dataChannel('tempId'); // TODO: generate a proper ID or drop ID for channels
-						ch.setOutputPort(outPort);
+						var ch = ACS.dataChannel(outPort.getId() + 'AT' + outPort.getParentComponent().getId(), outPort, null);
 						var addAct = ACS.addDataChannelAction(model, ch);
 						addAct.execute();
 					}
@@ -231,11 +237,13 @@
 			eventInPortView.on('click', function(evt) {
 				log.debug('clicked eventInputPort');
 				if ((model.eventChannelList.length > 0) && (!model.eventChannelList[model.eventChannelList.length - 1].endComponent)) {
-					evt.cancelBubble = true;
-					model.eventChannelList[model.eventChannelList.length - 1].setId(model.eventChannelList[model.eventChannelList.length - 1].getId() + component.getId()); // this ID currently involves start- and end-component - therefore it must be finalised here, on completion of channel
-					model.eventChannelList[model.eventChannelList.length - 1].endComponent = component;
-					model.eventChannelList[model.eventChannelList.length - 1].events.fireEvent('eventChannelCompletedEvent');
-					modelLayer.draw();
+					if (!eventChannelAlreadyExists(model.eventChannelList[model.eventChannelList.length - 1].startComponent, component)) {
+						evt.cancelBubble = true;
+						model.eventChannelList[model.eventChannelList.length - 1].setId(model.eventChannelList[model.eventChannelList.length - 1].getId() + component.getId()); // this ID involves start- and end-component - therefore it must be finalised here, on completion of channel
+						model.eventChannelList[model.eventChannelList.length - 1].endComponent = component;
+						model.eventChannelList[model.eventChannelList.length - 1].events.fireEvent('eventChannelCompletedEvent');
+						modelLayer.draw();
+					}
 				}
 			});
 			// catch mousedown event on port (prevents component from being selected, when only the port is clicked, e.g. when channel is drawn)
@@ -277,7 +285,7 @@
 				log.debug('clicked eventOutputPort');
 				if (!((model.eventChannelList.length > 0) && (!model.eventChannelList[model.eventChannelList.length - 1].endComponent))) {
 					evt.cancelBubble = true;
-					var ch = ACS.eventChannel(component.getId() + '_'); // second half of ID is added, when channel is completed
+					var ch = ACS.eventChannel(component.getId() + '_TO_'); // second half of ID is added, when channel is completed
 					ch.startComponent = component;
 					var addAct = ACS.addEventChannelAction(model, ch);
 					addAct.execute();

@@ -198,11 +198,9 @@ ACS.clipBoard = function() {
 			ext = ACS.mConst.CLIPBOARD_IDEXTENSION;
 		}		
 		for (var i = 0; i < oldList.length; i++) {
-			var channel = ACS.dataChannel(oldList[i].getId().valueOf() + ext);
+			var channel = ACS.dataChannel(oldList[i].getId().valueOf() + ext, findPort(oldList[i].getOutputPort(), extendId),findPort(oldList[i].getInputPort(), extendId));
 			channel.setIsSelected(true); // elements shall be selected, when pasted
 			channel.description = oldList[i].description.valueOf();
-			channel.setInputPort(findPort(oldList[i].getInputPort(), extendId));
-			channel.setOutputPort(findPort(oldList[i].getOutputPort(), extendId));
 			if ((channel.getInputPort() !== null) && (channel.getOutputPort() !== null)) { // only keep the channel, if it has a source and a target within the copied components
 				newList.push(channel);
 			}

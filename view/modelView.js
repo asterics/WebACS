@@ -247,7 +247,6 @@
 	}
 	
 	var componentRemovedEventHandler = function() {
-		var i = 0;
 		for (var i = 0; i < componentViewList.length; i++) {
 			var found = false;
 			for (var j = 0; j < model.componentList.length; j++) {

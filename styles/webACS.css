@@ -64,6 +64,11 @@ body {
 	font-weight: bold;
 }
 
+#pageAreas li:hover, #pageAreas li:focus  {
+	background-color: #0bf8ea;
+	cursor: pointer;
+}
+
 #menuPanel {
 	padding: 0 0 0.5em 1em;
 }
@@ -189,7 +194,7 @@ body {
 	background-color: #d1e511;
 }
 
-#arePropertyDiv:focus {
+.additionalFocusableElement:focus {
 	background-color: #d1e511;
 }
 

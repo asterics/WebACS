@@ -241,8 +241,11 @@
 		if (channels_section) {
 			var channels = channels_section.getElementsByTagName('channel');
 			for (var i = 0; i < channels.length; i++) {
-				dataChannelList.push(ACS.dataChannel(channels.item(i).attributes.getNamedItem('id').textContent));
-				if (channels.item(i).getElementsByTagName('description').item(0)) dataChannelList[dataChannelList.length-1].description = channels.item(i).getElementsByTagName('description').item(0).textContent;
+				var channelId = channels.item(i).attributes.getNamedItem('id').textContent;
+				var channelDescription = '';
+				if (channels.item(i).getElementsByTagName('description').item(0)) {
+					channelDescription = channels.item(i).getElementsByTagName('description').item(0).textContent;
+				}
 				// get the source port:
 				var sourceCompId = channels.item(i).getElementsByTagName('source').item(0).getElementsByTagName('component').item(0).attributes.getNamedItem('id').textContent;
 				var sourcePortId = channels.item(i).getElementsByTagName('source').item(0).getElementsByTagName('port').item(0).attributes.getNamedItem('id').textContent;
@@ -250,7 +253,6 @@
 				if (sourceComponent && (sourceComponent.foundInComponentCollection)) {
 					var outPort = findPortById(sourceComponent, sourcePortId, false);
 					if (outPort) {
-						dataChannelList[dataChannelList.length-1].setOutputPort(outPort);
 						// get the target port:
 						var targetCompId = channels.item(i).getElementsByTagName('target').item(0).getElementsByTagName('component').item(0).attributes.getNamedItem('id').textContent;
 						var targetPortId = channels.item(i).getElementsByTagName('target').item(0).getElementsByTagName('port').item(0).attributes.getNamedItem('id').textContent;
@@ -258,22 +260,11 @@
 						if (targetComponent && (targetComponent.foundInComponentCollection)) {
 							var inPort = findPortById(targetComponent, targetPortId, true);
 							if (inPort) {
-								dataChannelList[dataChannelList.length-1].setInputPort(inPort);
-							} else {
-								// in case the matching inputPort was not found on the component, delete the channel again
-								dataChannelList.pop();
+								dataChannelList.push(ACS.dataChannel(channelId, outPort, inPort));
+								dataChannelList[dataChannelList.length-1].description = channelDescription;
 							}
-						} else {
-							// in case the target component was not found in the component collection, delete the channel again
-							dataChannelList.pop();
 						}
-					} else {
-						// in case the matching outputPort was not found on the component, delete the channel again
-						dataChannelList.pop();
 					}
-				} else {
-					// in case the source component was not found in the component collection, delete the channel again
-					dataChannelList.pop();
 				}
 			}
 		}
@@ -435,6 +426,7 @@
 	returnObj.acsVersion = ACS.mConst.MODELGUI_ACSVERSION;
 	returnObj.selectedItemsList = []; // Array<Object>
 	returnObj.hasBeenChanged = false;
+	returnObj.recentlyRemovedChannel = null; // ACS.channel
 	
 	returnObj.getFilename = function() {
 		return filename;
@@ -797,6 +789,7 @@
 	returnObj.removeDataChannel = function(ch) { // ACS.dataChannel
 		if (returnObj.dataChannelList.indexOf(ch) > -1) returnObj.dataChannelList.splice(returnObj.dataChannelList.indexOf(ch), 1);
 		if (returnObj.selectedItemsList.indexOf(ch) > -1) returnObj.selectedItemsList.splice(returnObj.selectedItemsList.indexOf(ch), 1);
+		returnObj.recentlyRemovedChannel = ch;
 		returnObj.hasBeenChanged = true;
 		this.events.fireEvent('dataChannelRemovedEvent');
 	}	
@@ -811,6 +804,7 @@
 	returnObj.removeEventChannel = function(ch) { // ACS.eventChannel
 		if (returnObj.eventChannelList.indexOf(ch) > -1) returnObj.eventChannelList.splice(returnObj.eventChannelList.indexOf(ch), 1);
 		if (returnObj.selectedItemsList.indexOf(ch) > -1) returnObj.selectedItemsList.splice(returnObj.selectedItemsList.indexOf(ch), 1);
+		returnObj.recentlyRemovedChannel = ch;
 		returnObj.hasBeenChanged = true;
 		this.events.fireEvent('eventChannelRemovedEvent');
 	}		

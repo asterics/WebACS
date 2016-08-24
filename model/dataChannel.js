@@ -26,13 +26,13 @@
  * limitations under the License.
  */
  
- ACS.dataChannel = function(id) { // String
+ ACS.dataChannel = function(id, // String
+							outputPort, // ACS.port
+							inputPort) { // ACS.port
 
 // ***********************************************************************************************************************
 // ************************************************** private variables **************************************************
 // ***********************************************************************************************************************
-	var inputPort = null;
-	var outputPort = null;
 		
 // ***********************************************************************************************************************
 // ************************************************** private methods ****************************************************
@@ -44,6 +44,10 @@
 	var returnObj = ACS.channel(id);
 	
 	returnObj.description = '';
+
+	returnObj.getOutputPort = function() {
+		return outputPort;
+	}
 	
 	returnObj.getInputPort = function() {
 		return inputPort;
@@ -53,16 +57,10 @@
 		// will set inputPort only if it has not been set before - once a channel is completed, it cannot be changed
 		if (!inputPort) {
 			inputPort = newInPort;
+			// set second half of channel-id
+			returnObj.setId(returnObj.getId() + '_TO_' + inputPort.getId() + 'AT' + inputPort.getParentComponent().getId());
 			returnObj.events.fireEvent('dataChannelCompletedEvent');
 		}
-	}
-	
-	returnObj.getOutputPort = function() {
-		return outputPort;
-	}
-	
-	returnObj.setOutputPort = function(newOutPort) {
-		outputPort = newOutPort;
 	}
 
 // ***********************************************************************************************************************
