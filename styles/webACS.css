@@ -396,3 +396,35 @@ li[aria-selected='true'] {
 .loadModelFromStorageDialogButtonPane {
 	margin-top: 1em;
 }
+
+/* ******************** styles for Property Editor *************** */
+.propertyEditorTh{
+	background-color: #e9ecfa;
+}
+
+.propertyEditorT{
+	width: 100%;
+	border-spacing: 4px;
+	border: 3px solid #dddddd;
+	padding: 0px 0px 0px 0px;
+	margin: 0px 0px 10px 0px;
+}
+.propertyEditorTb{
+	background-color: #eeeeee;
+}
+.propertyeditorCaptions{
+	padding: 0px 0px 0px 0px;
+	margin: 0px 0px 4px 0px;
+	background-color: #d1e5fd;
+}
+.propertyEditorWrapper{
+	min-width: 100%;
+	padding: 0px 0px 0px 0px;
+	margin: 0px 0px 4px 0px;
+	display: inline-block;
+}
+.alertDialog{
+	font-family: Arial, Verdana, Helvetica, sans-serif;
+	font-size: 0.9em;
+	display: none;
+}
