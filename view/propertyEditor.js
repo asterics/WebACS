@@ -76,9 +76,15 @@ ACS.propertyEditor = function (modelList, // ACS.modelList
 	var wrapperDivListener = document.createElement('div');
 	var wrapperDivEvents = document.createElement('div');
 	var wrapperDivGUI = document.createElement('div');
-	var lastEditFieldId; 
+	var lastEditFieldId;
 	var lastModiviedElement;
-	
+	var notSavedId=null;//workaround to save change also when no blur event is fired; 
+						//values are stored localy by ocurring input event
+						//values are written to property in deselect methode
+	var changeNotSaved = false;//workaround to save change also when no blur event is fired
+	var notSavedValue=null;//workaround to save change also when no blur event is fired
+		
+
 	// ***********************************************************************************************************************
 	// ************************************************** private methods ****************************************************
 	// ***********************************************************************************************************************
@@ -121,7 +127,7 @@ ACS.propertyEditor = function (modelList, // ACS.modelList
 					document.getElementById("propertyEditorTabList").children[2].setAttribute("class", "tab propEdTab");
 					document.getElementById("propertyEditorTabList").children[3].setAttribute("class", "tab propEdTab");
 					document.getElementById("propertyEditorTabList").children[4].setAttribute("class", "tab propEdTab");
-
+					
 					generatePropertiesForComponent();
 					generateInputPortsForComponent();
 					generateOuputPortsForComponent();
@@ -164,8 +170,8 @@ ACS.propertyEditor = function (modelList, // ACS.modelList
 		propertyTable.setAttribute("class", "propertyEditorT");
 		wrapperDivProperty.setAttribute("class", "propertyEditorWrapper");
 		//wrapperDivProperty.setAttribute("tabindex","-1");
-		wrapperDivProperty.addEventListener("focusout",writeProperty);
-		
+		wrapperDivProperty.addEventListener("focusout", writeProperty);
+
 		var header = propertyTable.createTHead();
 		header.setAttribute("class", "propertyEditorTh");
 		row[0] = header.insertRow(0);
@@ -231,7 +237,7 @@ ACS.propertyEditor = function (modelList, // ACS.modelList
 				numberInput.setAttribute("id", h + "/1/" + valtemp);
 				numberInput.addEventListener("focus", setPreviousNumber);
 				numberInput.addEventListener("change", writeProperty);
-				//numberInput.addEventListener("input",writeProperty);
+				numberInput.addEventListener("input",writePropertyChangLocal);//workaround when blur is not fired
 				cell.appendChild(numberInput);
 			}
 
@@ -245,7 +251,7 @@ ACS.propertyEditor = function (modelList, // ACS.modelList
 				numberInput.setAttribute("pattern", "^[-]?(0|[1-9][0-9]*)(\.[0-9]+)?([eE][+-]?[0-9]+)?");
 				numberInput.setAttribute("id", h + "/1/" + valtemp);
 				numberInput.addEventListener("change", writeProperty);
-				//numberInput.addEventListener("input",writeProperty);
+				numberInput.addEventListener("input",writePropertyChangLocal);//workaround when blur is not fired
 				cell.appendChild(numberInput);
 			}
 
@@ -258,7 +264,7 @@ ACS.propertyEditor = function (modelList, // ACS.modelList
 				textInput.setAttribute("value", valtemp);
 				textInput.setAttribute("id", h + "/1/" + valtemp);
 				textInput.addEventListener("blur", writeProperty);
-				//CHANGEDtextInput.addEventListener("input",writeProperty);
+				textInput.addEventListener("input",writePropertyChangLocal);//workaround when blur is not fired
 				cell.appendChild(textInput);
 			}
 
@@ -294,6 +300,7 @@ ACS.propertyEditor = function (modelList, // ACS.modelList
 		textInput.setAttribute("value", valtemp);
 		textInput.setAttribute("id", "xx_name/1/" + valtemp);
 		textInput.addEventListener("blur", writeProperty);
+		textInput.addEventListener("input", writePropertyChangLocal);
 		cell.appendChild(textInput);
 
 		row[2] = bodyT2.insertRow(-1);
@@ -314,6 +321,7 @@ ACS.propertyEditor = function (modelList, // ACS.modelList
 		textInput.setAttribute("value", valtemp);
 		textInput.setAttribute("id", "xx_descr/1/" + valtemp);
 		textInput.addEventListener("blur", writeProperty);
+		textInput.addEventListener("input", writePropertyChangLocal);
 		cell.appendChild(textInput);
 
 		row[4] = bodyT2.insertRow(-1);
@@ -920,7 +928,8 @@ ACS.propertyEditor = function (modelList, // ACS.modelList
 
 	//write the actual input modification to the property
 	var writeProperty = function (evt) {
-		lastModiviedElement = selectedElement; 
+		changeNotSaved = false;
+		lastModiviedElement = selectedElement;
 		var t = document.getElementById(evt.target.id).value;
 		var t_temp = document.getElementById(evt.target.id);
 		var completeId = evt.target.id;
@@ -967,17 +976,15 @@ ACS.propertyEditor = function (modelList, // ACS.modelList
 			}
 		}
 		if (generateAlert) {
-			$( function() {
-				$( "#alertPanel" ).dialog(	
-				{
-				modal:true,
-				closeOnEscape: false,
-				open: function(event, ui) {
-				$(".ui-dialog-titlebar-close", ui.dialog | ui).hide();
-				}
-				}
-				);
-			} );
+			$(function () {
+				$("#alertPanel").dialog({
+					modal : true,
+					closeOnEscape : false,
+					open : function (event, ui) {
+						$(".ui-dialog-titlebar-close", ui.dialog | ui).hide();
+					}
+				});
+			});
 		}
 		// if ARE is connected and synchronised, write value directly to ARE via REST
 		if ((areStatus.getStatus != ACS.statusType.DISCONNECTED) &&
@@ -1172,6 +1179,28 @@ ACS.propertyEditor = function (modelList, // ACS.modelList
 			}
 		}
 	}
+	
+	var writeNotSavedChange = function(evt){
+		//workaround to save change also when no blur event is fired
+		if (notSavedId === 'xx_name') {
+			actModel.componentList[selectedElement].setId(notSavedValue);
+		}
+		else if (notSavedId === 'xx_descr') {
+			actModel.componentList[selectedElement].setDescription(notSavedValue);
+		}else{		
+			actModel.componentList[selectedElement].propertyList[notSavedId].setValue(notSavedValue);
+		}
+		changeNotSaved=false;
+	}
+	
+	var writePropertyChangLocal = function(evt) {
+		var completeId = evt.target.id;
+		var splitIda = completeId.split("/1/");
+		var splitId = splitIda[0];
+		notSavedValue = document.getElementById(evt.target.id).value;
+		notSavedId=splitId;
+		changeNotSaved = true;
+	}
 	//class needed methodes helper functions
 	//======================================
 
@@ -1239,19 +1268,22 @@ ACS.propertyEditor = function (modelList, // ACS.modelList
 		document.getElementById("eventPanel").setAttribute("aria-hidden", "true");
 
 	}
-	
-	var alertReset = function(){
+
+	var alertReset = function () {
 		//sets the value, which was stored before invlid input and focus the input
 		var tempId = lastModiviedElement;
-		if(actModel.componentList.length>0){
-		actModelOld.deSelectAll();
+		if (actModel.componentList.length > 0) {
+			actModelOld.deSelectAll();
 		}
-		$('#alertPanel').dialog('close');	
-		setTimeout(function(){ actModelOld.addItemToSelection(actModelOld.componentList[tempId]);if(document.getElementById(lastEditFieldId) !== null){
-		document.getElementById(lastEditFieldId).select();
-		}}, 50);	
+		$('#alertPanel').dialog('close');
+		setTimeout(function () {
+			actModelOld.addItemToSelection(actModelOld.componentList[tempId]);
+			if (document.getElementById(lastEditFieldId) !== null) {
+				document.getElementById(lastEditFieldId).select();
+			}
+		}, 50);
 	}
-	
+
 	// ********************************************** handlers ***********************************************************
 
 	var actModelChangedEventHandler = function () {
@@ -1313,15 +1345,16 @@ ACS.propertyEditor = function (modelList, // ACS.modelList
 		actModel.componentList[actModel.componentList.length - 1].events.registerHandler('deSelectedEvent', deSelectedEventHandler);
 	}
 
-	var selectedEventHandler = function () {	
-		actModelOld=actModel;
+	var selectedEventHandler = function () {
+		actModelOld = actModel;
 		generateViews();
 	}
 
 	var deSelectedEventHandler = function () {
-		selectedElementOld=selectedElement;	
-		var evtE = document.activeElement;
-		evtE.blur();
+		selectedElementOld = selectedElement;
+		if(changeNotSaved){//workaround to save change also when no blur event is fired
+			writeNotSavedChange();
+		}
 		clearPropertyEditor();
 		hideAllTabsAndPanels();
 		document.getElementById("propertyEditorTabList").children[0].setAttribute("class", "tab propEdTab");
@@ -1347,6 +1380,7 @@ ACS.propertyEditor = function (modelList, // ACS.modelList
 	var tabSwitchedEventHandler = function () {
 		generateViews();
 	}
+
 
 	// ***********************************************************************************************************************
 	// ************************************************** public stuff *******************************************************
@@ -1388,7 +1422,7 @@ ACS.propertyEditor = function (modelList, // ACS.modelList
 	li2.setAttribute('role', 'tab');
 	li2.setAttribute('tabindex', -1);
 	li2.textContent = ACS.vConst.PROPERTYEDITOR_INPUTHEADER;
-	document.getElementById(ACS.vConst.PROPERTYEDITOR_TABLIST).appendChild(li2);	
+	document.getElementById(ACS.vConst.PROPERTYEDITOR_TABLIST).appendChild(li2);
 	div = document.createElement('div');
 	div.setAttribute('id', 'inputPanel');
 	div.setAttribute('class', 'panel propEdPanel displayNone');
@@ -1467,15 +1501,15 @@ ACS.propertyEditor = function (modelList, // ACS.modelList
 	//alert div
 	var divAlert = document.createElement('div');
 	divAlert.setAttribute('id', 'alertPanel');
-	divAlert.setAttribute('title','Invalid Input');
-	divAlert.setAttribute('class','alertDialog');
+	divAlert.setAttribute('title', 'Invalid Input');
+	divAlert.setAttribute('class', 'alertDialog');
 	divAlert.innerHTML = "Old value will be restored!<br>";
 	var but1 = document.createElement('BUTTON'); //call the alert reset function to reset input value
-	but1.innerHTML="Ok";
-	but1.addEventListener('click',alertReset);
+	but1.innerHTML = "Ok";
+	but1.addEventListener('click', alertReset);
 	divAlert.appendChild(but1);
 	document.getElementById(ACS.vConst.PROPERTYEDITOR_MOTHERPANEL).appendChild(divAlert);
-	
+
 	propertiesTabPanel.updatePanel();
 
 	document.getElementById('propEdPanel').setAttribute("style", "overflow:auto;");
@@ -1497,6 +1531,7 @@ ACS.propertyEditor = function (modelList, // ACS.modelList
 	actModel.events.registerHandler('componentRemovedEvent', removeComponentEventHandler);
 	actModel.events.registerHandler('eventChannelAddedEvent', eventChannelAddedEventHandler);
 	actModel.events.registerHandler('eventChannelRemovedEvent', eventChannelRemovedEventHandler);
+
 	modelViewActTabPanel.events.registerHandler('tabSwitchedEvent', tabSwitchedEventHandler);
 
 	return returnObj;
