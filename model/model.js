@@ -41,12 +41,12 @@
 		var xmlObj;
 		var httpRequest = new XMLHttpRequest();
 		httpRequest.onreadystatechange = function() {
-			if (httpRequest.readyState === 4 && httpRequest.status === 200) {
+			if (httpRequest.readyState === XMLHttpRequest.DONE && httpRequest.status === 200) {
 				xmlObj = $.parseXML(httpRequest.responseText);
 			}
 		}
 		httpRequest.open('GET', ACS.mConst.MODEL_DEFAULTCOMPONENTCOLLECTION, false);
-		httpRequest.send(null);
+		httpRequest.send();
 		return xmlObj; 
 	}
 	

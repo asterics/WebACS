@@ -182,6 +182,10 @@
 			
 		}
 		$('#' + id).append($list);
+		$('#' + id).focus(function() {
+			model.deSelectAll();
+			model.addItemToSelection(component);
+		});	
 	}
 	
 	var listEntryEventConnection = function(channel, incomingEventConnection) {
@@ -353,13 +357,12 @@
 	$listElem.text(component.getId());
 	$subList.addClass('componentSublist');
 	$listElem.append($subList);
-	
 	$listElem.focus(function() {
 		model.deSelectAll();
 		model.addItemToSelection(component);
 	});	
-			
-	$(mainList).append($listElem);	
+	$(mainList).append($listElem);
+	
 	if (component.inputPortList.length > 0) {
 		$subList.append('<li id="' + containerId + '_inputPorts_AT_' + component.getId().replace(/\s+/g, '').replace(/\.+/g, '') + '" tabindex="0">Input Ports:</li>');
 		generatePortList(containerId + '_inputPorts_AT_' + component.getId().replace(/\s+/g, '').replace(/\.+/g, ''), component.inputPortList);
