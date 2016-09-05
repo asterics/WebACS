@@ -102,17 +102,18 @@
 	
 	// check if the URL contains a querystring and if yes, try to load a model defined by this string
 	if (window.location.search != '') {
+		var filePath = window.location.search.substring(1);
 		var xmlObj;
 		var httpRequest = new XMLHttpRequest();
 		httpRequest.onreadystatechange = function() {
 			if (httpRequest.readyState === XMLHttpRequest.DONE && httpRequest.status === 200) {
-				list[0].setFilename(window.location.search.substr(window.location.search.lastIndexOf('/') + 1, window.location.search.length - 1));
+				list[0].setFilename(filePath.substring(filePath.lastIndexOf('/') + 1));
 				xmlObj = $.parseXML(httpRequest.responseText);
 				list[0].loadModel(xmlObj);
 			}
 		}
 		try {
-			httpRequest.open('GET', window.location.search.substr(1, window.location.search.length-1), false);
+			httpRequest.open('GET', filePath, false);
 			httpRequest.send();
 		} catch (e) {
 			// Note: If an invalid URL is passed to the WebACS, it will start normally, showing an empty model.
