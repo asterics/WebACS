@@ -94,6 +94,7 @@ ACS.vConst = {
 	MENUVIEW_CLASSOFPANEL: 'panel',
 	MENUVIEW_BEFOREUNLOADMESSAGE: 'At least one model has not been saved. If you leave now, you will loose all unsaved changes!',
 	MENUVIEW_AREBASEURI: 'http://localhost:8081/rest/',
+	MENUVIEW_ALERTSTRINGPORTSMUSTBECONNECTED: 'Cannot upload model - the following ports\nneed an incoming data connection first:\n\n',
 	// modelView
 	MODELVIEW_CLASSOFTAB: 'modelTab',
 	MODELVIEW_CLASSOFPANEL: 'modelPanel',

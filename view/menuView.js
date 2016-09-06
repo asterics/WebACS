@@ -293,16 +293,45 @@
 	
 	var handleUploadModel = function(e) {
 		log.debug('uploading model');
-		var modelInXML = modelList.getActModel().getModelXMLString();
-		uploadModel(UM_successCallback, UM_errorCallback, modelInXML);
-		
-		function UM_successCallback(data, HTTPstatus) {
-			log.debug('success: ' + data);
+		// check whether all mustbeconnected-ports actually have a connection
+		// if not, alert the user and abort upload
+		var actModel = modelList.getActModel();
+		var problemPorts = [];
+		for (var i = 0; i < actModel.componentList.length; i++) {
+			for (var j = 0; j < actModel.componentList[i].inputPortList.length; j++) {
+				if (actModel.componentList[i].inputPortList[j].getMustBeConnected()) {
+					var k = 0;
+					var found = false;
+					while (!found && (k < actModel.dataChannelList.length)) {
+						if (actModel.componentList[i].inputPortList[j] === actModel.dataChannelList[k].getInputPort()) {
+							found = true;
+						} else {
+							k++;
+						}
+					}
+					if (!found) problemPorts.push(actModel.componentList[i].inputPortList[j]);
+				}
+			}
 		}
-		
-		function UM_errorCallback(HTTPstatus, AREerrorMessage) {
-			alert('error: ' + AREerrorMessage + HTTPstatus);
-		}		
+		if(problemPorts.length > 0) {
+			var alertString = ACS.vConst.MENUVIEW_ALERTSTRINGPORTSMUSTBECONNECTED;
+			for (var i = 0; i < problemPorts.length; i++) {
+				alertString += problemPorts[i].getId() + ' at ' + problemPorts[i].getParentComponent().getComponentTypeId() + '\n';
+			}
+			alert(alertString);
+		} else {
+			// actually perform the upload
+			var modelInXML = actModel.getModelXMLString();
+			uploadModel(UM_successCallback, UM_errorCallback, modelInXML);
+			
+			function UM_successCallback(data, HTTPstatus) {
+				log.debug('success: ' + data);
+			}
+			
+			function UM_errorCallback(HTTPstatus, AREerrorMessage) {
+				alert('error: ' + AREerrorMessage + HTTPstatus);
+			}
+		}
 	}
 	
 	var handleDownloadModel = function(e) {
