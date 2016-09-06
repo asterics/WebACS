@@ -35,7 +35,8 @@ ACS.clipBoard = function() {
 	var dataChannels = []; // Array<ACS.dataChannel>
 	var eventChannels = []; // Array<ACS.eventChannel>
 	var removedComponentsList = []; // list of all components that were not found in the componentCollection
-	var changedComponentsList = []; // list of all components that did not match the componentCollection	
+	var changedComponentsList = []; // list of all components that did not match the componentCollection
+	var removedSingletonComponentsList = []; // list of all singleton-components that were already in the model and have therefore not been pasted
 	var portList = []; // array of all copied ports
 	var eventList = []; // array of all copied events
 
@@ -229,7 +230,24 @@ ACS.clipBoard = function() {
 		}
 		
 		return newList;
-	}	
+	}
+	
+	var isInList = function(comp, pasteComponents) {
+		for (var i = 0; i < pasteComponents.length; i++) {
+			if (pasteComponents[i] === comp) return true;
+		}
+		return false;
+	}
+	
+	var singletonAndAlreadyInModel = function(model, fullComponent, pasteComponent) {
+		var singleton = fullComponent.getElementsByTagName('singleton');
+		if (singleton[0].textContent === 'true') {
+			for (var i = 0; i < model.componentList.length; i++) {
+				if (model.componentList[i].getComponentTypeId() === pasteComponent.getComponentTypeId()) return true;
+			}
+		}
+		return false;
+	}
 	
 // ***********************************************************************************************************************
 // ************************************************** public stuff *******************************************************
@@ -281,138 +299,145 @@ ACS.clipBoard = function() {
 			// reset removed- and mismatch-lists
 			removedComponentsList = [];
 			changedComponentsList = [];
+			removedSingletonComponentsList = [];
 			
 			// check components
 			var i = 0;
 			while (i < pasteComponents.length) {
 				var fullComponent = model.findComponentInCollection(pasteComponents[i].getComponentTypeId());
 				if (fullComponent) {
-					// mark the component as existent
-					pasteComponents[i].foundInComponentCollection = true;
-					// check, if the component's id already exists in the model and, if so, add another extension
-					var j = 0;
-					while (j < model.componentList.length) {
-						if (model.componentList[j].getId() === pasteComponents[i].getId()) {
-							pasteComponents[i].setId(pasteComponents[i].getId() + ACS.mConst.CLIPBOARD_IDEXTENSION);
-							j = 0; // must start checking from the beginning, since the ID has changed and all components have to be checked for the new ID
-						} else {
-							j++;
-						}
-					}
-					// avoid pasting components with the same id
-					var j = 0;
-					while (j < pasteComponents.length) {
-						if (j !== i) { // avoid comparing with self
-							if (pasteComponents[j].getId() === pasteComponents[i].getId()) {
+					// check if component is singleton and if yes, if it can be pasted or if it would be the second of its kind
+					if (!singletonAndAlreadyInModel(model, fullComponent, pasteComponents[i])) {
+						// mark the component as existent
+						pasteComponents[i].foundInComponentCollection = true;
+						// check, if the component's id already exists in the model and, if so, add another extension
+						var j = 0;
+						while (j < model.componentList.length) {
+							if (model.componentList[j].getId() === pasteComponents[i].getId()) {
 								pasteComponents[i].setId(pasteComponents[i].getId() + ACS.mConst.CLIPBOARD_IDEXTENSION);
 								j = 0; // must start checking from the beginning, since the ID has changed and all components have to be checked for the new ID
 							} else {
 								j++;
 							}
-						} else {
-							j++;
 						}
-					}
-					// check if the component's position in the model-graph is free
-					var newPos = model.getFreePosition([pasteComponents[i].getX(), pasteComponents[i].getY()]);
-					pasteComponents[i].setNewPosition(newPos[0], newPos[1]);
-					// avoid pasting several components at the same position
-					var j = 0;
-					while (j < pasteComponents.length) {
-						if (j !== i) { // avoid comparing with self
-							if ((pasteComponents[i].getX() === pasteComponents[j].getX()) && (pasteComponents[i].getY() === pasteComponents[j].getY())) {
-								pasteComponents[i].setNewPosition(pasteComponents[i].getX() + ACS.mConst.MODEL_COMPONENTPOSITIONOFFSETX, pasteComponents[i].getY() + ACS.mConst.MODEL_COMPONENTPOSITIONOFFSETY);
-								j = 0; // must start checking from the beginning, since the position has changed and all components have to be checked for the new position
+						// avoid pasting components with the same id
+						var j = 0;
+						while (j < pasteComponents.length) {
+							if (j !== i) { // avoid comparing with self
+								if (pasteComponents[j].getId() === pasteComponents[i].getId()) {
+									pasteComponents[i].setId(pasteComponents[i].getId() + ACS.mConst.CLIPBOARD_IDEXTENSION);
+									j = 0; // must start checking from the beginning, since the ID has changed and all components have to be checked for the new ID
+								} else {
+									j++;
+								}
 							} else {
 								j++;
 							}
-						} else {
-							j++;
 						}
-					}
-					// check if the input ports match the component collection
-					var inputPortsFull = fullComponent.getElementsByTagName('inputPort');
-					if (inputPortsFull.length < pasteComponents[i].inputPortList.length) {
-						pasteComponents[i].inputPortList.splice(inputPortsFull.length, pasteComponents[i].inputPortList.length - inputPortsFull.length);
-						pasteComponents[i].matchesComponentCollection = false;
-					} else if (inputPortsFull.length > pasteComponents[i].inputPortList.length) {
-						for (var j = pasteComponents[i].inputPortList.length; j < inputPortsFull.length; j++) {
-							pasteComponents[i].inputPortList.push(ACS.port(	inputPortsFull.item(j).attributes.getNamedItem('id').textContent,
-																			pasteComponents[i],
-																			ACS.portType.INPUT,
-																			model.getDataType(inputPortsFull.item(j).getElementsByTagName('dataType').item(0).textContent),
-																			j,
-																			inputPortsFull.item(j).getElementsByTagName('mustBeConnected').item(0).textContent));
-							// TODO: add the port's properties
+						// check if the component's position in the model-graph is free
+						var newPos = model.getFreePosition([pasteComponents[i].getX(), pasteComponents[i].getY()]);
+						pasteComponents[i].setNewPosition(newPos[0], newPos[1]);
+						// avoid pasting several components at the same position
+						var j = 0;
+						while (j < pasteComponents.length) {
+							if (j !== i) { // avoid comparing with self
+								if ((pasteComponents[i].getX() === pasteComponents[j].getX()) && (pasteComponents[i].getY() === pasteComponents[j].getY())) {
+									pasteComponents[i].setNewPosition(pasteComponents[i].getX() + ACS.mConst.MODEL_COMPONENTPOSITIONOFFSETX, pasteComponents[i].getY() + ACS.mConst.MODEL_COMPONENTPOSITIONOFFSETY);
+									j = 0; // must start checking from the beginning, since the position has changed and all components have to be checked for the new position
+								} else {
+									j++;
+								}
+							} else {
+								j++;
+							}
 						}
-						pasteComponents[i].matchesComponentCollection = false;
-					}
-					// check if the output ports match the component collection
-					var outputPortsFull = fullComponent.getElementsByTagName('outputPort');
-					if (outputPortsFull.length < pasteComponents[i].outputPortList.length) {
-						pasteComponents[i].outputPortList.splice(outputPortsFull.length, pasteComponents[i].outputPortList.length - outputPortsFull.length);
-						pasteComponents[i].matchesComponentCollection = false;
-					} else if (outputPortsFull.length > pasteComponents[i].outputPortList.length) {
-						for (var j = pasteComponents[i].outputPortList.length; j < outputPortsFull.length; j++) {
-							pasteComponents[i].outputPortList.push(ACS.port(	outputPortsFull.item(j).attributes.getNamedItem('id').textContent,
+						// check if the input ports match the component collection
+						var inputPortsFull = fullComponent.getElementsByTagName('inputPort');
+						if (inputPortsFull.length < pasteComponents[i].inputPortList.length) {
+							pasteComponents[i].inputPortList.splice(inputPortsFull.length, pasteComponents[i].inputPortList.length - inputPortsFull.length);
+							pasteComponents[i].matchesComponentCollection = false;
+						} else if (inputPortsFull.length > pasteComponents[i].inputPortList.length) {
+							for (var j = pasteComponents[i].inputPortList.length; j < inputPortsFull.length; j++) {
+								pasteComponents[i].inputPortList.push(ACS.port(	inputPortsFull.item(j).attributes.getNamedItem('id').textContent,
 																				pasteComponents[i],
-																				ACS.portType.OUTPUT,
-																				model.getDataType(outputPortsFull.item(j).getElementsByTagName('dataType').item(0).textContent),
+																				ACS.portType.INPUT,
+																				model.getDataType(inputPortsFull.item(j).getElementsByTagName('dataType').item(0).textContent),
 																				j,
-																				false));
-							// TODO: add the port's properties
+																				inputPortsFull.item(j).getElementsByTagName('mustBeConnected').item(0).textContent));
+								// TODO: add the port's properties
+							}
+							pasteComponents[i].matchesComponentCollection = false;
 						}
-						pasteComponents[i].matchesComponentCollection = false;
+						// check if the output ports match the component collection
+						var outputPortsFull = fullComponent.getElementsByTagName('outputPort');
+						if (outputPortsFull.length < pasteComponents[i].outputPortList.length) {
+							pasteComponents[i].outputPortList.splice(outputPortsFull.length, pasteComponents[i].outputPortList.length - outputPortsFull.length);
+							pasteComponents[i].matchesComponentCollection = false;
+						} else if (outputPortsFull.length > pasteComponents[i].outputPortList.length) {
+							for (var j = pasteComponents[i].outputPortList.length; j < outputPortsFull.length; j++) {
+								pasteComponents[i].outputPortList.push(ACS.port(	outputPortsFull.item(j).attributes.getNamedItem('id').textContent,
+																					pasteComponents[i],
+																					ACS.portType.OUTPUT,
+																					model.getDataType(outputPortsFull.item(j).getElementsByTagName('dataType').item(0).textContent),
+																					j,
+																					false));
+								// TODO: add the port's properties
+							}
+							pasteComponents[i].matchesComponentCollection = false;
+						}
+						// check if the listener events match the component collection
+						var listenEvents = fullComponent.getElementsByTagName('eventListenerPort');
+						if (listenEvents.length < pasteComponents[i].listenEventList.length) {
+							pasteComponents[i].listenEventList.splice(listenEvents.length, pasteComponents[i].listenEventList.length - listenEvents.length);
+							pasteComponents[i].matchesComponentCollection = false;
+						} else if (listenEvents.length > pasteComponents[i].listenEventList.length) {
+							for (var j = pasteComponents[i].listenEventList.length; j < listenEvents.length; j++) {
+								pasteComponents[i].listenEventList.push(ACS.event(	listenEvents.item(j).attributes.getNamedItem('id').textContent,
+																				listenEvents.item(j).getElementsByTagName('description').item(0).textContent,
+																				pasteComponents[i]));
+							}
+							pasteComponents[i].matchesComponentCollection = false;
+						}
+						// check if the trigger events match the component collection
+						var triggerEvents = fullComponent.getElementsByTagName('eventTriggererPort');
+						if (triggerEvents.length < pasteComponents[i].triggerEventList.length) {
+							pasteComponents[i].triggerEventList.splice(triggerEvents.length, pasteComponents[i].triggerEventList.length - triggerEvents.length);
+							pasteComponents[i].matchesComponentCollection = false;
+						} else if (triggerEvents.length > pasteComponents[i].triggerEventList.length) {
+							for (var j = pasteComponents[i].triggerEventList.length; j < triggerEvents.length; j++) {
+								pasteComponents[i].triggerEventList.push(ACS.event(	triggerEvents.item(j).attributes.getNamedItem('id').textContent,
+																				triggerEvents.item(j).getElementsByTagName('description').item(0).textContent,
+																				pasteComponents[i]));
+							}
+							pasteComponents[i].matchesComponentCollection = false;
+						}				
+						// check if the properties match the component collection
+						var propertiesFull = fullComponent.getElementsByTagName('property');
+						if (propertiesFull.length < pasteComponents[i].propertyList.length) {
+							pasteComponents[i].propertyList.splice(propertiesFull.length, pasteComponents[i].propertyList.length - propertiesFull.length);
+							pasteComponents[i].matchesComponentCollection = false;
+						} else if (propertiesFull.length > pasteComponents[i].propertyList.length) {
+							for (var j = pasteComponents[i].propertyList.length; j < propertiesFull.length; j++) {
+								pasteComponents[i].propertyList.push(ACS.property(	propertiesFull.item(j).attributes.getNamedItem('name').textContent, 
+																				model.getDataType(propertiesFull.item(j).attributes.getNamedItem('type').textContent), 
+																				propertiesFull.item(j).attributes.getNamedItem('value').textContent));
+								if (propertiesFull.item(j).attributes.getNamedItem('description'))
+									pasteComponents[i].propertyList[pasteComponents[i].propertyList.length - 1].description = propertiesFull.item(j).attributes.getNamedItem('description').textContent;
+								if (propertiesFull.item(j).attributes.getNamedItem('combobox'))
+									pasteComponents[i].propertyList[pasteComponents[i].propertyList.length - 1].combobox = propertiesFull.item(j).attributes.getNamedItem('combobox').textContent;
+								if (propertiesFull.item(j).attributes.getNamedItem('getStringList'))
+									pasteComponents[i].propertyList[pasteComponents[i].propertyList.length - 1].getStringList = propertiesFull.item(j).attributes.getNamedItem('getStringList').textContent;					
+							}
+							pasteComponents[i].matchesComponentCollection = false;
+						}
+						if ((pasteComponents[i]) && (!pasteComponents[i].matchesComponentCollection)) {
+							changedComponentsList.push(pasteComponents[i]);
+						}					
+						i++;
+					} else {
+						removedSingletonComponentsList.push(pasteComponents[i]);
+						pasteComponents.splice(i, 1);
 					}
-					// check if the listener events match the component collection
-					var listenEvents = fullComponent.getElementsByTagName('eventListenerPort');
-					if (listenEvents.length < pasteComponents[i].listenEventList.length) {
-						pasteComponents[i].listenEventList.splice(listenEvents.length, pasteComponents[i].listenEventList.length - listenEvents.length);
-						pasteComponents[i].matchesComponentCollection = false;
-					} else if (listenEvents.length > pasteComponents[i].listenEventList.length) {
-						for (var j = pasteComponents[i].listenEventList.length; j < listenEvents.length; j++) {
-							pasteComponents[i].listenEventList.push(ACS.event(	listenEvents.item(j).attributes.getNamedItem('id').textContent,
-																			listenEvents.item(j).getElementsByTagName('description').item(0).textContent,
-																			pasteComponents[i]));
-						}
-						pasteComponents[i].matchesComponentCollection = false;
-					}
-					// check if the trigger events match the component collection
-					var triggerEvents = fullComponent.getElementsByTagName('eventTriggererPort');
-					if (triggerEvents.length < pasteComponents[i].triggerEventList.length) {
-						pasteComponents[i].triggerEventList.splice(triggerEvents.length, pasteComponents[i].triggerEventList.length - triggerEvents.length);
-						pasteComponents[i].matchesComponentCollection = false;
-					} else if (triggerEvents.length > pasteComponents[i].triggerEventList.length) {
-						for (var j = pasteComponents[i].triggerEventList.length; j < triggerEvents.length; j++) {
-							pasteComponents[i].triggerEventList.push(ACS.event(	triggerEvents.item(j).attributes.getNamedItem('id').textContent,
-																			triggerEvents.item(j).getElementsByTagName('description').item(0).textContent,
-																			pasteComponents[i]));
-						}
-						pasteComponents[i].matchesComponentCollection = false;
-					}				
-					// check if the properties match the component collection
-					var propertiesFull = fullComponent.getElementsByTagName('property');
-					if (propertiesFull.length < pasteComponents[i].propertyList.length) {
-						pasteComponents[i].propertyList.splice(propertiesFull.length, pasteComponents[i].propertyList.length - propertiesFull.length);
-						pasteComponents[i].matchesComponentCollection = false;
-					} else if (propertiesFull.length > pasteComponents[i].propertyList.length) {
-						for (var j = pasteComponents[i].propertyList.length; j < propertiesFull.length; j++) {
-							pasteComponents[i].propertyList.push(ACS.property(	propertiesFull.item(j).attributes.getNamedItem('name').textContent, 
-																			model.getDataType(propertiesFull.item(j).attributes.getNamedItem('type').textContent), 
-																			propertiesFull.item(j).attributes.getNamedItem('value').textContent));
-							if (propertiesFull.item(j).attributes.getNamedItem('description'))
-								pasteComponents[i].propertyList[pasteComponents[i].propertyList.length - 1].description = propertiesFull.item(j).attributes.getNamedItem('description').textContent;
-							if (propertiesFull.item(j).attributes.getNamedItem('combobox'))
-								pasteComponents[i].propertyList[pasteComponents[i].propertyList.length - 1].combobox = propertiesFull.item(j).attributes.getNamedItem('combobox').textContent;
-							if (propertiesFull.item(j).attributes.getNamedItem('getStringList'))
-								pasteComponents[i].propertyList[pasteComponents[i].propertyList.length - 1].getStringList = propertiesFull.item(j).attributes.getNamedItem('getStringList').textContent;					
-						}
-						pasteComponents[i].matchesComponentCollection = false;
-					}
-					if ((pasteComponents[i]) && (!pasteComponents[i].matchesComponentCollection)) {
-						changedComponentsList.push(pasteComponents[i]);
-					}					
-					i++;
 				} else {
 					removedComponentsList.push(pasteComponents[i]);
 					pasteComponents.splice(i, 1);
@@ -422,8 +447,8 @@ ACS.clipBoard = function() {
 			// check dataChannels
 			var i = 0;
 			while (i < pasteDataChannels.length) {
-				if (!pasteDataChannels[i].getInputPort().getParentComponent().foundInComponentCollection || !pasteDataChannels[i].getOutputPort().getParentComponent().foundInComponentCollection) {
-					pasteDataChannels.splice(i, 1); // delete channel if either end-component is not in component collection of current model
+				if (!isInList(pasteDataChannels[i].getInputPort().getParentComponent(), pasteComponents) || !isInList(pasteDataChannels[i].getOutputPort().getParentComponent(), pasteComponents)) {
+					pasteDataChannels.splice(i, 1); // delete channel if either end-component is not in the list of components to be pasted
 				} else {
 					i++;
 				}
@@ -432,8 +457,8 @@ ACS.clipBoard = function() {
 			// check eventChannels
 			var i = 0;
 			while (i < pasteEventChannels.length) {
-				if (!pasteEventChannels[i].startComponent.foundInComponentCollection || !pasteEventChannels[i].endComponent.foundInComponentCollection) {
-					pasteEventChannels.splice(i, 1); // delete channel if either end-component is not in component collection of current model
+				if (!isInList(pasteEventChannels[i].startComponent, pasteComponents) || !isInList(pasteEventChannels[i].endComponent, pasteComponents)) {
+					pasteEventChannels.splice(i, 1); // delete channel if either end-component is not in the list of components to be pasted
 				} else {
 					i++;
 				}
@@ -442,6 +467,7 @@ ACS.clipBoard = function() {
 			var addAct = ACS.addItemsAction(model, pasteComponents, pasteDataChannels, pasteEventChannels);
 			addAct.execute();
 			model.events.fireEvent('alertUserOfComponentCollectionMismatchEvent'); // needed in case the pasted parts do not match the component collection (alerts the user)
+			if (removedSingletonComponentsList.length > 0) model.events.fireEvent('alertUserOfRemovedSingletonComponentsEvent');
 		}
 	}
 
@@ -452,6 +478,10 @@ ACS.clipBoard = function() {
 	returnObj.getChangedComponentsList = function() {
 		return changedComponentsList;
 	}
+	
+	returnObj.getRemovedSingletonComponentsList = function() {
+		return removedSingletonComponentsList;
+	}	
 	
 // ***********************************************************************************************************************
 // ************************************************** constructor code ***************************************************

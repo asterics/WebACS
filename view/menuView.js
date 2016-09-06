@@ -89,6 +89,15 @@
 		return -1;
 	}
 	
+	var addComponentToModel = function(compObject, actCompName) {
+		if (compObject === 'singleton') {
+			alert('Sorry, you cannot insert another ' + actCompName + ' - there can be only one per model.');
+		} else {
+			var remAct = ACS.addComponentAction(modelList.getActModel(), compObject);
+			remAct.execute();
+		}		
+	}
+	
 	// ********************************************** handlers ***********************************************************
 	var componentCollectionChangedEventHandler = function() {
 		log.info('menuView: The componentCollection has been changed!');
@@ -739,10 +748,7 @@
 			select: function(event, ui) {
 						var actCompName = ui.item[0].textContent;
 						var compObject = modelList.getActModel().initiateComponentByName(actCompName);
-						if (compObject) {
-							var remAct = ACS.addComponentAction(modelList.getActModel(), compObject);
-							remAct.execute();
-						}
+						if (compObject) addComponentToModel(compObject, actCompName);
 					}
 		});
 	}
@@ -785,20 +791,16 @@
 	document.getElementById('redoBtn').addEventListener('click', handleRedo);
 	
 	// handlers for the quickselect field and the corresponding insert-button
-	document.getElementById('quickselect').addEventListener('change', function() {	
+	document.getElementById('quickselect').addEventListener('change', function() {
+		var actCompName = this.value;
 		var compObject = modelList.getActModel().initiateComponentByName(this.value);
-		if (compObject) {
-			var remAct = ACS.addComponentAction(modelList.getActModel(), compObject);
-			remAct.execute();
-		}
+		if (compObject) addComponentToModel(compObject, actCompName);
 		this.value = '';
 	});
-	document.getElementById('insertButton').addEventListener('click', function() {	
+	document.getElementById('insertButton').addEventListener('click', function() {
+		var actCompName = document.getElementById('quickselect').value;
 		var compObject = modelList.getActModel().initiateComponentByName(document.getElementById('quickselect').value);
-		if (compObject) {
-			var remAct = ACS.addComponentAction(modelList.getActModel(), compObject);
-			remAct.execute();
-		}
+		if (compObject) addComponentToModel(compObject, actCompName);
 		document.getElementById('quickselect').value = '';
 	});
 

@@ -665,6 +665,7 @@
 	
 	returnObj.initiateComponentByName = function(compName) {
 		// returns null if compName does not exist
+		// returns 'singleton", when the component is a singleton and there is already an instance in this model
 		var compTypeId;
 		if (compName.indexOf('Oska') > -1) { 
 			compTypeId = compName;
@@ -673,6 +674,12 @@
 		}
 		var compXml = returnObj.findComponentInCollection(compTypeId);
 		if (compXml) {
+			// check whether the component is a singleton and if yes, avoid multiple instances by returning 'singleton' instead of a component object
+			if (compXml.getElementsByTagName('singleton').item(0).textContent === 'true') {
+				for (var i = 0; i < returnObj.componentList.length; i++) {
+					if (returnObj.componentList[i].getComponentTypeId() === compTypeId) return 'singleton';
+				}
+			}
 			// find out the component's type:
 			var compType = 0;
 			switch (compXml.getElementsByTagName('type').item(0).textContent) {
