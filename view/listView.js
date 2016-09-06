@@ -81,88 +81,93 @@
 	var focusSelectedItem = function() {
 		// select the selected item; if more than one item is selected, select only the first one in the list; 
 		// in the case of a channel, select the outport of the "left" component;
-		if (model.selectedItemsList.length > 0)	{
-			if (typeof(model.selectedItemsList[0].getComponentTypeId) !== 'undefined') {
-				// must be a component
-				var done = false;
-				var i = 0;
-				while (!done && (i < sensorViewList.length)) {
-					if (sensorViewList[i].getComponent() === model.selectedItemsList[0]) {
-						sensorViewList[i].focusComponent();
-						done = true;
+		// in case there is an incomplete channel (i.e. being drawn right now), select nothing and focus the actionInfo
+		if ($('#' + containerId + '_actionInfo').text() != 'none') {
+			$('#' + containerId + '_actionInfo').focus();
+		} else {
+			if (model.selectedItemsList.length > 0)	{
+				if (typeof(model.selectedItemsList[0].getComponentTypeId) !== 'undefined') {
+					// must be a component
+					var done = false;
+					var i = 0;
+					while (!done && (i < sensorViewList.length)) {
+						if (sensorViewList[i].getComponent() === model.selectedItemsList[0]) {
+							sensorViewList[i].focusComponent();
+							done = true;
+						}
+						i++;
 					}
-					i++;
+					i = 0;
+					while (!done && (i < processorViewList.length)) {
+						if (processorViewList[i].getComponent() === model.selectedItemsList[0]) {
+							processorViewList[i].focusComponent();
+							done = true;
+						}
+						i++;
+					}
+					i = 0;
+					while (!done && (i < actuatorViewList.length)) {
+						if (actuatorViewList[i].getComponent() === model.selectedItemsList[0]) {
+							actuatorViewList[i].focusComponent();
+							done = true;
+						}
+						i++;
+					}				
+				} else if (typeof(model.selectedItemsList[0].startComponent) !== 'undefined') {
+					// must be an eventChannel
+					var done = false;
+					var i = 0;
+					while (!done && (i < sensorViewList.length)) {
+						if (sensorViewList[i].getComponent() === model.selectedItemsList[0].startComponent) {
+							sensorViewList[i].focusOutgoingEventConnection(model.selectedItemsList[0]);
+							done = true;
+						}
+						i++;
+					}
+					i = 0;
+					while (!done && (i < processorViewList.length)) {
+						if (processorViewList[i].getComponent() === model.selectedItemsList[0].startComponent) {
+							processorViewList[i].focusOutgoingEventConnection(model.selectedItemsList[0]);
+							done = true;
+						}
+						i++;
+					}
+					i = 0;
+					while (!done && (i < actuatorViewList.length)) {
+						if (actuatorViewList[i].getComponent() === model.selectedItemsList[0].startComponent) {
+							actuatorViewList[i].focusOutgoingEventConnection(model.selectedItemsList[0]);
+							done = true;
+						}
+						i++;
+					}									
+				} else if (typeof(model.selectedItemsList[0].getInputPort) !== 'undefined') {
+					// must be a dataChannel
+					var done = false;
+					var i = 0;
+					while (!done && (i < sensorViewList.length)) {
+						if (sensorViewList[i].getComponent() === model.selectedItemsList[0].getOutputPort().getParentComponent()) {
+							sensorViewList[i].focusOutgoingDataChannel(model.selectedItemsList[0]);
+							done = true;
+						}
+						i++;
+					}
+					i = 0;
+					while (!done && (i < processorViewList.length)) {
+						if (processorViewList[i].getComponent() === model.selectedItemsList[0].getOutputPort().getParentComponent()) {
+							processorViewList[i].focusOutgoingDataChannel(model.selectedItemsList[0]);
+							done = true;
+						}
+						i++;
+					}
+					i = 0;
+					while (!done && (i < actuatorViewList.length)) {
+						if (actuatorViewList[i].getComponent() === model.selectedItemsList[0].getOutputPort().getParentComponent()) {
+							actuatorViewList[i].focusOutgoingDataChannel(model.selectedItemsList[0]);
+							done = true;
+						}
+						i++;
+					}												
 				}
-				i = 0;
-				while (!done && (i < processorViewList.length)) {
-					if (processorViewList[i].getComponent() === model.selectedItemsList[0]) {
-						processorViewList[i].focusComponent();
-						done = true;
-					}
-					i++;
-				}
-				i = 0;
-				while (!done && (i < actuatorViewList.length)) {
-					if (actuatorViewList[i].getComponent() === model.selectedItemsList[0]) {
-						actuatorViewList[i].focusComponent();
-						done = true;
-					}
-					i++;
-				}				
-			} else if (typeof(model.selectedItemsList[0].startComponent) !== 'undefined') {
-				// must be an eventChannel
-				var done = false;
-				var i = 0;
-				while (!done && (i < sensorViewList.length)) {
-					if (sensorViewList[i].getComponent() === model.selectedItemsList[0].startComponent) {
-						sensorViewList[i].focusOutgoingEventConnection(model.selectedItemsList[0]);
-						done = true;
-					}
-					i++;
-				}
-				i = 0;
-				while (!done && (i < processorViewList.length)) {
-					if (processorViewList[i].getComponent() === model.selectedItemsList[0].startComponent) {
-						processorViewList[i].focusOutgoingEventConnection(model.selectedItemsList[0]);
-						done = true;
-					}
-					i++;
-				}
-				i = 0;
-				while (!done && (i < actuatorViewList.length)) {
-					if (actuatorViewList[i].getComponent() === model.selectedItemsList[0].startComponent) {
-						actuatorViewList[i].focusOutgoingEventConnection(model.selectedItemsList[0]);
-						done = true;
-					}
-					i++;
-				}									
-			} else if (typeof(model.selectedItemsList[0].getInputPort) !== 'undefined') {
-				// must be a dataChannel
-				var done = false;
-				var i = 0;
-				while (!done && (i < sensorViewList.length)) {
-					if (sensorViewList[i].getComponent() === model.selectedItemsList[0].getOutputPort().getParentComponent()) {
-						sensorViewList[i].focusOutgoingDataChannel(model.selectedItemsList[0]);
-						done = true;
-					}
-					i++;
-				}
-				i = 0;
-				while (!done && (i < processorViewList.length)) {
-					if (processorViewList[i].getComponent() === model.selectedItemsList[0].getOutputPort().getParentComponent()) {
-						processorViewList[i].focusOutgoingDataChannel(model.selectedItemsList[0]);
-						done = true;
-					}
-					i++;
-				}
-				i = 0;
-				while (!done && (i < actuatorViewList.length)) {
-					if (actuatorViewList[i].getComponent() === model.selectedItemsList[0].getOutputPort().getParentComponent()) {
-						actuatorViewList[i].focusOutgoingDataChannel(model.selectedItemsList[0]);
-						done = true;
-					}
-					i++;
-				}												
 			}
 		}
 	}
