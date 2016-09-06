@@ -56,7 +56,6 @@ ACS.propertyEditor = function (modelList, // ACS.modelList
 	var textInput;
 	var selectedElement;
 	var selectedElementOld;
-	var flagActiveModelChanged = false;
 	var eventChannelTable = document.createElement('table');
 	var previousDropDownEntry = null; //stores the selected dropdownvalue before entry is changed
 	var previousNumberEntry = null; //stored for an alert on wron input format
@@ -78,14 +77,14 @@ ACS.propertyEditor = function (modelList, // ACS.modelList
 	var wrapperDivGUI = document.createElement('div');
 	var lastEditFieldId;
 	var lastModiviedElement;
-	var notSavedId=null;//workaround to save change also when no blur event is fired; 
-						//values are stored localy by ocurring input event
-						//values are written to property in deselect methode
-	var changeNotSaved = false;//workaround to save change also when no blur event is fired
-	var notSavedValue=null;//workaround to save change also when no blur event is fired
-	var selectedNumberOfComponents =0;
-	var selectedNumberOfEventChannels =0;
-	var selectedNumberOfDataChannels =0;
+	var notSavedId = null; //workaround to save change also when no blur event is fired;
+	//values are stored localy by ocurring input event
+	//values are written to property in deselect methode
+	var changeNotSaved = false; //workaround to save change also when no blur event is fired
+	var notSavedValue = null; //workaround to save change also when no blur event is fired
+	var selectedNumberOfComponents = 0;
+	var selectedNumberOfEventChannels = 0;
+	var selectedNumberOfDataChannels = 0;
 
 	// ***********************************************************************************************************************
 	// ************************************************** private methods ****************************************************
@@ -96,10 +95,6 @@ ACS.propertyEditor = function (modelList, // ACS.modelList
 
 	//generate view based on the type eventchannel or coponent and the selected tab
 	var generateViews = function () {
-		console.log("Werte");
-		console.log(selectedNumberOfComponents);
-		console.log(selectedNumberOfDataChannels);
-		console.log(selectedNumberOfEventChannels);
 		clearPropertyEditor();
 		var selectedElementType = null;
 		var containerId = modelViewAct.getModelContainerId();
@@ -110,9 +105,9 @@ ACS.propertyEditor = function (modelList, // ACS.modelList
 		//hide All Tabs and Panels => activation in the respective cases
 		hideAllTabsAndPanels();
 		if (document.getElementById(modelPanelId).getAttribute("aria-hidden") === 'false' || document.getElementById(listPanelId).getAttribute("aria-hidden") === 'false') {
-			selectedElementType="none";
+			selectedElementType = "none";
 			if (selectedNumberOfComponents === 1 && selectedNumberOfEventChannels === 0) { //check if only one component is selected
-			//get selected component
+				//get selected component
 				for (var i = 0; i < actModel.componentList.length; i++) {
 					if (actModel.componentList[i].getIsSelected()) {
 						selectedElement = i;
@@ -121,7 +116,7 @@ ACS.propertyEditor = function (modelList, // ACS.modelList
 				}
 			}
 			if (selectedNumberOfComponents === 0 && selectedNumberOfEventChannels === 1) { //check if only one component is selected
-			//get selected component
+				//get selected component
 				for (var i = 0; i < actModel.eventChannelList.length; i++) {
 					if (actModel.eventChannelList[i].getIsSelected()) {
 						selectedElement = i;
@@ -129,7 +124,7 @@ ACS.propertyEditor = function (modelList, // ACS.modelList
 					}
 				}
 			}
-			
+
 			//Part for component
 			if (selectedElementType === "component") {
 				document.getElementById("propertyEditorTabList").children[0].setAttribute("class", "tab propEdTab");
@@ -137,7 +132,7 @@ ACS.propertyEditor = function (modelList, // ACS.modelList
 				document.getElementById("propertyEditorTabList").children[2].setAttribute("class", "tab propEdTab");
 				document.getElementById("propertyEditorTabList").children[3].setAttribute("class", "tab propEdTab");
 				document.getElementById("propertyEditorTabList").children[4].setAttribute("class", "tab propEdTab");
-					
+
 				generatePropertiesForComponent();
 				generateInputPortsForComponent();
 				generateOuputPortsForComponent();
@@ -145,27 +140,30 @@ ACS.propertyEditor = function (modelList, // ACS.modelList
 				generateEventListenerForComponent();
 				document.getElementById("propEdPanel").setAttribute("class", "panel propEdPanel");
 				document.getElementById("propertyEditorTabList").children[0].setAttribute("aria-selected", "true");
+				document.getElementById("propertyEditorTabList").children[0].tabIndex="0";
 				document.getElementById("propEdPanel").setAttribute("aria-hidden", "false");
 			}
-				
+
 			//Part for Events
 			if (selectedElementType === "channel") {
 				document.getElementById("propertyEditorTabList").children[5].setAttribute("class", "tab propEdTab");
 				generateChannelEventsForChannel();
 				document.getElementById("eventPanel").setAttribute("class", "panel propEdPanel");
 				document.getElementById("propertyEditorTabList").children[5].setAttribute("aria-selected", "true");
+				document.getElementById("propertyEditorTabList").children[5].tabIndex="0";
 				document.getElementById("eventPanel").setAttribute("aria-hidden", "false");
 			}
-				
+
 			//in case the selected item is either a component or a eventchannel
 			if (selectedElementType === "none") {
 				document.getElementById("propertyEditorTabList").children[0].setAttribute("class", "tab propEdTab");
 				generateEmptyMessage();
 				document.getElementById("propEdPanel").setAttribute("class", "panel propEdPanel");
 				document.getElementById("propertyEditorTabList").children[0].setAttribute("aria-selected", "true");
-				document.getElementById("propEdPanel").setAttribute("aria-hidden", "false");	
+				document.getElementById("propertyEditorTabList").children[0].tabIndex="0";
+				document.getElementById("propEdPanel").setAttribute("aria-hidden", "false");
 			}
-			 
+
 		}
 		if (document.getElementById(guiPanelId).getAttribute("aria-hidden") === 'false') {
 			//Render Properties for Gui Editor
@@ -173,6 +171,7 @@ ACS.propertyEditor = function (modelList, // ACS.modelList
 			generaterPropertiesForGUIEditor();
 			document.getElementById("propEdPanel").setAttribute("class", "panel propEdPanel");
 			document.getElementById("propertyEditorTabList").children[0].setAttribute("aria-selected", "true");
+			document.getElementById("propertyEditorTabList").children[0].tabIndex="0";
 			document.getElementById("propEdPanel").setAttribute("aria-hidden", "false");
 		}
 	}
@@ -251,7 +250,7 @@ ACS.propertyEditor = function (modelList, // ACS.modelList
 				numberInput.setAttribute("id", h + "/1/" + valtemp);
 				numberInput.addEventListener("focus", setPreviousNumber);
 				numberInput.addEventListener("change", writeProperty);
-				numberInput.addEventListener("input",writePropertyChangLocal);//workaround when blur is not fired
+				numberInput.addEventListener("input", writePropertyChangLocal); //workaround when blur is not fired
 				cell.appendChild(numberInput);
 			}
 
@@ -265,7 +264,7 @@ ACS.propertyEditor = function (modelList, // ACS.modelList
 				numberInput.setAttribute("pattern", "^[-]?(0|[1-9][0-9]*)(\.[0-9]+)?([eE][+-]?[0-9]+)?");
 				numberInput.setAttribute("id", h + "/1/" + valtemp);
 				numberInput.addEventListener("change", writeProperty);
-				numberInput.addEventListener("input",writePropertyChangLocal);//workaround when blur is not fired
+				numberInput.addEventListener("input", writePropertyChangLocal); //workaround when blur is not fired
 				cell.appendChild(numberInput);
 			}
 
@@ -278,7 +277,7 @@ ACS.propertyEditor = function (modelList, // ACS.modelList
 				textInput.setAttribute("value", valtemp);
 				textInput.setAttribute("id", h + "/1/" + valtemp);
 				textInput.addEventListener("blur", writeProperty);
-				textInput.addEventListener("input",writePropertyChangLocal);//workaround when blur is not fired
+				textInput.addEventListener("input", writePropertyChangLocal); //workaround when blur is not fired
 				cell.appendChild(textInput);
 			}
 
@@ -356,8 +355,6 @@ ACS.propertyEditor = function (modelList, // ACS.modelList
 		wrapperDivProperty.appendChild(propertyTable);
 		wrapperDivProperty.appendChild(internalPropertyTable);
 		document.getElementById('propEdPanel').appendChild(wrapperDivProperty);
-
-		flagActiveModelChanged = false;
 	}
 
 	//generate the parts / fields for the inputs of the selected property
@@ -1193,26 +1190,25 @@ ACS.propertyEditor = function (modelList, // ACS.modelList
 			}
 		}
 	}
-	
-	var writeNotSavedChange = function(evt){
+
+	var writeNotSavedChange = function (evt) {
 		//workaround to save change also when no blur event is fired
 		if (notSavedId === 'xx_name') {
 			actModel.componentList[selectedElement].setId(notSavedValue);
-		}
-		else if (notSavedId === 'xx_descr') {
+		} else if (notSavedId === 'xx_descr') {
 			actModel.componentList[selectedElement].setDescription(notSavedValue);
-		}else{		
+		} else {
 			actModel.componentList[selectedElement].propertyList[notSavedId].setValue(notSavedValue);
 		}
-		changeNotSaved=false;
+		changeNotSaved = false;
 	}
-	
-	var writePropertyChangLocal = function(evt) {
+
+	var writePropertyChangLocal = function (evt) {
 		var completeId = evt.target.id;
 		var splitIda = completeId.split("/1/");
 		var splitId = splitIda[0];
 		notSavedValue = document.getElementById(evt.target.id).value;
-		notSavedId=splitId;
+		notSavedId = splitId;
 		changeNotSaved = true;
 	}
 	//class needed methodes helper functions
@@ -1258,7 +1254,14 @@ ACS.propertyEditor = function (modelList, // ACS.modelList
 		document.getElementById("propertyEditorTabList").children[3].setAttribute("class", "tab propEdTab displayNone");
 		document.getElementById("propertyEditorTabList").children[4].setAttribute("class", "tab propEdTab displayNone");
 		document.getElementById("propertyEditorTabList").children[5].setAttribute("class", "tab propEdTab displayNone");
-
+		
+		document.getElementById("propertyEditorTabList").children[0].tabIndex="-1";
+		document.getElementById("propertyEditorTabList").children[1].tabIndex="-1";
+		document.getElementById("propertyEditorTabList").children[2].tabIndex="-1";
+		document.getElementById("propertyEditorTabList").children[3].tabIndex="-1";
+		document.getElementById("propertyEditorTabList").children[4].tabIndex="-1";
+		document.getElementById("propertyEditorTabList").children[5].tabIndex="-1";
+		
 		document.getElementById("propertyEditorTabList").children[0].setAttribute("aria-selected", "false");
 		document.getElementById("propertyEditorTabList").children[1].setAttribute("aria-selected", "false");
 		document.getElementById("propertyEditorTabList").children[2].setAttribute("aria-selected", "false");
@@ -1305,72 +1308,71 @@ ACS.propertyEditor = function (modelList, // ACS.modelList
 		actModelOld = actModel;
 		generateViews();
 	}
-	
+
 	var selectedEventChannelEventHandler = function () {
 		selectedNumberOfEventChannels++;
 		actModelOld = actModel;
 		generateViews();
 	}
-	
-	var selectedDataChannelEventHandler = function(){
-		selectedNumberOfDataChannels++;	
-		generateViews();
+
+	var selectedDataChannelEventHandler = function () {
+		selectedNumberOfDataChannels++;
+		//generateViews();
 	}
-	
-	var deSelectedDataChannelEventHandler = function(){
-		if(selectedNumberOfDataChannels>0){
+
+	var deSelectedDataChannelEventHandler = function () {
+		if (selectedNumberOfDataChannels > 0) {
 			// after remove a deselect event can happen => if statement necessary else -1 can happen
 			selectedNumberOfDataChannels--;
 		}
-		generateViews();
+		//generateViews();
 	}
-	
+
 	var deSelectedComponentEventHandler = function () {
 		selectedElementOld = selectedElement;
-		if(selectedNumberOfComponents>0){
+		if (selectedNumberOfComponents > 0) {
 			// after remove a deselect event can happen => if statement necessary else -1 can happen
 			selectedNumberOfComponents--;
 		}
-		if(changeNotSaved){//workaround to save change also when no blur event is fired
-			writeNotSavedChange();
-		}
-		generateViews();
-	}
-	
-	var deSelectedEventChannelEventHandler = function () {
-		selectedElementOld = selectedElement;
-		if(selectedNumberOfEventChannels>0){
-			// after remove a deselect event can happen => if statement necessary else -1 can happen
-			selectedNumberOfEventChannels--;
-		}
-		if(changeNotSaved){//workaround to save change also when no blur event is fired
+		if (changeNotSaved) { //workaround to save change also when no blur event is fired
 			writeNotSavedChange();
 		}
 		generateViews();
 	}
 
-	
+	var deSelectedEventChannelEventHandler = function () {
+		selectedElementOld = selectedElement;
+		if (selectedNumberOfEventChannels > 0) {
+			// after remove a deselect event can happen => if statement necessary else -1 can happen
+			selectedNumberOfEventChannels--;
+		}
+		if (changeNotSaved) { //workaround to save change also when no blur event is fired
+			writeNotSavedChange();
+		}
+		generateViews();
+	}
+
 	var componentAddedEventHandler = function () {
 		actModel.componentList[actModel.componentList.length - 1].events.registerHandler('selectedEvent', selectedComponentEventHandler);
 		actModel.componentList[actModel.componentList.length - 1].events.registerHandler('deSelectedEvent', deSelectedComponentEventHandler);
 	}
 
 	var removeComponentEventHandler = function () {
-		selectedNumberOfComponents=0;
-		selectedNumberOfDataChannels=0;
-		selectedNumberOfEventChannels=0;
+		selectedNumberOfComponents = 0;
+		selectedNumberOfDataChannels = 0;
+		selectedNumberOfEventChannels = 0;
 		generateViews();
 	}
-	
+
 	var eventChannelAddedEventHandler = function () {
 		actModel.eventChannelList[actModel.eventChannelList.length - 1].events.registerHandler('selectedEvent', selectedEventChannelEventHandler);
 		actModel.eventChannelList[actModel.eventChannelList.length - 1].events.registerHandler('deSelectedEvent', deSelectedEventChannelEventHandler);
 	}
 
 	var eventChannelRemovedEventHandler = function () {
-		selectedNumberOfComponents=0;
-		selectedNumberOfDataChannels=0;
-		selectedNumberOfEventChannels=0;
+		selectedNumberOfComponents = 0;
+		selectedNumberOfDataChannels = 0;
+		selectedNumberOfEventChannels = 0;
 		generateViews();
 	}
 
@@ -1380,9 +1382,9 @@ ACS.propertyEditor = function (modelList, // ACS.modelList
 	}
 
 	var dataChannelRemovedEventHandler = function () {
-		selectedNumberOfComponents=0;
-		selectedNumberOfDataChannels=0;
-		selectedNumberOfEventChannels=0;
+		selectedNumberOfComponents = 0;
+		selectedNumberOfDataChannels = 0;
+		selectedNumberOfEventChannels = 0;
 		generateViews();
 	}
 
@@ -1395,26 +1397,25 @@ ACS.propertyEditor = function (modelList, // ACS.modelList
 		actModel.events.removeHandler('dataChannelAddedEvent', dataChannelAddedEventHandler);
 		actModel.events.removeHandler('dataChannelRemovedEvent', dataChannelRemovedEventHandler);
 		actModel.events.removeHandler('modelChangedEvent', modelChangedEventHandler);
-		
+
 		//get the new model
 		actModel = modelList.getActModel();
 		//reset the counts of selections
 		var tempCountAllSelected = actModel.selectedItemsList.length;
-		
-		selectedNumberOfComponents=0;
+
+		selectedNumberOfComponents = 0;
 		for (var i = 0; i < actModel.componentList.length; i++) {
 			if (actModel.componentList[i].getIsSelected()) {
 				selectedNumberOfComponents++;
 			}
 		}
-		selectedNumberOfEventChannels=0;
+		selectedNumberOfEventChannels = 0;
 		for (var i = 0; i < actModel.eventChannelList.length; i++) {
 			if (actModel.eventChannelList[i].getIsSelected()) {
-					selectedNumberOfEventChannels++;
+				selectedNumberOfEventChannels++;
 			}
 		}
-		
-		
+
 		actModel.events.registerHandler('componentAddedEvent', componentAddedEventHandler);
 		actModel.events.registerHandler('componentRemovedEvent', removeComponentEventHandler);
 		actModel.events.registerHandler('eventChannelAddedEvent', eventChannelAddedEventHandler);
@@ -1435,12 +1436,6 @@ ACS.propertyEditor = function (modelList, // ACS.modelList
 		var containerId = modelViewAct.getModelContainerId();
 		var panelId = 'modelPanel' + containerId;
 		generateViews();
-		/*if (actModel.selectedItemsList.length === 1 || document.getElementById(panelId).getAttribute("aria-hidden") === 'true') {
-			flagActiveModelChanged = true;
-			generateViews();
-		} else {
-			clearPropertyEditor();
-		}*/
 	}
 
 	var modelChangedEventHandler = function () {
@@ -1464,11 +1459,10 @@ ACS.propertyEditor = function (modelList, // ACS.modelList
 			actModel.eventChannelList[countery].events.registerHandler('deSelectedEvent', deSelectedDataChannelEventHandler);
 		}
 	}
-	
+
 	var tabSwitchedEventHandler = function () {
 		generateViews();
 	}
-
 
 	// ***********************************************************************************************************************
 	// ************************************************** public stuff *******************************************************
@@ -1478,11 +1472,6 @@ ACS.propertyEditor = function (modelList, // ACS.modelList
 	// ***********************************************************************************************************************
 	// ************************************************** constructor code ***************************************************
 	// ***********************************************************************************************************************
-	var ul = document.createElement('ul');
-	ul.setAttribute('id', 'TabList');
-	ul.setAttribute('class', 'tablist');
-	ul.setAttribute('role', 'tablist');
-	document.getElementById(ACS.vConst.PROPERTYEDITOR_MOTHERPANEL).appendChild(ul);
 
 	// generate panel to represent the components Properties or the GUI Editor Properties
 	var li1 = document.createElement('li');
@@ -1622,7 +1611,6 @@ ACS.propertyEditor = function (modelList, // ACS.modelList
 	actModel.events.registerHandler('dataChannelAddedEvent', dataChannelAddedEventHandler);
 	actModel.events.registerHandler('dataChannelRemovedEvent', dataChannelRemovedEventHandler);
 
-	
 	modelViewActTabPanel.events.registerHandler('tabSwitchedEvent', tabSwitchedEventHandler);
 
 	return returnObj;
