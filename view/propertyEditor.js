@@ -1445,8 +1445,8 @@ ACS.propertyEditor = function (modelList, // ACS.modelList
 			actModel.componentList[countera].events.removeHandler('deSelectedEvent', deSelectedComponentEventHandler);
 		}
 		for (var counterx = 0; counterx <= actModel.eventChannelList.length - 1; counterx++) {
-			actModel.eventChannelList[counterx].events.removeHandler('selectedEvent', selectedEventHandler);
-			actModel.eventChannelList[counterx].events.removeHandler('deSelectedEvent', deSelectedEventHandler);
+			actModel.eventChannelList[counterx].events.removeHandler('selectedEvent', selectedEventChannelEventHandler);
+			actModel.eventChannelList[counterx].events.removeHandler('deSelectedEvent', deSelectedEventChannelEventHandler);
 		}
 		actModel = modelList.getActModel();
 		//in case that model was loaded select and deselect events must be registered
