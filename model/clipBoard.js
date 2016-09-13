@@ -180,10 +180,10 @@ ACS.clipBoard = function() {
 				comp.propertyList[j] = copyProperty(oldList[i].propertyList[j]);
 			}
 			if (oldList[i].gui) {
-				comp.gui = ACS.gui(oldList[i].gui.x,
-								   oldList[i].gui.y,
-								   oldList[i].gui.width,
-								   oldList[i].gui.height,
+				comp.gui = ACS.gui(oldList[i].gui.getX(),
+								   oldList[i].gui.getY(),
+								   oldList[i].gui.getWidth(),
+								   oldList[i].gui.getHeight(),
 								   oldList[i].gui.getIsExternal())
 			}
 			newList.push(comp);
