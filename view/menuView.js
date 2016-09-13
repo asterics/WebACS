@@ -262,7 +262,7 @@
 			}
 			
 			function SUBSCRIBE_MODELCHANGE_successCallback(data, HTTPstatus) {
-				areStatus.checkAndSetSynchronisation();
+				if (data === 'post_deploy_event') areStatus.checkAndSetSynchronisation();
 			}		
 			
 			function SUBSCRIBE_EVENTS_errorCallback(HTTPstatus, AREerrorMessage) {
