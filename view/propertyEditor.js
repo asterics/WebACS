@@ -1444,6 +1444,10 @@ ACS.propertyEditor = function (modelList, // ACS.modelList
 			actModel.componentList[countera].events.removeHandler('selectedEvent', selectedComponentEventHandler);
 			actModel.componentList[countera].events.removeHandler('deSelectedEvent', deSelectedComponentEventHandler);
 		}
+		for (var counterx = 0; counterx <= actModel.dataChannelList.length - 1; counterx++) {
+			actModel.dataChannelList[counterx].events.removeHandler('selectedEvent', selectedDataChannelEventHandler);
+			actModel.dataChannelList[counterx].events.removeHandler('deSelectedEvent', deSelectedDataChannelEventHandler);
+		}
 		for (var counterx = 0; counterx <= actModel.eventChannelList.length - 1; counterx++) {
 			actModel.eventChannelList[counterx].events.removeHandler('selectedEvent', selectedEventChannelEventHandler);
 			actModel.eventChannelList[counterx].events.removeHandler('deSelectedEvent', deSelectedEventChannelEventHandler);
@@ -1454,9 +1458,13 @@ ACS.propertyEditor = function (modelList, // ACS.modelList
 			actModel.componentList[counterb].events.registerHandler('selectedEvent', selectedComponentEventHandler);
 			actModel.componentList[counterb].events.registerHandler('deSelectedEvent', deSelectedComponentEventHandler);
 		}
+		for (var counterb = 0; counterb <= actModel.dataChannelList.length - 1; counterb++) {
+			actModel.dataChannelList[counterb].events.registerHandler('selectedEvent', selectedDataChannelEventHandler);
+			actModel.dataChannelList[counterb].events.registerHandler('deSelectedEvent', deSelectedDataChannelEventHandler);
+		}
 		for (var countery = 0; countery <= actModel.eventChannelList.length - 1; countery++) {
-			actModel.eventChannelList[countery].events.registerHandler('selectedEvent', selectedDataChannelEventHandler);
-			actModel.eventChannelList[countery].events.registerHandler('deSelectedEvent', deSelectedDataChannelEventHandler);
+			actModel.eventChannelList[countery].events.registerHandler('selectedEvent', selectedEventChannelEventHandler);
+			actModel.eventChannelList[countery].events.registerHandler('deSelectedEvent', deSelectedEventChannelEventHandler);
 		}
 	}
 
