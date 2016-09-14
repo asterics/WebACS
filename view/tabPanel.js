@@ -207,7 +207,7 @@ ACS.tabPanel = function (id, // String; the id of the div-container holding the 
 				return false;
 			}
 		case ACS.tabPanelKeyCodes.PGUP:
-		case ACS.tabPanelKeyCodes.PGDOWN: { // TODO: check if the following makes sense at all
+		case ACS.tabPanelKeyCodes.PGDOWN: {
 
 				// The tab keypress handler must consume pageup and pagedown
 				// keypresses to prevent Firefox from switching tabs
