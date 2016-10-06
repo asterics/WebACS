@@ -104,7 +104,7 @@
 	});
 	
 	returnObj.line.on('mousedown', function(e) {
-		e.cancelBubble = true; // prevents modelView from starting a focusRect
+		e.cancelBubble = true; // prevents modelView from starting a focusRect; note that this is KineticJS' cancelBubble attribute, not the one IE uses
 	});
 	
 	modelLayer.add(returnObj.line);

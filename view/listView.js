@@ -362,7 +362,7 @@
 	}
 	
 	var tabSwitchedEventHandler = function() {
-		if ($('#' + tabId).attr('aria-selected')) focusSelectedItem();
+		//if ($('#' + tabId).attr('aria-selected')) focusSelectedItem();
 	}
 	
 // ***********************************************************************************************************************

@@ -46,6 +46,16 @@
 	var focusRect = null; // Kinetic.Rect
 	var dragAct = null; // ACS.dragDropAction
 	var dragging = false; // boolean
+	var keyboardMode = false; // boolean
+	var portMode = false; // boolean
+	var channelMode = false; // boolean
+	var guiKeyboardMode = false; // boolean
+	var listKeyboardMode = false; // boolean
+	var listPortMode = false; // boolean
+	var listChannelMode = false; // boolean
+	var channelModePort = null; // ACS.port or Object {component: ACS.component, direction: <in, out>}
+	var channelModeChannelList = []; // Array<ACS.channel>
+	var channelModeActChannelPointer = -1; // int
 	
 // ***********************************************************************************************************************
 // ************************************************** private methods ****************************************************
@@ -236,6 +246,42 @@
 		return compList;
 	}
 	
+	var distanceToZero = function(comp) {
+		return Math.sqrt(Math.pow(comp.getX(), 2) + Math.pow(comp.getY(), 2));
+	}
+	
+	var findCompView = function(comp) {
+		for (var i = 0; i < componentViewList.length; i++) {
+			if (componentViewList[i].getComponent() === comp) return componentViewList[i];
+		}
+		return null;
+	}
+	
+	var getCloserComponent = function(closestComponent, thisComponent, otherComponent) {
+		var centerOfThisComponent = {x: thisComponent.getX() + (ACS.vConst.COMPONENTVIEW_ELEMENTWIDTH / 2),
+									 y: thisComponent.getY() + (findCompView(thisComponent).getElementHeight() / 2)};		
+		var centerOfOtherComponent = {x: otherComponent.getX() + (ACS.vConst.COMPONENTVIEW_ELEMENTWIDTH / 2),
+									  y: otherComponent.getY() + (findCompView(otherComponent).getElementHeight() / 2)};
+		var centerOfClosestComponent = {x: closestComponent.getX() + (ACS.vConst.COMPONENTVIEW_ELEMENTWIDTH / 2),
+										y: closestComponent.getY() + (findCompView(closestComponent).getElementHeight() / 2)};
+		var distToClosest = Math.sqrt(Math.pow(centerOfClosestComponent.x - centerOfThisComponent.x, 2) + Math.pow(centerOfClosestComponent.y - centerOfThisComponent.y, 2));								
+		var distToOther = Math.sqrt(Math.pow(centerOfOtherComponent.x - centerOfThisComponent.x, 2) + Math.pow(centerOfOtherComponent.y - centerOfThisComponent.y, 2));
+		if ((distToClosest === 0) || (distToOther < distToClosest)) {
+			return otherComponent;
+		} else {
+			return closestComponent;
+		}
+	}
+	
+	var updateChannelSelection = function() {
+		if (model.selectedItemsList.length > 1) {
+			model.removeItemFromSelection(model.selectedItemsList[model.selectedItemsList.length - 1]);
+		}
+		if (channelModeActChannelPointer > -1) {
+			model.addItemToSelection(channelModeChannelList[channelModeActChannelPointer]);
+		}
+	}
+	
 	// ********************************************** handlers ***********************************************************
 	var modelChangedEventHandler = function() {
 		drawCompleteModel();
@@ -264,6 +310,10 @@
 	
 	var dataChannelAddedEventHandler = function() {
 		dataChannelViewList.push(ACS.dataChannelView(model.dataChannelList[model.dataChannelList.length -1], model, returnObj, modelLayer));
+		// if the channel is currently being drawn and the user is using the keyboard, set a default endpoint to make unfinished channel visible to the user
+		if (!model.dataChannelList[model.dataChannelList.length - 1].getInputPort() && portMode) {
+			dataChannelViewList[dataChannelViewList.length - 1].setEndPoint(50, 0);
+		}
 		modelLayer.draw();
 	}
 	
@@ -283,6 +333,10 @@
 	
 	var eventChannelAddedEventHandler = function() {
 		eventChannelViewList.push(ACS.eventChannelView(model.eventChannelList[model.eventChannelList.length -1], model, returnObj, modelLayer));
+		// if the channel is currently being drawn and the user is using the keyboard, set a default endpoint to make unfinished channel visible to the user
+		if (!model.eventChannelList[model.eventChannelList.length - 1].endComponent && portMode) {
+			eventChannelViewList[eventChannelViewList.length - 1].setEndPoint(50, 0);
+		}		
 		modelLayer.draw();
 	}
 	
@@ -336,9 +390,246 @@
 		return dragging;
 	}
 	
-	returnObj.getModelTabPanel = function(){
+	returnObj.getModelTabPanel = function() {
 		return modelTabPanel;
 	}
+	
+	returnObj.setKeyboardMode = function(newMode) {
+		log.debug('setting keyboardMode: ' + newMode);
+		if (newMode) {
+			if (model.componentList.length > 0) {
+				// focus first component (except if exactly one component is already focussed - no changes in this case)
+				if ((model.selectedItemsList.length != 1) || (typeof model.selectedItemsList[0].inputPortList === 'undefined')) {
+					var firstComp = model.componentList[0];
+					for (var i = 1; i < model.componentList.length; i++) {
+						if (distanceToZero(model.componentList[i]) < distanceToZero(firstComp)) firstComp = model.componentList[i];
+					}
+					model.deSelectAll();
+					model.addItemToSelection(firstComp);
+				}
+			}
+		} else {
+			if (channelMode) returnObj.setChannelMode(false);
+			if (portMode) returnObj.setPortMode(false);
+		}
+		keyboardMode = newMode;
+	}
+
+	returnObj.getKeyboardMode = function() {
+		return keyboardMode;
+	}
+
+	returnObj.setPortMode = function(newMode) {
+		log.debug('setting portMode: ' + newMode);
+		if ((model.selectedItemsList.length === 1) && (typeof model.selectedItemsList[0].inputPortList != 'undefined')) {
+			findCompView(model.selectedItemsList[0]).setPortMode(newMode);
+			portMode = newMode;
+		} else {
+			portMode = false;
+		}
+	}
+
+	returnObj.getPortMode = function() {
+		return portMode;
+	}
+	
+	returnObj.setChannelMode = function(newMode) {
+		if (newMode) {
+			channelModePort = findCompView(model.selectedItemsList[0]).getFocussedPort();
+			if (channelModePort) {
+				// generate a list of all channels connected to this port
+				if (typeof channelModePort.direction === 'undefined') { // must be ACS.port, i.e. we are looking for dataChannels
+					for (var i = 0; i < model.dataChannelList.length; i++) {
+						if (((channelModePort.getType() === ACS.portType.INPUT) && (model.dataChannelList[i].getInputPort() === channelModePort)) || 
+							((channelModePort.getType() === ACS.portType.OUTPUT) && (model.dataChannelList[i].getOutputPort() === channelModePort))) {
+							channelModeChannelList.push(model.dataChannelList[i]);
+						}
+					}
+				} else { // we are looking for eventChannels
+					for (var i = 0; i < model.eventChannelList.length; i++) {
+						if (((channelModePort.direction === 'in') && (model.eventChannelList[i].endComponent === channelModePort.component)) ||
+							((channelModePort.direction === 'out') && (model.eventChannelList[i].startComponent === channelModePort.component))) {
+							channelModeChannelList.push(model.eventChannelList[i]);
+						}
+					}
+				}
+				if (channelModeChannelList.length > 0) {
+					channelModeActChannelPointer = 0;
+					updateChannelSelection();
+					portMode = false;
+					channelMode = true;
+					log.debug('setting channelMode: true');
+				}
+			}
+		} else {
+			channelModeActChannelPointer = -1;
+			updateChannelSelection();
+			channelModeChannelList = [];
+			channelModePort = null;
+			channelMode = false;
+			portMode = true;
+			log.debug('setting channelMode: false');
+		}
+	}
+
+	returnObj.getChannelMode = function() {
+		return channelMode;
+	}
+	
+	returnObj.setGuiKeyboardMode = function(newMode) {
+		log.debug('setting GuiKeyboardMode: ' + newMode);
+		if (newMode) {
+			// set keyboardFocus to guiPanel (otherwise tabPanel would consume the arrow-keys)
+			$('#guiPanel' + modelContainerId).focus();
+		}			
+		guiKeyboardMode = newMode;
+	}
+
+	returnObj.getGuiKeyboardMode = function() {
+		return guiKeyboardMode;
+	}
+
+	returnObj.setListKeyboardMode = function(newMode) {
+		log.debug('setting listKeyboardMode: ' + newMode);
+		if (newMode) {
+			// TODO
+		} else {
+			if (listChannelMode) returnObj.setListChannelMode(false);
+			if (listPortMode) returnObj.setListPortMode(false);
+		}
+		listKeyboardMode = newMode;
+	}
+
+	returnObj.getListKeyboardMode = function() {
+		return listKeyboardMode;
+	}
+
+	returnObj.setListPortMode = function(newMode) {
+		log.debug('setting listPortMode: ' + newMode);
+		listPortMode = newMode;
+	}
+
+	returnObj.getListPortMode = function() {
+		return listPortMode;
+	}
+
+	returnObj.setListChannelMode = function(newMode) {
+		log.debug('setting listChannelMode: ' + newMode);
+		if (newMode) {
+			listPortMode = false;
+			// do stuff
+		} else {
+			listPortMode = true;
+			// focus the port we came from
+		}
+		listChannelMode = newMode;
+	}
+
+	returnObj.getListChannelMode = function() {
+		return listChannelMode;
+	}
+	
+	returnObj.focusNextComponent = function(direction) {
+		log.debug('focussing next component: ' + direction);
+		if ((componentViewList.length > 1) && (model.selectedItemsList.length > 0) && (typeof model.selectedItemsList[0].inputPortList != 'undefined')) {
+			var closestComponent = model.selectedItemsList[0]; // if there is no other component, this component keeps the focus
+			if (direction === 'up') {
+				for (var i = 0; i < componentViewList.length; i++) {
+					if (componentViewList[i].getComponent().getY() + componentViewList[i].getElementHeight() < model.selectedItemsList[0].getY()) { // i.e. if it is above this component
+						closestComponent = getCloserComponent(closestComponent, model.selectedItemsList[0], componentViewList[i].getComponent());
+					}
+				}	
+			} else if (direction === 'right') {
+				for (var i = 0; i < componentViewList.length; i++) {
+					if (componentViewList[i].getComponent().getX() > model.selectedItemsList[0].getX() + ACS.vConst.COMPONENTVIEW_ELEMENTWIDTH) { // i.e. if it is to the right of this component
+						closestComponent = getCloserComponent(closestComponent, model.selectedItemsList[0], componentViewList[i].getComponent());
+					}
+				}	
+			} else if (direction === 'down') {
+				for (var i = 0; i < componentViewList.length; i++) {
+					if (componentViewList[i].getComponent().getY() > model.selectedItemsList[0].getY() + findCompView(model.selectedItemsList[0]).getElementHeight()) { // i.e. if it is below this component
+						closestComponent = getCloserComponent(closestComponent, model.selectedItemsList[0], componentViewList[i].getComponent());
+					}
+				}	
+			} else if (direction === 'left') {
+				for (var i = 0; i < componentViewList.length; i++) {
+					if (componentViewList[i].getComponent().getX() + ACS.vConst.COMPONENTVIEW_ELEMENTWIDTH < model.selectedItemsList[0].getX()) { // i.e. if it is to the left of this component
+						closestComponent = getCloserComponent(closestComponent, model.selectedItemsList[0], componentViewList[i].getComponent());
+					}
+				}	
+			}
+			model.deSelectAll();
+			model.addItemToSelection(closestComponent);
+		}
+	}	
+	
+	returnObj.focusNextPort = function(direction) {
+		log.debug('focussing next port: ' + direction);
+		if (portMode) findCompView(model.selectedItemsList[0]).focusNextPort(direction);
+	}	
+
+	returnObj.focusNextChannel = function(direction) {
+		log.debug('focussing next channel: ' + direction);
+		if ((direction === 'up') || (direction === 'left')) {
+			if (channelModeActChannelPointer < channelModeChannelList.length - 1) {
+				channelModeActChannelPointer++;
+			} else {
+				channelModeActChannelPointer = 0;
+			}
+		} else if ((direction === 'down') || (direction === 'right')) {
+			if (channelModeActChannelPointer > 0) {
+				channelModeActChannelPointer--;
+			} else {
+				channelModeActChannelPointer = channelModeChannelList.length - 1;
+			}
+		}
+		updateChannelSelection();
+	}	
+
+	returnObj.focusNextGuiElement = function(direction) {
+		log.debug('focussing next guiElement: ' + direction);
+	}	
+
+	returnObj.focusNextListComponent = function(direction) {
+		log.debug('focussing next listComponent: ' + direction);
+	}	
+
+	returnObj.focusNextListPort = function(direction) {
+		log.debug('focussing next ListPort: ' + direction);
+	}	
+
+	returnObj.focusNextListChannel = function(direction) {
+		log.debug('focussing next listChannel: ' + direction);
+	}	
+
+	returnObj.resizeGuiElement = function(direction) {
+		log.debug('resizing gui element: ' + direction);
+	}
+	
+	returnObj.moveComponent = function(direction) {
+		log.debug('moving component: ' + direction);
+		if ((model.selectedItemsList.length > 0) && (typeof model.selectedItemsList[0].inputPortList != 'undefined')) {
+			var comp = model.selectedItemsList[0];		
+			if (direction === 'up') {
+				comp.setNewPosition(comp.getX(), comp.getY() - 1);
+			} else if (direction === 'right') {
+				comp.setNewPosition(comp.getX() + 1, comp.getY());
+			} else if (direction === 'down') {
+				comp.setNewPosition(comp.getX(), comp.getY() + 1);
+			} else if (direction === 'left') {
+				comp.setNewPosition(comp.getX() - 1, comp.getY());
+			}
+		}
+	}	
+	
+	returnObj.moveGuiElement = function(direction) {
+		log.debug('moving gui element: ' + direction);
+	}		
+	
+	returnObj.connectChannelAtActPort = function() {
+		log.debug('connecting channel');
+		if (portMode) findCompView(model.selectedItemsList[0]).connectChannelAtActPort();
+	}	
 	
 // ***********************************************************************************************************************
 // ************************************************** constructor code ***************************************************
@@ -363,6 +654,7 @@
 	div.setAttribute('class', 'panel modelPanel');
 	div.setAttribute('aria-labelledby', 'modelTab' + modelContainerId);
 	div.setAttribute('role', 'tabpanel');
+	div.setAttribute('tabindex', -1);
 	document.getElementById(modelContainerId).appendChild(div);
 	var li2 = document.createElement('li');
 	li2.setAttribute('id', 'guiTab' + modelContainerId);
@@ -378,6 +670,7 @@
 	div.setAttribute('class', 'panel modelPanel');
 	div.setAttribute('aria-labelledby', 'guiTab' + modelContainerId);
 	div.setAttribute('role', 'tabpanel');
+	div.setAttribute('tabindex', -1);
 	document.getElementById(modelContainerId).appendChild(div);
 	var li3 = document.createElement('li');
 	li3.setAttribute('id', 'listTab' + modelContainerId);
@@ -393,6 +686,7 @@
 	div.setAttribute('class', 'panel modelPanel listPanel');
 	div.setAttribute('aria-labelledby', 'listTab' + modelContainerId);
 	div.setAttribute('role', 'tabpanel');
+	div.setAttribute('tabindex', -1);
 	document.getElementById(modelContainerId).appendChild(div);
 	modelTabPanel.updatePanel();
 	// activate the modelTab (a simple li1.click() will not work in safari)
@@ -510,7 +804,7 @@
 			ch.undo();
 		}
 	});
-	
+
 	modelLayer.on('mousedown', function() {
 		var focusid='modelPanel'+modelContainerId;
 		document.getElementById(focusid).focus();
@@ -552,7 +846,7 @@
 	});
 	
 	returnObj.selectedComponentsGroup.on('mousedown', function(e) {
-		e.cancelBubble = true; // avoids the starting of a focusRect
+		e.cancelBubble = true; // avoids the starting of a focusRect; note that this is KineticJS' cancelBubble attribute, not the one IE uses
 	});
 	
 	returnObj.selectedComponentsGroup.on('dragstart', function() {

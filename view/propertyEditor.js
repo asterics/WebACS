@@ -1595,8 +1595,6 @@ ACS.propertyEditor = function (modelList, // ACS.modelList
 	divAlert.appendChild(but1);
 	document.getElementById(ACS.vConst.PROPERTYEDITOR_MOTHERPANEL).appendChild(divAlert);
 
-	propertiesTabPanel.updatePanel();
-
 	document.getElementById('propEdPanel').setAttribute("style", "overflow:auto;");
 	document.getElementById('inputPanel').setAttribute("style", "overflow:auto;");
 	document.getElementById('outputPanel').setAttribute("style", "overflow:auto;");
@@ -1609,6 +1607,8 @@ ACS.propertyEditor = function (modelList, // ACS.modelList
 	document.getElementById("propEdPanel").setAttribute("class", "panel propEdPanel");
 	document.getElementById("propertyEditorTabList").children[0].setAttribute("aria-selected", "true");
 	document.getElementById("propEdPanel").setAttribute("aria-hidden", "false");
+	
+	propertiesTabPanel.updatePanel();
 
 	modelList.events.registerHandler('actModelChangedEvent', actModelChangedEventHandler);
 	actModel.events.registerHandler('modelChangedEvent', modelChangedEventHandler);

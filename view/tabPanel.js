@@ -51,6 +51,8 @@ ACS.tabPanel = function (id, // String; the id of the div-container holding the 
 		if ($tab === undefined) {
 			$tab = $tabs.first();
 		}
+		// make the tab navigable
+		$tab.attr('tabindex', '0');
 
 		// show the panel that the selected tab controls, set aria-hidden to false and eliminate class displayNone
 		$panel.find('#' + $tab.attr('aria-controls')).attr('aria-hidden', 'false').removeClass('displayNone');

@@ -36,6 +36,7 @@ ACS.view = function(modelList, // ACS.modelList
 	var menu = ACS.menuView(modelList, areStatus);
 	var canvas = ACS.canvasView(modelList, clipBoard);
 	var propertyEditor = ACS.propertyEditor(modelList,canvas.getCanvasModelViewList(),canvas.getEditorProperties(), areStatus);
+	var actModelView;
 
 // ***********************************************************************************************************************
 // ************************************************** private methods ****************************************************
@@ -48,7 +49,59 @@ ACS.view = function(modelList, // ACS.modelList
 		}
 		if (e.preventDefault) e.preventDefault();
 	}
-
+	
+	var catchArrowKey = function(e, direction) {
+		if (e.shiftKey) {
+			if (actModelView.getKeyboardMode() && $('#modelPanel' + actModelView.getModelContainerId()).is(':focus')) { // move component
+				actModelView.moveComponent(direction);
+				return true;
+			} else if (actModelView.getGuiKeyboardMode() && $('#guiPanel' + actModelView.getModelContainerId()).is(':focus')) { // move GUI
+				actModelView.moveGuiElement(direction);
+				return true;
+			}
+		} else if (e.ctrlKey) {
+			if (actModelView.getGuiKeyboardMode() && $('#guiPanel' + actModelView.getModelContainerId()).is(':focus')) { // resize GUI
+				actModelView.resizeGuiElement(direction);
+				return true;
+			}
+		} else {
+			if (actModelView.getPortMode() && $('#modelPanel' + actModelView.getModelContainerId()).is(':focus')) { // switch ports
+				actModelView.focusNextPort(direction);
+				return true;
+			} else if (actModelView.getListPortMode() && $('#listPanel' + actModelView.getModelContainerId()).is(':focus')) { // switch ports in listview
+				actModelView.focusNextListPort(direction);
+				return true;
+			} else if (actModelView.getChannelMode() && $('#modelPanel' + actModelView.getModelContainerId()).is(':focus')) { // switch channels
+				actModelView.focusNextChannel(direction);
+				return true;
+			} else if (actModelView.getListChannelMode() && $('#listPanel' + actModelView.getModelContainerId()).is(':focus')) { // switch channels in listview
+				actModelView.focusNextListChannel(direction);
+				return true;
+			} else if (actModelView.getKeyboardMode() && $('#modelPanel' + actModelView.getModelContainerId()).is(':focus')) { // switch components
+				actModelView.focusNextComponent(direction);
+				return true;
+			} else if (actModelView.getGuiKeyboardMode() && $('#guiPanel' + actModelView.getModelContainerId()).is(':focus')) { // switch Gui Elements
+				actModelView.focusNextGuiElement(direction);
+				return true;
+			} else if (actModelView.getListKeyboardMode() && $('#listPanel' + actModelView.getModelContainerId()).is(':focus')) { // switch components in listview
+				actModelView.focusNextListComponent(direction);
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	var dropStartedChannel = function() {
+		var actModel = modelList.getActModel();
+		if (((actModel.dataChannelList.length > 0) && (!actModel.dataChannelList[actModel.dataChannelList.length - 1].getInputPort())) || // unfinished dataChannel to be dropped
+		   ((actModel.eventChannelList.length > 0) && (!actModel.eventChannelList[actModel.eventChannelList.length - 1].endComponent))) { // unfinished eventChannel to be dropped
+			var ch = actModel.undoStack.pop();
+			ch.undo();
+			return true;
+		}
+		return false;
+	}
+	
 	// ********************************************** handlers ***********************************************************	
 	var handleMenuShortcutClick = function() {
 		var tablist = document.getElementById('mainMenuTablist').getElementsByClassName('tab');
@@ -171,50 +224,168 @@ ACS.view = function(modelList, // ACS.modelList
 					cutHandler();
 					stopEvent(e);
 					return false;					
-				}		
+				}
+				break;
 			case 99: // Ctrl-c for copy
 				if (e.ctrlKey) {
 					copyHandler();
 					stopEvent(e);
 					return false;					
 				}
+				break;
 			case 118: // Ctrl-v for paste
 				if (e.ctrlKey) {
 					pasteHandler();
 					stopEvent(e);
 					return false;					
-				}				
+				}
+				break;
 			case 122: // Ctrl-z for undo
 				if (e.ctrlKey) {
 					undoHandler();
 					stopEvent(e);
 					return false;					
 				}
+				break;
 			case 121: // Ctrl-y for redo
 				if (e.ctrlKey) {
 					redoHandler();
 					stopEvent(e);
 					return false;					
 				}
+				break;
+			case 32: // SPACE
+				if (actModelView.getKeyboardMode() && $('#modelPanel' + actModelView.getModelContainerId()).is(':focus')) {
+					if (actModelView.getPortMode()) {
+						if (e.shiftKey) {
+							// begin new channel or connect incomplete channel to the selected port
+							actModelView.connectChannelAtActPort();
+							actModelView.setPortMode(false);
+						} else {
+							actModelView.setChannelMode(true);
+						}
+						stopEvent(e);
+						return false;		
+					} else if (!actModelView.getChannelMode()) {
+						actModelView.setPortMode(true);
+						stopEvent(e);
+						return false;		
+					}
+				} else if (actModelView.getListKeyboardMode() && $('#listPanel' + actModelView.getModelContainerId()).is(':focus')) {
+					if (actModelView.getListPortMode()) {
+						if (e.shiftKey) {
+							// begin new channel or connect incomplete channel to the selected port
+							actModelView.connectChannelAtActPort();
+						} else {
+							actModelView.setListChannelMode(true);
+						}
+						stopEvent(e);
+						return false;		
+					} else if (!actModelView.getListChannelMode()) {
+						actModelView.setListPortMode(true);
+						stopEvent(e);
+						return false;		
+					}
+				}
+		}
+		
+		switch (e.keyCode) {
+			case 37: // arrow left
+				if (catchArrowKey(e, 'left')) {
+					stopEvent(e);
+					return false;
+				}
+				break;
+			case 38: // arrow up
+				if (catchArrowKey(e, 'up')) {
+					stopEvent(e);
+					return false;
+				}
+				break;
+			case 39: // arrow right
+				if (catchArrowKey(e, 'right')) {
+					stopEvent(e);
+					return false;
+				}
+				break;
+			case 40: // arrow down
+				if (catchArrowKey(e, 'down')) {
+					stopEvent(e);
+					return false;
+				}
+				break;
 		}
 	}
 	
+	var handleKeyup = function(e) {
+		// ECS and ENTER need to be caught on keyup, since firefox does not send the keydown event
+		if (e.keyCode === 27) { // one step back up in the hierarchy of keyboard modes
+			if (actModelView.getKeyboardMode() && $('#modelPanel' + actModelView.getModelContainerId()).is(':focus')) {
+				if (!dropStartedChannel()) {
+					if (actModelView.getChannelMode()) {
+						actModelView.setChannelMode(false);
+					} else if (actModelView.getPortMode()) {
+						actModelView.setPortMode(false);
+					}
+				}
+				stopEvent(e);
+				return false;											
+			} else if (actModelView.getListKeyboardMode() && $('#listPanel' + actModelView.getModelContainerId()).is(':focus')) {
+				if (!dropStartedChannel()) {
+					if (actModelView.getListChannelMode()) {
+						actModelView.setListChannelMode(false);
+					} else if (actModelView.getListPortMode()) {
+						actModelView.setListPortMode(false);
+					}
+				}				
+				stopEvent(e);
+				return false;						
+			}
+		} else if (e.keyCode === 13) { // ENTER to enter keyboard mode
+			if (($('#' + actModelView.getModelContainerId()).has(':focus').length > 0) || ($('#' + actModelView.getModelContainerId()).find('*').has(':focus').length > 0)) { // enter keyboard mode only, when the focus on or somewhere in the canvasPanel
+				if ($('#modelTab' + actModelView.getModelContainerId()).attr('aria-selected') === 'true') {
+					$('#modelPanel' + actModelView.getModelContainerId()).focus(); // set keyboardFocus to modelPanel (otherwise tabPanel would consume the arrow-keys)
+					if (!actModelView.getKeyboardMode()) actModelView.setKeyboardMode(true);
+					stopEvent(e);
+					return false;								
+				} else if ($('#guiTab' + actModelView.getModelContainerId()).attr('aria-selected') === 'true') {
+					$('#guiPanel' + actModelView.getModelContainerId()).focus(); // set keyboardFocus to guiPanel (otherwise tabPanel would consume the arrow-keys)
+					if (!actModelView.getGuiKeyboardMode()) actModelView.setGuiKeyboardMode(true);
+					stopEvent(e);
+					return false;								
+				} else if ($('#listTab' + actModelView.getModelContainerId()).attr('aria-selected') === 'true') {
+					$('#listPanel' + actModelView.getModelContainerId()).focus(); // set keyboardFocus to listPanel (otherwise tabPanel would consume the arrow-keys)
+					if (!actModelView.getListKeyboardMode()) actModelView.setListKeyboardMode(true);
+					stopEvent(e);
+					return false;								
+				}
+			}
+		}
+	}	
+	
 	var cutHandler = function() {
-		clipBoard.cut(modelList.getActModel());
+		if (!actModelView.getPortMode() && !actModelView.getChannelMode()) clipBoard.cut(modelList.getActModel());
 	}
 	
 	var copyHandler = function() {
-		clipBoard.copy(modelList.getActModel());
+		if (!actModelView.getPortMode() && !actModelView.getChannelMode()) clipBoard.copy(modelList.getActModel());
 	}
 	
 	var pasteHandler = function() {
-		clipBoard.paste(modelList.getActModel());
+		if (!actModelView.getPortMode() && !actModelView.getChannelMode()) clipBoard.paste(modelList.getActModel());
 	}	
 
 	var deleteSelectionHandler = function() {
 		log.debug('deleteBtnPressed');
-		var remAct = ACS.removeItemListAction(modelList.getActModel(), modelList.getActModel().selectedItemsList);
-		remAct.execute();
+		if (!$('#guiPanel' + actModelView.getModelContainerId()).is(':focus')) {
+			var remAct;			
+			if (actModelView.getChannelMode() && $('#modelPanel' + actModelView.getModelContainerId()).is(':focus')) {
+				remAct = ACS.removeItemListAction(modelList.getActModel(), modelList.getActModel().selectedItemsList.slice(1)); // omits the first selected item, so that the operation is only performed on the channel
+			} else {
+				remAct = ACS.removeItemListAction(modelList.getActModel(), modelList.getActModel().selectedItemsList);
+			}	
+			remAct.execute();
+		}
 	}
 	
 	var undoHandler = function() {
@@ -280,6 +451,10 @@ ACS.view = function(modelList, // ACS.modelList
 		}
 	}
 	
+	var actModelChangedEventHandler = function() {
+		actModelView = canvas.getActModelView();
+	}
+	
 // ***********************************************************************************************************************
 // ************************************************** public stuff *******************************************************
 // ***********************************************************************************************************************
@@ -292,6 +467,7 @@ ACS.view = function(modelList, // ACS.modelList
 	// catch keyboard shortcuts
 	document.addEventListener('keydown', handleKeydown);
 	document.addEventListener('keypress', handleKeypress);
+	document.addEventListener('keyup', handleKeyup);
 	// register handlers for button-presses in menu
 	menu.events.registerHandler('cutBtnPressedEvent', cutHandler);
 	menu.events.registerHandler('copyBtnPressedEvent', copyHandler);
@@ -309,6 +485,17 @@ ACS.view = function(modelList, // ACS.modelList
 	$('#AKguiDesigner').click(handleGuiDesignerShortcutClick).keypress(function(e) {if (e.keyCode === 13) handleGuiDesignerShortcutClick();});
 	$('#AKlistView').click(handleListViewShortcutClick).keypress(function(e) {if (e.keyCode === 13) handleListViewShortcutClick();});
 	$('#AKPropertyEditor').click(handlePropertyEditorShortcutClick).keypress(function(e) {if (e.keyCode === 13) handlePropertyEditorShortcutClick();});
+	// register handler for change of the actModel
+	modelList.events.registerHandler('actModelChangedEvent', actModelChangedEventHandler);
+	// get the actModelView (needed for keyboard navigation)
+	actModelView = canvas.getActModelView();
+
+	// deactivate keyboardModes when using the mouse
+	$('body').mousedown(function() {
+		if (actModelView.getKeyboardMode()) actModelView.setKeyboardMode(false);
+		if (actModelView.getGuiKeyboardMode()) actModelView.setGuiKeyboardMode(false);
+		if (actModelView.getListKeyboardMode()) actModelView.setListKeyboardMode(false);		
+	});
 
 	return returnObj;
 }

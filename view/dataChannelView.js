@@ -158,7 +158,7 @@
 			model.deSelectAll();
 			model.addItemToSelection(dc);
 		}
-		e.cancelBubble = true;
+		e.cancelBubble = true; // note that this is KineticJS' cancelBubble attribute, not the one IE uses
 	});
 	
 	// register event handlers

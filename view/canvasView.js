@@ -58,6 +58,7 @@
 				modelViewList.splice(i, 1);
 			}
 		}
+		
 		// remove the tab from the DOM:
 		document.getElementById(ACS.vConst.CANVASVIEW_TABLIST).removeChild(document.getElementById(removePanel.replace('Panel', 'Tab')));
 		document.getElementById(ACS.vConst.CANVASVIEW_MOTHERPANEL).removeChild(document.getElementById(removePanel));
@@ -107,7 +108,7 @@
 		div.setAttribute('aria-labelledby', 'tab' + panelId);
 		div.setAttribute('role', 'tabpanel');
 		document.getElementById(ACS.vConst.CANVASVIEW_MOTHERPANEL).appendChild(div);
-		modelViewList[panelId] = ACS.modelView('canvasPanel' + panelId, actModel, clipBoard, editorProperties);
+		modelViewList.push(ACS.modelView('canvasPanel' + panelId, actModel, clipBoard, editorProperties));
 		panelId++;
 		canvasTabPanel.updatePanel();
 		// activate the tab (a simple li.click() will not work in safari)
@@ -127,6 +128,15 @@
 	
 	returnObj.getEditorProperties = function(){
 		return editorProperties;
+	}
+	
+	returnObj.getActModelView = function() {
+		for (var i = 0; i < modelViewList.length; i++) {
+			if (modelViewList[i].getModel() === modelList.getActModel()) {
+				return modelViewList[i];
+			}
+		}
+		return null;
 	}
 	
 // ***********************************************************************************************************************

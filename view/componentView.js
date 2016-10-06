@@ -42,6 +42,8 @@
 	var eventOutPortView = null;
 	var eventInPortView = null;
 	var selectedRect = null;
+	var portMode = false;
+	var portFocus = {inP: -1, inEP: -1, outEP: -1, outP: -1};
 
 // ***********************************************************************************************************************
 // ************************************************** private methods ****************************************************
@@ -128,12 +130,7 @@
 			inputPortViewList[i]['port'].on('click', function(inPort) {
 				return function(evt) {
 					log.debug('clicked inputport');
-					if ((model.dataChannelList.length > 0) && (!model.dataChannelList[model.dataChannelList.length - 1].getInputPort())) {
-						if (!channelExists(inPort)) {
-							evt.cancelBubble = true;
-							model.dataChannelList[model.dataChannelList.length - 1].setInputPort(inPort);
-						}
-					}
+					evt.cancelBubble = finaliseDataChannelIfPossible(inPort);
 				}
 			}(component.inputPortList[i]));
 			// catch mousedown event on port (prevents component from being selected, when only the port is clicked, e.g. when channel is drawn)
@@ -185,12 +182,7 @@
 			outputPortViewList[i]['port'].on('click', function(outPort) {
 				return function(evt) {
 					log.debug('clicked outputport');
-					if (!((model.dataChannelList.length > 0) && (!model.dataChannelList[model.dataChannelList.length - 1].getInputPort()))) {
-						evt.cancelBubble = true;
-						var ch = ACS.dataChannel(outPort.getId() + 'AT' + outPort.getParentComponent().getId(), outPort, null);
-						var addAct = ACS.addDataChannelAction(model, ch);
-						addAct.execute();
-					}
+					evt.cancelBubble = startDataChannelIfPossible(outPort);
 				}
 			}(component.outputPortList[i]));
 			// catch mousedown event on port (prevents component from being selected, when only the port is clicked, e.g. when channel is drawn)
@@ -236,15 +228,7 @@
 			});	
 			eventInPortView.on('click', function(evt) {
 				log.debug('clicked eventInputPort');
-				if ((model.eventChannelList.length > 0) && (!model.eventChannelList[model.eventChannelList.length - 1].endComponent)) {
-					if (!eventChannelAlreadyExists(model.eventChannelList[model.eventChannelList.length - 1].startComponent, component)) {
-						evt.cancelBubble = true;
-						model.eventChannelList[model.eventChannelList.length - 1].setId(model.eventChannelList[model.eventChannelList.length - 1].getId() + component.getId()); // this ID involves start- and end-component - therefore it must be finalised here, on completion of channel
-						model.eventChannelList[model.eventChannelList.length - 1].endComponent = component;
-						model.eventChannelList[model.eventChannelList.length - 1].events.fireEvent('eventChannelCompletedEvent');
-						modelLayer.draw();
-					}
-				}
+				evt.cancelBubble = finaliseEventChannelIfPossible();
 			});
 			// catch mousedown event on port (prevents component from being selected, when only the port is clicked, e.g. when channel is drawn)
 			eventInPortView.on('mousedown', function(evt) {
@@ -283,13 +267,7 @@
 			// listen for click event on port
 			eventOutPortView.on('click', function(evt) {
 				log.debug('clicked eventOutputPort');
-				if (!((model.eventChannelList.length > 0) && (!model.eventChannelList[model.eventChannelList.length - 1].endComponent))) {
-					evt.cancelBubble = true;
-					var ch = ACS.eventChannel(component.getId() + '_TO_'); // second half of ID is added, when channel is completed
-					ch.startComponent = component;
-					var addAct = ACS.addEventChannelAction(model, ch);
-					addAct.execute();
-				}
+				evt.cancelBubble = startEventChannelIfPossible();
 			});
 			// catch mousedown event on port (prevents component from being selected, when only the port is clicked, e.g. when channel is drawn)
 			eventOutPortView.on('mousedown', function(evt) {
@@ -451,6 +429,103 @@
 		}
 	}
 	
+	var updatePortFocusHighlighting = function() {
+		for (var i = 0; i < inputPortViewList.length; i++) {
+			if (portFocus.inP === i) {
+				inputPortViewList[i].port.fill(ACS.vConst.COMPONENTVIEW_SELECTEDPORTCOLOR);
+			} else {
+				inputPortViewList[i].port.fill(ACS.vConst.COMPONENTVIEW_INPUTPORTCOLOR);
+			}
+		}
+		for (var i = 0; i < outputPortViewList.length; i++) {
+			if (portFocus.outP === i) {
+				outputPortViewList[i].port.fill(ACS.vConst.COMPONENTVIEW_SELECTEDPORTCOLOR);
+			} else {
+				outputPortViewList[i].port.fill(ACS.vConst.COMPONENTVIEW_OUTPUTPORTCOLOR);
+			}
+		}
+		if (eventInPortView) {
+			if (portFocus.inEP > -1) {
+				eventInPortView.fill(ACS.vConst.COMPONENTVIEW_SELECTEDPORTCOLOR);
+			} else {
+				eventInPortView.fill(ACS.vConst.COMPONENTVIEW_EVENTINPUTPORTCOLOR);
+			}
+		}
+		if (eventOutPortView) {
+			if (portFocus.outEP > -1) {
+				eventOutPortView.fill(ACS.vConst.COMPONENTVIEW_SELECTEDPORTCOLOR);
+			} else {
+				eventOutPortView.fill(ACS.vConst.COMPONENTVIEW_EVENTOUTPUTPORTCOLOR);
+			} 
+		}
+		modelLayer.draw();
+	}
+
+	var focusFirstPort = function() {
+		if (outputPortViewList.length > 0) {
+			portFocus.outP = 0;
+		} else if (inputPortViewList.length > 0) {
+			portFocus.inP = 0;
+		} else if (eventInPortView) {
+			portFocus.inEP = 0;
+		} else if (eventOutPortView) {
+			portFocus.outEP = 0;
+		}
+		updatePortFocusHighlighting();
+	}
+	
+	var unFocusAllPorts = function() {
+		portFocus = {inP: -1, inEP: -1, outEP: -1, outP: -1};
+		updatePortFocusHighlighting();
+	}
+
+	// ********************************************** private helper methods *********************************************
+	var startDataChannelIfPossible = function(outPort) {
+		if (!((model.dataChannelList.length > 0) && (!model.dataChannelList[model.dataChannelList.length - 1].getInputPort())) && // if no dataChannel started already
+			!((model.eventChannelList.length > 0) && (!model.eventChannelList[model.eventChannelList.length - 1].endComponent))) { // and no eventChannel started already
+			var ch = ACS.dataChannel(outPort.getId() + 'AT' + outPort.getParentComponent().getId(), outPort, null);
+			var addAct = ACS.addDataChannelAction(model, ch);
+			addAct.execute();
+			return true;
+		}
+		return false;
+	}
+	
+	var finaliseDataChannelIfPossible = function(inPort) {
+		if ((model.dataChannelList.length > 0) && (!model.dataChannelList[model.dataChannelList.length - 1].getInputPort())) {
+			if (!channelExists(inPort)) {
+				model.dataChannelList[model.dataChannelList.length - 1].setInputPort(inPort);
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	var startEventChannelIfPossible = function() {
+		if (!((model.eventChannelList.length > 0) && (!model.eventChannelList[model.eventChannelList.length - 1].endComponent)) && // if no eventChannel started already
+			!((model.dataChannelList.length > 0) && (!model.dataChannelList[model.dataChannelList.length - 1].getInputPort()))) { // and no dataChannel started already
+			var ch = ACS.eventChannel(component.getId() + '_TO_'); // second half of ID is added, when channel is completed
+			ch.startComponent = component;
+			var addAct = ACS.addEventChannelAction(model, ch);
+			addAct.execute();
+			return true;
+		}
+		return false;
+	}
+	
+	var finaliseEventChannelIfPossible = function() {
+		if ((model.eventChannelList.length > 0) && (!model.eventChannelList[model.eventChannelList.length - 1].endComponent)) {
+			if (!eventChannelAlreadyExists(model.eventChannelList[model.eventChannelList.length - 1].startComponent, component)) {
+				model.eventChannelList[model.eventChannelList.length - 1].setId(model.eventChannelList[model.eventChannelList.length - 1].getId() + component.getId()); // this ID involves start- and end-component - therefore it must be finalised here, on completion of channel
+				model.eventChannelList[model.eventChannelList.length - 1].endComponent = component;
+				model.eventChannelList[model.eventChannelList.length - 1].events.fireEvent('eventChannelCompletedEvent');
+				modelLayer.draw();
+				return true;
+			}
+		}
+		return false;
+	}
+	
 	// ********************************************** handlers ***********************************************************
 	var selectedEventHandler = function() {
 		selectView();
@@ -459,6 +534,7 @@
 	}
 	
 	var deSelectedEventHandler = function() {
+		if (portMode) returnObj.setPortMode(false);
 		selectedRect.hide();
 		view.setAttr('draggable', true);
 		view.remove(); // view is in selectedComponentsGroup AND modelLayer, the remove-function only exists for removing from all parents, thus we need to remove and then add to the modelLayer again
@@ -525,6 +601,135 @@
 	
 	returnObj.getView = function() {
 		return view;
+	}
+	
+	returnObj.getElementHeight = function() {
+		return elementHeight;
+	}
+	
+	returnObj.setPortMode = function(newMode) {
+		if (newMode) {
+			selectedRect.fill(ACS.vConst.COMPONENTVIEW_SELECTIONFRAMECOLORPORTMODE);
+			modelLayer.draw();
+			focusFirstPort();
+		} else {
+			selectedRect.fill(ACS.vConst.COMPONENTVIEW_SELECTIONFRAMECOLOR);
+			modelLayer.draw();
+			unFocusAllPorts();
+		}
+		portMode = newMode;
+	}
+	
+	returnObj.getPortMode = function(newmode) {
+		return portMode;
+	}
+	
+	returnObj.focusNextPort = function(direction) {
+		if (portFocus.outP > -1) {
+			switch (direction) {
+				case 'up':  	if (portFocus.outP > 0) {
+									portFocus.outP--;
+								}
+								break;
+				case 'down':	if (portFocus.outP < outputPortViewList.length - 1) {
+									portFocus.outP++;
+								} else if (eventOutPortView) {
+									portFocus.outP = -1;
+									portFocus.outEP = 0;
+								} else if (eventInPortView) {
+									portFocus.outP = -1;
+									portFocus.inEP = 0;
+								}
+								break;
+				case 'left':	if (inputPortViewList.length > 0) {
+									while (portFocus.outP >= inputPortViewList.length) portFocus.outP--;
+									portFocus.inP = portFocus.outP;
+									portFocus.outP = -1;
+								}
+								break;						   
+			}
+		} else if (portFocus.inP > -1) {
+			switch (direction) {
+				case 'up':		if (portFocus.inP > 0) {
+									portFocus.inP--;
+								}
+								break;
+				case 'right':	if (outputPortViewList.length > 0) {
+									while (portFocus.inP >= outputPortViewList.length) portFocus.inP--;
+									portFocus.outP = portFocus.inP;
+									portFocus.inP = -1;
+								}
+								break;							
+				case 'down':	if (portFocus.inP < inputPortViewList.length - 1) {
+									portFocus.inP++;
+								} else if (eventInPortView) {
+									portFocus.inP = -1;
+									portFocus.inEP = 0;
+								} else if (eventOutPortView) {
+									portFocus.inP = -1;
+									portFocus.outEP = 0;
+								}
+								break;
+			}
+		} else if (portFocus.inEP > -1) {
+			switch (direction) {
+				case 'up':		if (inputPortViewList.length > 0) {
+									portFocus.inP = inputPortViewList.length - 1;
+									portFocus.inEP = -1;
+								} else if (outputPortViewList.length > 0) {
+									portFocus.outP = outputPortViewList.length - 1;
+									portFocus.inEP = -1;
+								}
+								break;
+				case 'right':	if (eventOutPortView) {
+									portFocus.outEP = 0;
+									portFocus.inEP = -1;
+								}
+								break;							
+			}
+		} else if (portFocus.outEP > -1) {
+			switch (direction) {
+				case 'up':		if (outputPortViewList.length > 0) {
+									portFocus.outP = outputPortViewList.length - 1;
+									portFocus.outEP = -1;
+								} else if (inputPortViewList.length > 0) {
+									portFocus.inP = inputPortViewList.length - 1;
+									portFocus.outEP = -1;
+								}
+								break;
+				case 'left':	if (eventInPortView) {
+									portFocus.inEP = 0;
+									portFocus.outEP = -1;
+								}
+								break;						   
+			}
+		}
+		updatePortFocusHighlighting();
+	}
+	
+	returnObj.connectChannelAtActPort = function() {
+		if (portFocus.outP > -1) {
+			startDataChannelIfPossible(component.outputPortList[portFocus.outP]);
+		} else if (portFocus.outEP > -1) {
+			startEventChannelIfPossible();
+		} else if (portFocus.inP > -1) {
+			finaliseDataChannelIfPossible(component.inputPortList[portFocus.inP]);
+		} else if (portFocus.inEP > -1) {
+			finaliseEventChannelIfPossible();
+		}
+	}
+	
+	returnObj.getFocussedPort = function() {
+		if (portFocus.outP > -1) {
+			return component.outputPortList[portFocus.outP];
+		} else if (portFocus.outEP > -1) {
+			return {component: component, direction: 'out'};
+		} else if (portFocus.inP > -1) {
+			return component.inputPortList[portFocus.inP];
+		} else if (portFocus.inEP > -1) {
+			return {component: component, direction: 'in'};
+		}
+		return null;
 	}
 
 // ***********************************************************************************************************************
