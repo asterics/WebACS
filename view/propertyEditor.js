@@ -104,7 +104,7 @@ ACS.propertyEditor = function (modelList, // ACS.modelList
 
 		//hide All Tabs and Panels => activation in the respective cases
 		hideAllTabsAndPanels();
-		if (document.getElementById(modelPanelId).getAttribute("aria-hidden") === 'false' || document.getElementById(listPanelId).getAttribute("aria-hidden") === 'false') {
+		if (document.getElementById(modelPanelId).getAttribute("aria-hidden") === 'false' || document.getElementById(listPanelId).getAttribute("aria-hidden") === 'false') {		
 			selectedElementType = "none";
 			if (selectedNumberOfComponents === 1 && selectedNumberOfEventChannels === 0) { //check if only one component is selected
 				//get selected component
@@ -124,6 +124,17 @@ ACS.propertyEditor = function (modelList, // ACS.modelList
 					}
 				}
 			}
+			if (selectedNumberOfComponents === 1 && selectedNumberOfEventChannels === 1 && modelViewAct.getListChannelMode) { //check if channelMode is activated an two components are selected
+				//get selected component
+				for (var i = 0; i < actModel.eventChannelList.length; i++) {
+					if (actModel.eventChannelList[i].getIsSelected()) {
+						selectedElement = i;
+						selectedElementType = "channel";
+					}
+				}
+			}
+			
+				
 
 			//Part for component
 			if (selectedElementType === "component") {
@@ -163,8 +174,8 @@ ACS.propertyEditor = function (modelList, // ACS.modelList
 				document.getElementById("propertyEditorTabList").children[0].tabIndex="0";
 				document.getElementById("propEdPanel").setAttribute("aria-hidden", "false");
 			}
-
 		}
+		
 		if (document.getElementById(guiPanelId).getAttribute("aria-hidden") === 'false') {
 			//Render Properties for Gui Editor
 			document.getElementById("propertyEditorTabList").children[0].setAttribute("class", "tab propEdTab");
