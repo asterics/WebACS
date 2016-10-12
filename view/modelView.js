@@ -257,13 +257,9 @@
 		return null;
 	}
 	
-	var getCloserComponent = function(closestComponent, thisComponent, otherComponent) {
-		var centerOfThisComponent = {x: thisComponent.getX() + (ACS.vConst.COMPONENTVIEW_ELEMENTWIDTH / 2),
-									 y: thisComponent.getY() + (findCompView(thisComponent).getElementHeight() / 2)};		
-		var centerOfOtherComponent = {x: otherComponent.getX() + (ACS.vConst.COMPONENTVIEW_ELEMENTWIDTH / 2),
-									  y: otherComponent.getY() + (findCompView(otherComponent).getElementHeight() / 2)};
+	var getCloserComponent = function(closestComponent, otherComponent, centerOfThisComponent, centerOfOtherComponent) {
 		var centerOfClosestComponent = {x: closestComponent.getX() + (ACS.vConst.COMPONENTVIEW_ELEMENTWIDTH / 2),
-										y: closestComponent.getY() + (findCompView(closestComponent).getElementHeight() / 2)};
+										y: closestComponent.getY() + (ACS.vConst.COMPONENTVIEW_ELEMENTHEIGHT / 2)}; // deliberately using center of standard-size component, ignoring different heights
 		var distToClosest = Math.sqrt(Math.pow(centerOfClosestComponent.x - centerOfThisComponent.x, 2) + Math.pow(centerOfClosestComponent.y - centerOfThisComponent.y, 2));								
 		var distToOther = Math.sqrt(Math.pow(centerOfOtherComponent.x - centerOfThisComponent.x, 2) + Math.pow(centerOfOtherComponent.y - centerOfThisComponent.y, 2));
 		if ((distToClosest === 0) || (distToOther < distToClosest)) {
@@ -532,31 +528,31 @@
 	returnObj.focusNextComponent = function(direction) {
 		log.debug('focussing next component: ' + direction);
 		if ((componentViewList.length > 1) && (model.selectedItemsList.length > 0) && (typeof model.selectedItemsList[0].inputPortList != 'undefined')) {
+			var centerOfThisComponent = {x: model.selectedItemsList[0].getX() + (ACS.vConst.COMPONENTVIEW_ELEMENTWIDTH / 2),
+										 y: model.selectedItemsList[0].getY() + (ACS.vConst.COMPONENTVIEW_ELEMENTHEIGHT / 2)}; // deliberately using center of standard-size component, ignoring different heights
+			var centerOfOtherComponent = {};
+			var n1 = centerOfThisComponent.y - centerOfThisComponent.x;
+			var n2 = centerOfThisComponent.y + centerOfThisComponent.x;			
 			var closestComponent = model.selectedItemsList[0]; // if there is no other component, this component keeps the focus
-			if (direction === 'up') {
-				for (var i = 0; i < componentViewList.length; i++) {
-					if (componentViewList[i].getComponent().getY() + componentViewList[i].getElementHeight() < model.selectedItemsList[0].getY()) { // i.e. if it is above this component
-						closestComponent = getCloserComponent(closestComponent, model.selectedItemsList[0], componentViewList[i].getComponent());
-					}
-				}	
-			} else if (direction === 'right') {
-				for (var i = 0; i < componentViewList.length; i++) {
-					if (componentViewList[i].getComponent().getX() > model.selectedItemsList[0].getX() + ACS.vConst.COMPONENTVIEW_ELEMENTWIDTH) { // i.e. if it is to the right of this component
-						closestComponent = getCloserComponent(closestComponent, model.selectedItemsList[0], componentViewList[i].getComponent());
-					}
-				}	
-			} else if (direction === 'down') {
-				for (var i = 0; i < componentViewList.length; i++) {
-					if (componentViewList[i].getComponent().getY() > model.selectedItemsList[0].getY() + findCompView(model.selectedItemsList[0]).getElementHeight()) { // i.e. if it is below this component
-						closestComponent = getCloserComponent(closestComponent, model.selectedItemsList[0], componentViewList[i].getComponent());
-					}
-				}	
-			} else if (direction === 'left') {
-				for (var i = 0; i < componentViewList.length; i++) {
-					if (componentViewList[i].getComponent().getX() + ACS.vConst.COMPONENTVIEW_ELEMENTWIDTH < model.selectedItemsList[0].getX()) { // i.e. if it is to the left of this component
-						closestComponent = getCloserComponent(closestComponent, model.selectedItemsList[0], componentViewList[i].getComponent());
-					}
-				}	
+/*			for (var i = 0; i < componentViewList.length; i++) {
+				centerOfOtherComponent = {x: componentViewList[i].getComponent().getX() + (ACS.vConst.COMPONENTVIEW_ELEMENTWIDTH / 2),
+										  y: componentViewList[i].getComponent().getY() + (ACS.vConst.COMPONENTVIEW_ELEMENTHEIGHT / 2)}; // deliberately using center of standard-size component, ignoring different heights				
+				if ((direction === 'up' && centerOfOtherComponent.y < centerOfThisComponent.y) ||
+					(direction === 'right' && centerOfOtherComponent.x > centerOfThisComponent.x) ||
+					(direction === 'down' && centerOfOtherComponent.y > centerOfThisComponent.y) ||
+					(direction === 'left' && centerOfOtherComponent.x < centerOfThisComponent.x)) {
+					closestComponent = getCloserComponent(closestComponent, componentViewList[i].getComponent(), centerOfThisComponent, centerOfOtherComponent);
+				}
+			}*/
+			for (var i = 0; i < componentViewList.length; i++) {
+				centerOfOtherComponent = {x: componentViewList[i].getComponent().getX() + (ACS.vConst.COMPONENTVIEW_ELEMENTWIDTH / 2),
+										  y: componentViewList[i].getComponent().getY() + (ACS.vConst.COMPONENTVIEW_ELEMENTHEIGHT / 2)}; // deliberately using center of standard-size component, ignoring different heights				
+				if ((direction === 'up' && centerOfOtherComponent.y < centerOfOtherComponent.x + n1 && centerOfOtherComponent.y < -centerOfOtherComponent.x + n2) ||
+					(direction === 'right' && centerOfOtherComponent.y < centerOfOtherComponent.x + n1 && centerOfOtherComponent.y > -centerOfOtherComponent.x + n2) ||
+					(direction === 'down' && centerOfOtherComponent.y > centerOfOtherComponent.x + n1 && centerOfOtherComponent.y > -centerOfOtherComponent.x + n2) ||
+					(direction === 'left' && centerOfOtherComponent.y > centerOfOtherComponent.x + n1 && centerOfOtherComponent.y < -centerOfOtherComponent.x + n2)) {
+					closestComponent = getCloserComponent(closestComponent, componentViewList[i].getComponent(), centerOfThisComponent, centerOfOtherComponent);
+				}
 			}
 			model.deSelectAll();
 			model.addItemToSelection(closestComponent);
@@ -797,6 +793,10 @@
 	});
 	
 	modelLayer.on('click', function(e) {
+		// set focus to modelPanel if canvas clicked, so that then the keyboardMode can be activated on ENTER
+		if (!$('#modelPanel' + modelContainerId).is(':focus')) {
+			$('#modelPanel' + modelContainerId).focus();
+		}
 		// started channels of any kind are dropped, because click was not on an inputPort
 		if (((model.dataChannelList.length > 0) && (!model.dataChannelList[model.dataChannelList.length - 1].getInputPort())) || // unfinished dataChannel to be dropped
 		   ((eventChannelViewList.length > 0) && (!eventChannelViewList[eventChannelViewList.length - 1].getChannel().endComponent))) { // unfinished eventChannel to be dropped
