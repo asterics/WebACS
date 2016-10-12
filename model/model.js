@@ -298,21 +298,25 @@
 			for (var i = 0; i < eventChannels.length; i++) {
 				var startCompId = eventChannels.item(i).getElementsByTagName('source').item(0).getElementsByTagName('component').item(0).attributes.getNamedItem('id').textContent;
 				var endCompId = eventChannels.item(i).getElementsByTagName('target').item(0).getElementsByTagName('component').item(0).attributes.getNamedItem('id').textContent;
-				var channelId = startCompId + '_' + endCompId;
-				var actChannel = seekChannelInList(eventChannelList, channelId);
-				if (!actChannel) {
-					eventChannelList.push(ACS.eventChannel(channelId));
-					eventChannelList[eventChannelList.length-1].startComponent = findComponentById(componentList, startCompId);
-					eventChannelList[eventChannelList.length-1].endComponent = findComponentById(componentList, endCompId);
-					actChannel = eventChannelList[eventChannelList.length-1];
+				var startComp = findComponentById(componentList, startCompId);
+				var endComp = findComponentById(componentList, endCompId);
+				if ((startComp && startComp.foundInComponentCollection) && (endComp && endComp.foundInComponentCollection)) { // component might have been removed, because not in componentCollection
+					var channelId = startCompId + '_' + endCompId;
+					var actChannel = seekChannelInList(eventChannelList, channelId);
+					if (!actChannel) {
+						eventChannelList.push(ACS.eventChannel(channelId));
+						eventChannelList[eventChannelList.length-1].startComponent = startComp;
+						eventChannelList[eventChannelList.length-1].endComponent = endComp;
+						actChannel = eventChannelList[eventChannelList.length-1];
+					}
+					var triggerEventId = eventChannels.item(i).getElementsByTagName('source').item(0).getElementsByTagName('eventPort').item(0).attributes.getNamedItem('id').textContent;
+					var listenerEventId = eventChannels.item(i).getElementsByTagName('target').item(0).getElementsByTagName('eventPort').item(0).attributes.getNamedItem('id').textContent;
+					var desc = '';
+					if (eventChannels.item(i).getElementsByTagName('description').item(0)) desc = eventChannels.item(i).getElementsByTagName('description').item(0).textContent;
+					actChannel.eventConnections.push({	trigger: findEventById(actChannel.startComponent, triggerEventId, false),
+														listener: findEventById(actChannel.endComponent, listenerEventId, true),
+														description: desc});
 				}
-				var triggerEventId = eventChannels.item(i).getElementsByTagName('source').item(0).getElementsByTagName('eventPort').item(0).attributes.getNamedItem('id').textContent;
-				var listenerEventId = eventChannels.item(i).getElementsByTagName('target').item(0).getElementsByTagName('eventPort').item(0).attributes.getNamedItem('id').textContent;
-				var desc = '';
-				if (eventChannels.item(i).getElementsByTagName('description').item(0)) desc = eventChannels.item(i).getElementsByTagName('description').item(0).textContent;
-				actChannel.eventConnections.push({	trigger: findEventById(actChannel.startComponent, triggerEventId, false),
-													listener: findEventById(actChannel.endComponent, listenerEventId, true),
-													description: desc});
 			}
 		}
 		return eventChannelList;
