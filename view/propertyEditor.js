@@ -833,8 +833,8 @@ ACS.propertyEditor = function (modelList, // ACS.modelList
 		}
 
 		wrapperDivGUI.appendChild(propertyEdPanelCaptions);
-		wrapperDivGUI.appendChild(propertiesGuiEditorTableEditorProperties);
 		wrapperDivGUI.appendChild(propertiesGuiEditorTable);
+		wrapperDivGUI.appendChild(propertiesGuiEditorTableEditorProperties);
 		document.getElementById('propEdPanel').appendChild(wrapperDivGUI);
 	}
 
