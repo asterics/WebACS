@@ -169,9 +169,11 @@ ACS.view = function(modelList, // ACS.modelList
 	var handleKeydown = function(e) {
 		// catch Del to delete selected items
 		if (e.keyCode === 46) { // Del can't be caught by keyPress for not all browsers act consistently (see: http://unixpapa.com/js/key.html)
-			deleteSelectionHandler();
-			stopEvent(e);
-			return false;		
+			if ($('#' + ACS.vConst.CANVASVIEW_MOTHERPANEL).is(':focus')) { // if focus somewhere inside canvasMotherPanel (otherwise Del could not be used in propertyEditor)
+				deleteSelectionHandler();
+				stopEvent(e);
+				return false;
+			}
 		}
 	}
 	
