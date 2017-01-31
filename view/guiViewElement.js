@@ -55,6 +55,7 @@
 	var dragAct = null; // ACS.guiDragDropAction
 	var dragOffsetX = null;
 	var dragOffsetY = null;
+	var hasFocus = false;
 
 // ***********************************************************************************************************************
 // ************************************************** private methods ****************************************************
@@ -109,6 +110,16 @@
 			children[i].setSizeBoundsMax({width: xToNormRes(newWidth - (xToScreenRes(children[i].getX()) - mainRect.getAbsolutePosition().x)),
 										  height: yToNormRes(newHeight - (yToScreenRes(children[i].getY()) - mainRect.getAbsolutePosition().y))});
 		}
+		// recalc bounds for parent (if there is one) and own sizeBoundsMax
+		if (parent) {
+			parent.reCalcSizeBoundsMin();
+			returnObj.setSizeBoundsMax({width: xToNormRes(xToScreenRes(parent.getWidth()) - (mainRect.getAbsolutePosition().x - xToScreenRes(parent.getX()))),
+										height: yToNormRes(yToScreenRes(parent.getHeight()) - (mainRect.getAbsolutePosition().y - yToScreenRes(parent.getY())))});
+		} else {
+			returnObj.setSizeBoundsMax({width: xToNormRes(editorProperties.getGuiDesignerSize().width - mainRect.getAbsolutePosition().x), 
+										height: yToNormRes(editorProperties.getGuiDesignerSize().height - mainRect.getAbsolutePosition().y)});
+		}
+		guiLayer.draw();
 	}
 
 	var updateSize = function() {
@@ -150,7 +161,46 @@
 			if (sizeBoundsMin.width < xToScreenRes(childElem.getX()) - mainRect.getAbsolutePosition().x + xToScreenRes(childElem.getWidth())) sizeBoundsMin.width = xToScreenRes(childElem.getX()) - mainRect.getAbsolutePosition().x + xToScreenRes(childElem.getWidth());
 		}
 		if (sizeBoundsMin.height < yToScreenRes(childElem.getY()) - mainRect.getAbsolutePosition().y + yToScreenRes(childElem.getHeight())) sizeBoundsMin.height = yToScreenRes(childElem.getY()) - mainRect.getAbsolutePosition().y + yToScreenRes(childElem.getHeight());
-	}	
+	}
+
+	var updatePosAccordingToGrid = function(newPos) {
+		// if grid enabled, make newPos stick to grid
+		if (editorProperties.getEnableGrid()) {
+			var step = getGridStep();
+			if (newPos.x % step < step/2) {
+				newPos.x = newPos.x - (newPos.x % step);
+			} else {
+				newPos.x = newPos.x - (newPos.x % step) + step;
+			}
+			if (newPos.y % step < step/2) {
+				newPos.y = newPos.y - (newPos.y % step);
+			} else {
+				newPos.y = newPos.y - (newPos.y % step) + step;
+			}
+		}		
+		return newPos;
+	}
+	
+	var updateChildrensPosition = function() {
+		for (var i = 0; i < children.length; i++) {
+			children[i].updatePosition();
+			children[i].setDragBounds({left: xToNormRes(mainRect.getAbsolutePosition().x),
+									   upper: yToNormRes(mainRect.getAbsolutePosition().y),
+									   right: xToNormRes(mainRect.getAbsolutePosition().x + mainRect.width()),
+									   lower: yToNormRes(mainRect.getAbsolutePosition().y + mainRect.height())});		
+		}		
+	}
+	
+	var updateSizeBounds = function() {
+		if (parent) {
+			parent.reCalcSizeBoundsMin();
+			returnObj.setSizeBoundsMax({width: xToNormRes(xToScreenRes(parent.getWidth()) - (mainRect.getAbsolutePosition().x - xToScreenRes(parent.getX()))),
+										height: yToNormRes(yToScreenRes(parent.getHeight()) - (mainRect.getAbsolutePosition().y - yToScreenRes(parent.getY())))});
+		} else {
+			returnObj.setSizeBoundsMax({width: xToNormRes(editorProperties.getGuiDesignerSize().width - mainRect.getAbsolutePosition().x), 
+										height: yToNormRes(editorProperties.getGuiDesignerSize().height - mainRect.getAbsolutePosition().y)});
+		}		
+	}
 	
 	// ********************************************** handlers ***********************************************************
 	var guiPositionChangedEventHandler = function() {
@@ -274,6 +324,16 @@
 		parent = p;
 	}
 	
+	returnObj.setFocus = function(focus) { // boolean
+		hasFocus = focus;
+		if (focus) {
+			mainRect.fill(ACS.vConst.GUIVIEWELEMENT_FOCUSCOLOR);
+		} else {
+			mainRect.fill(backgroundColor);
+		}
+		guiLayer.draw();
+	}	
+	
 	returnObj.addChildElement = function(newChild) { // guiViewElement
 		children.push(newChild);
 		group.add(newChild.getKineticGroup());
@@ -292,6 +352,58 @@
 	returnObj.updatePosition = function() {
 		gui.setNewPosition({x: xToNormRes(mainRect.getAbsolutePosition().x),
 							y: yToNormRes(mainRect.getAbsolutePosition().y)});
+	}
+	
+	returnObj.resize = function(direction) {
+		resizeAct = ACS.guiResizeAction(model, gui);
+		var moveStep = 1;
+		if (editorProperties.getEnableGrid()) moveStep = getGridStep();
+		switch (direction) {
+			case 'up':		anchor.move({x: 0, y: -moveStep});
+							break;
+			case 'right':	anchor.move({x: moveStep, y: 0});
+							break;
+			case 'down':	anchor.move({x: 0, y: moveStep});
+							break;
+			case 'left':	anchor.move({x: -moveStep, y: 0});
+							break;
+		}
+		var newPos = updatePosAccordingToGrid({x: anchor.getAbsolutePosition().x, y: anchor.getAbsolutePosition().y});
+		anchor.x(newPos.x);
+		anchor.y(newPos.y);
+		updateSize();
+		resizeAct.execute();		
+	}
+	
+	returnObj.reposition = function(direction) {
+		var guis = [gui];
+		for (var i = 0; i < children.length; i++) {
+			guis.push(children[i].getGui());
+		}
+		dragAct = ACS.guiDragDropAction(model, guis);		
+		var moveStep = 1;
+		if (editorProperties.getEnableGrid()) moveStep = getGridStep();
+		switch (direction) {
+			case 'up':		mainRect.move({x: 0, y: -moveStep});
+							break;
+			case 'right':	mainRect.move({x: moveStep, y: 0});
+							break;
+			case 'down':	mainRect.move({x: 0, y: moveStep});
+							break;
+			case 'left':	mainRect.move({x: -moveStep, y: 0});
+							break;
+		}
+		var newPos = updatePosAccordingToGrid({x: mainRect.getAbsolutePosition().x, y: mainRect.getAbsolutePosition().y});
+		mainRect.x(newPos.x);
+		mainRect.y(newPos.y);
+		updateChildrensPosition();
+		returnObj.updatePosition();
+		updateSizeBounds();
+		dragAct.execute();	
+	}	
+	
+	returnObj.getFocus = function() {
+		return hasFocus;
 	}
 	
 	returnObj.getX = function() {
@@ -340,6 +452,7 @@
 	decorHeight = yToScreenRes(ACS.vConst.GUIVIEW_DECORATIONHEIGHT);
 	controlWidth = xToScreenRes(ACS.vConst.GUIVIEW_CONTROLSWIDTH);
 	
+	
 	mainRect = new Kinetic.Rect({x: xToScreenRes(gui.getX()),
 								 y: yToScreenRes(gui.getY()),
 								 width: xToScreenRes(gui.getWidth()),
@@ -367,29 +480,13 @@
 								},
 								draggable: true,
 								dragBoundFunc: function(pos) {
-										var newX = pos.x;
-										var newY = pos.y;
-										// check grid, if enabled
-										if (editorProperties.getEnableGrid()) {
-											var step = getGridStep();
-											if (newX % step < step/2) {
-												newX = newX - (newX % step);
-											} else {
-												newX = newX - (newX % step) + step;
-											}
-											if (newY % step < step/2) {
-												newY = newY - (newY % step);
-											} else {
-												newY = newY - (newY % step) + step;
-											}
-										}
+										var newPos = {x: pos.x,
+													  y: pos.y}
+										newPos = updatePosAccordingToGrid(newPos);
 										// check the bounds
-										if (newX - mainRect.getAbsolutePosition().x > sizeBoundsMax.width) newX = sizeBoundsMax.width + mainRect.getAbsolutePosition().x;
-										if (newY - mainRect.getAbsolutePosition().y > sizeBoundsMax.height) newY = sizeBoundsMax.height + mainRect.getAbsolutePosition().y;	
-
-						//console.log('x: '+newX+', y: '+newY);
-										
-										return {x: newX, y: newY};
+										if (newPos.x - mainRect.getAbsolutePosition().x > sizeBoundsMax.width) newPos.x = sizeBoundsMax.width + mainRect.getAbsolutePosition().x;
+										if (newPos.y - mainRect.getAbsolutePosition().y > sizeBoundsMax.height) newPos.y = sizeBoundsMax.height + mainRect.getAbsolutePosition().y;	
+										return {x: newPos.x, y: newPos.y};
 								}
 								});
 	group = new Kinetic.Group({	draggable: true,
@@ -398,30 +495,19 @@
 										dragOffsetX = Math.floor(mainRect.getAbsolutePosition().x - pos.x);
 										dragOffsetY = Math.floor(mainRect.getAbsolutePosition().y - pos.y);
 									}
-									var newX = pos.x;
-									var newY = pos.y;
-									// check grid, if enabled
-									if (editorProperties.getEnableGrid()) {
-										var step = getGridStep();
-										if (newX % step < step/2) {
-											newX = newX - (newX % step);
-										} else {
-											newX = newX - (newX % step) + step;
-										}
-										if (newY % step < step/2) {
-											newY = newY - (newY % step);
-										} else {
-											newY = newY - (newY % step) + step;
-										}
-									}
+									var newPos = {x: pos.x,
+												  y: pos.y};
+									newPos = updatePosAccordingToGrid({x: newPos.x + dragOffsetX,
+																	   y: newPos.y + dragOffsetY});
+									newPos.x = newPos.x - dragOffsetX;
+									newPos.y = newPos.y - dragOffsetY;
 									// check the bounds
 									actBounds = {left: (dragBounds.left - dragOffsetX), right: (dragBounds.right - dragOffsetX), upper: (dragBounds.upper - dragOffsetY), lower: (dragBounds.lower - dragOffsetY)};
-									if (newX < actBounds.left) newX = actBounds.left;
-									if (newX + mainRect.width() > actBounds.right) newX = actBounds.right - mainRect.width();
-									if (newY < actBounds.upper) newY = actBounds.upper;
-									if (newY + mainRect.height() > actBounds.lower) newY = actBounds.lower - mainRect.height();
-
-									return {x: newX, y: newY};
+									if (newPos.x < actBounds.left) newPos.x = actBounds.left;
+									if (newPos.x + mainRect.width() > actBounds.right) newPos.x = actBounds.right - mainRect.width();
+									if (newPos.y < actBounds.upper) newPos.y = actBounds.upper;
+									if (newPos.y + mainRect.height() > actBounds.lower) newPos.y = actBounds.lower - mainRect.height();
+									return {x: newPos.x, y: newPos.y};
 								}
 							 });
 
@@ -436,22 +522,9 @@
 	group.on('dragend', function(e) {
 		dragOffsetX = null;
 		dragOffsetY = null;
-		for (var i = 0; i < children.length; i++) {
-			children[i].updatePosition();
-			children[i].setDragBounds({left: xToNormRes(mainRect.getAbsolutePosition().x),
-									   upper: yToNormRes(mainRect.getAbsolutePosition().y),
-									   right: xToNormRes(mainRect.getAbsolutePosition().x + mainRect.width()),
-									   lower: yToNormRes(mainRect.getAbsolutePosition().y + mainRect.height())});		
-		}
+		updateChildrensPosition();
 		returnObj.updatePosition();
-		if (parent) {
-			parent.reCalcSizeBoundsMin();
-			returnObj.setSizeBoundsMax({width: xToNormRes(xToScreenRes(parent.getWidth()) - (mainRect.getAbsolutePosition().x - xToScreenRes(parent.getX()))),
-										height: yToNormRes(yToScreenRes(parent.getHeight()) - (mainRect.getAbsolutePosition().y - yToScreenRes(parent.getY())))});
-		} else {
-			returnObj.setSizeBoundsMax({width: xToNormRes(editorProperties.getGuiDesignerSize().width - mainRect.getAbsolutePosition().x), 
-										height: yToNormRes(editorProperties.getGuiDesignerSize().height - mainRect.getAbsolutePosition().y)});
-		}
+		updateSizeBounds();
 		dragAct.execute();
 	});
 									
@@ -473,14 +546,6 @@
 	anchor.on('dragend', function(e) {
 		group.setDraggable(true);
 		guiLayer.draw();
-		if (parent) {
-			parent.reCalcSizeBoundsMin();
-			returnObj.setSizeBoundsMax({width: xToNormRes(xToScreenRes(parent.getWidth()) - (mainRect.getAbsolutePosition().x - xToScreenRes(parent.getX()))),
-										height: yToNormRes(yToScreenRes(parent.getHeight()) - (mainRect.getAbsolutePosition().y - yToScreenRes(parent.getY())))});
-		} else {
-			returnObj.setSizeBoundsMax({width: xToNormRes(editorProperties.getGuiDesignerSize().width - mainRect.getAbsolutePosition().x), 
-										height: yToNormRes(editorProperties.getGuiDesignerSize().height - mainRect.getAbsolutePosition().y)});
-		}
 		resizeAct.execute();
 		stopEvent(e);
 	});

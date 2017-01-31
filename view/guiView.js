@@ -27,7 +27,7 @@
  */
  
  ACS.guiView = function(model, // ACS.model
-						containerId, // String
+						modelContainerId, // String
 						editorProperties) { // ACS.editorProperties
 						
 // ***********************************************************************************************************************
@@ -40,6 +40,7 @@
 	var gridLines = []; // Array<Kinetic.Line>
 	var img = null; // Image
 	var guiDesignerFrame; // Kinetic.Rect
+	var guiKeyboardMode = false; // boolean
 	
 // ***********************************************************************************************************************
 // ************************************************** private methods ****************************************************
@@ -145,6 +146,29 @@
 		}
 	}
 	
+	var getFocussedGUI = function() {
+		if (areGUI.getFocus()) {
+			return areGUI;
+		} else {
+			for (var i = 0; i < componentGUIs.length; i++) {
+				if (componentGUIs[i].guiViewElement.getFocus()) return componentGUIs[i].guiViewElement;
+			}
+		}
+		return null;
+	}
+	
+	var getCloserGUI = function(closestGUI, otherGUI, centerOfFocussedGUI, centerOfOtherGUI) {
+		var centerOfClosestGUI = {x: closestGUI.getX() + (closestGUI.getWidth() / 2),
+								  y: closestGUI.getY() + (closestGUI.getHeight() / 2)};
+		var distToClosest = Math.sqrt(Math.pow(centerOfClosestGUI.x - centerOfFocussedGUI.x, 2) + Math.pow(centerOfClosestGUI.y - centerOfFocussedGUI.y, 2));								
+		var distToOther = Math.sqrt(Math.pow(centerOfOtherGUI.x - centerOfFocussedGUI.x, 2) + Math.pow(centerOfOtherGUI.y - centerOfFocussedGUI.y, 2));
+		if ((distToClosest === 0) || (distToOther < distToClosest)) {
+			return otherGUI;
+		} else {
+			return closestGUI;
+		}
+	}	
+	
 	// ********************************************** handlers ***********************************************************
 	var componentAddedEventHandler = function() {
 		if (model.componentList.length > 0) {
@@ -232,11 +256,67 @@
 // ***********************************************************************************************************************
 	var returnObj = {};
 	
+	returnObj.setGuiKeyboardMode = function(newMode) {
+		if (newMode) {
+			// first set focus on areGUI
+			areGUI.setFocus(true);
+		} else {
+			// unfocus all
+			if (areGUI.getFocus()) areGUI.setFocus(false);
+			for (var i = 0; i < componentGUIs.length; i++) {
+				if (componentGUIs[i].guiViewElement.getFocus()) componentGUIs[i].guiViewElement.setFocus(false);
+			}
+		}
+		guiKeyboardMode = newMode;
+	}
+	
+	returnObj.focusNextGuiElement = function(direction) {
+		log.debug('focussing next guiView: ' + direction);
+		var focussedGUI = getFocussedGUI();
+		if ((componentGUIs.length > 0) && focussedGUI) {
+			var centerOfFocussedGUI = {x: focussedGUI.getX() + (focussedGUI.getWidth() / 2),
+									   y: focussedGUI.getY() + (focussedGUI.getHeight() / 2)};
+			var n1 = centerOfFocussedGUI.y - centerOfFocussedGUI.x;
+			var n2 = centerOfFocussedGUI.y + centerOfFocussedGUI.x;
+			var closestGUI = focussedGUI;
+			var otherGUI = areGUI;
+			var centerOfOtherGUI = {x: areGUI.getX() + (areGUI.getWidth() / 2),
+									y: areGUI.getY() + (areGUI.getHeight() / 2)};
+			for (var i = 0; i < componentGUIs.length + 1; i++) {
+				if ((direction === 'up' && centerOfOtherGUI.y < centerOfOtherGUI.x + n1 && centerOfOtherGUI.y < -centerOfOtherGUI.x + n2) ||
+					(direction === 'right' && centerOfOtherGUI.y < centerOfOtherGUI.x + n1 && centerOfOtherGUI.y > -centerOfOtherGUI.x + n2) ||
+					(direction === 'down' && centerOfOtherGUI.y > centerOfOtherGUI.x + n1 && centerOfOtherGUI.y > -centerOfOtherGUI.x + n2) ||
+					(direction === 'left' && centerOfOtherGUI.y > centerOfOtherGUI.x + n1 && centerOfOtherGUI.y < -centerOfOtherGUI.x + n2)) {
+					closestGUI = getCloserGUI(closestGUI, otherGUI, centerOfFocussedGUI, centerOfOtherGUI);
+				}
+				if (i < componentGUIs.length) {
+					otherGUI = componentGUIs[i].guiViewElement;
+					centerOfOtherGUI = {x: otherGUI.getX() + (otherGUI.getWidth() / 2),
+										y: otherGUI.getY() + (otherGUI.getHeight() / 2)};				
+				}
+			}
+			focussedGUI.setFocus(false);
+			closestGUI.setFocus(true);
+		}
+	}
+	
+	returnObj.resizeFocussedGuiElement = function(direction) {
+		log.debug('resizing focussed GuiElement: ' + direction);
+		var focussedGUI = getFocussedGUI();
+		if (focussedGUI) focussedGUI.resize(direction);
+	}
+	
+	returnObj.moveFocussedElement = function(direction) {
+		log.debug('repositioning focussed GuiElement: ' + direction);
+		var focussedGUI = getFocussedGUI();
+		if (focussedGUI) focussedGUI.reposition(direction);
+	}
+	
 // ***********************************************************************************************************************
 // ************************************************** constructor code ***************************************************
 // ***********************************************************************************************************************
 	guiStage = new Kinetic.Stage({
-		container: containerId,
+		container: modelContainerId,
 		width: editorProperties.getGuiDesignerSize().width,
 		height: editorProperties.getGuiDesignerSize().height
 	});

@@ -190,12 +190,12 @@ body {
   overflow: scroll;
 }
 
-.listPanel li:focus {
+.listPanelFocusableElement:focus {
 	background-color: #d1e511;
 }
 
-.additionalFocusableElement:focus {
-	background-color: #d1e511;
+.listPanelFocusableElementKeyboardMode:focus {
+	background-color: #fdae33;
 }
 
 .propEdPanel {

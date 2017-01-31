@@ -474,10 +474,7 @@
 	
 	returnObj.setGuiKeyboardMode = function(newMode) {
 		log.debug('setting GuiKeyboardMode: ' + newMode);
-		if (newMode) {
-			// set keyboardFocus to guiPanel (otherwise tabPanel would consume the arrow-keys)
-			$('#guiPanel' + modelContainerId).focus();
-		}			
+		guiView.setGuiKeyboardMode(newMode);
 		guiKeyboardMode = newMode;
 	}
 
@@ -488,21 +485,24 @@
 	returnObj.setListKeyboardMode = function(newMode) {
 		log.debug('setting listKeyboardMode: ' + newMode);
 		if (newMode) {
-			// TODO
+			$('.listPanelFocusableElement').switchClass('listPanelFocusableElement', 'listPanelFocusableElementKeyboardMode');
 		} else {
+			$('.listPanelFocusableElementKeyboardMode').switchClass('listPanelFocusableElementKeyboardMode', 'listPanelFocusableElement');
 			if (listChannelMode) returnObj.setListChannelMode(false);
-			if (listPortMode) returnObj.setListPortMode(false);
+			if (listPortMode) returnObj.setListPortMode(false, false);
 		}
 		listKeyboardMode = newMode;
+		listView.setListKeyboardMode(newMode);
 	}
 
 	returnObj.getListKeyboardMode = function() {
 		return listKeyboardMode;
 	}
 
-	returnObj.setListPortMode = function(newMode) {
+	returnObj.setListPortMode = function(newMode, focusFirst) {
 		log.debug('setting listPortMode: ' + newMode);
 		listPortMode = newMode;
+		listView.setListPortMode(newMode, focusFirst);
 	}
 
 	returnObj.getListPortMode = function() {
@@ -510,15 +510,12 @@
 	}
 
 	returnObj.setListChannelMode = function(newMode) {
-		log.debug('setting listChannelMode: ' + newMode);
-		if (newMode) {
-			listPortMode = false;
-			// do stuff
-		} else {
-			listPortMode = true;
-			// focus the port we came from
-		}
-		listChannelMode = newMode;
+		if (listView.setListChannelMode(newMode)) {
+			log.debug('setting listChannelMode: ' + newMode);
+			listChannelMode = newMode;
+			returnObj.setListPortMode(!newMode, false);
+			return true;
+		} else return false;
 	}
 
 	returnObj.getListChannelMode = function() {
@@ -534,16 +531,6 @@
 			var n1 = centerOfThisComponent.y - centerOfThisComponent.x;
 			var n2 = centerOfThisComponent.y + centerOfThisComponent.x;			
 			var closestComponent = model.selectedItemsList[0]; // if there is no other component, this component keeps the focus
-/*			for (var i = 0; i < componentViewList.length; i++) {
-				centerOfOtherComponent = {x: componentViewList[i].getComponent().getX() + (ACS.vConst.COMPONENTVIEW_ELEMENTWIDTH / 2),
-										  y: componentViewList[i].getComponent().getY() + (ACS.vConst.COMPONENTVIEW_ELEMENTHEIGHT / 2)}; // deliberately using center of standard-size component, ignoring different heights				
-				if ((direction === 'up' && centerOfOtherComponent.y < centerOfThisComponent.y) ||
-					(direction === 'right' && centerOfOtherComponent.x > centerOfThisComponent.x) ||
-					(direction === 'down' && centerOfOtherComponent.y > centerOfThisComponent.y) ||
-					(direction === 'left' && centerOfOtherComponent.x < centerOfThisComponent.x)) {
-					closestComponent = getCloserComponent(closestComponent, componentViewList[i].getComponent(), centerOfThisComponent, centerOfOtherComponent);
-				}
-			}*/
 			for (var i = 0; i < componentViewList.length; i++) {
 				centerOfOtherComponent = {x: componentViewList[i].getComponent().getX() + (ACS.vConst.COMPONENTVIEW_ELEMENTWIDTH / 2),
 										  y: componentViewList[i].getComponent().getY() + (ACS.vConst.COMPONENTVIEW_ELEMENTHEIGHT / 2)}; // deliberately using center of standard-size component, ignoring different heights				
@@ -584,22 +571,27 @@
 
 	returnObj.focusNextGuiElement = function(direction) {
 		log.debug('focussing next guiElement: ' + direction);
+		guiView.focusNextGuiElement(direction);
 	}	
 
 	returnObj.focusNextListComponent = function(direction) {
 		log.debug('focussing next listComponent: ' + direction);
+		listView.focusNextListComponent(direction);
 	}	
 
 	returnObj.focusNextListPort = function(direction) {
 		log.debug('focussing next ListPort: ' + direction);
+		listView.focusNextListPort(direction);
 	}	
 
 	returnObj.focusNextListChannel = function(direction) {
 		log.debug('focussing next listChannel: ' + direction);
-	}	
+		listView.focusNextListChannel(direction);
+	}
 
 	returnObj.resizeGuiElement = function(direction) {
 		log.debug('resizing gui element: ' + direction);
+		guiView.resizeFocussedGuiElement(direction);
 	}
 	
 	returnObj.moveComponent = function(direction) {
@@ -620,6 +612,7 @@
 	
 	returnObj.moveGuiElement = function(direction) {
 		log.debug('moving gui element: ' + direction);
+		guiView.moveFocussedElement(direction);
 	}		
 	
 	returnObj.connectChannelAtActPort = function() {

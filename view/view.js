@@ -59,7 +59,7 @@ ACS.view = function(modelList, // ACS.modelList
 				actModelView.moveGuiElement(direction);
 				return true;
 			}
-		} else if (e.ctrlKey) {
+		} else if (e.altKey) {
 			if (actModelView.getGuiKeyboardMode() && $('#guiPanel' + actModelView.getModelContainerId()).is(':focus')) { // resize GUI
 				actModelView.resizeGuiElement(direction);
 				return true;
@@ -68,13 +68,13 @@ ACS.view = function(modelList, // ACS.modelList
 			if (actModelView.getPortMode() && $('#modelPanel' + actModelView.getModelContainerId()).is(':focus')) { // switch ports
 				actModelView.focusNextPort(direction);
 				return true;
-			} else if (actModelView.getListPortMode() && $('#listPanel' + actModelView.getModelContainerId()).is(':focus')) { // switch ports in listview
+			} else if (actModelView.getListPortMode() && $('#listPanel' + actModelView.getModelContainerId()).find('*').is(':focus')) { // switch ports in listview
 				actModelView.focusNextListPort(direction);
 				return true;
 			} else if (actModelView.getChannelMode() && $('#modelPanel' + actModelView.getModelContainerId()).is(':focus')) { // switch channels
 				actModelView.focusNextChannel(direction);
 				return true;
-			} else if (actModelView.getListChannelMode() && $('#listPanel' + actModelView.getModelContainerId()).is(':focus')) { // switch channels in listview
+			} else if (actModelView.getListChannelMode() && $('#listPanel' + actModelView.getModelContainerId()).find('*').is(':focus')) { // switch channels in listview
 				actModelView.focusNextListChannel(direction);
 				return true;
 			} else if (actModelView.getKeyboardMode() && $('#modelPanel' + actModelView.getModelContainerId()).is(':focus')) { // switch components
@@ -83,7 +83,7 @@ ACS.view = function(modelList, // ACS.modelList
 			} else if (actModelView.getGuiKeyboardMode() && $('#guiPanel' + actModelView.getModelContainerId()).is(':focus')) { // switch Gui Elements
 				actModelView.focusNextGuiElement(direction);
 				return true;
-			} else if (actModelView.getListKeyboardMode() && $('#listPanel' + actModelView.getModelContainerId()).is(':focus')) { // switch components in listview
+			} else if (actModelView.getListKeyboardMode() && $('#listPanel' + actModelView.getModelContainerId()).find('*').is(':focus')) { // switch components in listview
 				actModelView.focusNextListComponent(direction);
 				return true;
 			}
@@ -271,7 +271,7 @@ ACS.view = function(modelList, // ACS.modelList
 						stopEvent(e);
 						return false;		
 					}
-				} else if (actModelView.getListKeyboardMode() && $('#listPanel' + actModelView.getModelContainerId()).is(':focus')) {
+				} else if (actModelView.getListKeyboardMode() && $('#listPanel' + actModelView.getModelContainerId()).find('*').is(':focus')) {
 					if (actModelView.getListPortMode()) {
 						if (e.shiftKey) {
 							// begin new channel or connect incomplete channel to the selected port
@@ -282,7 +282,7 @@ ACS.view = function(modelList, // ACS.modelList
 						stopEvent(e);
 						return false;		
 					} else if (!actModelView.getListChannelMode()) {
-						actModelView.setListPortMode(true);
+						actModelView.setListPortMode(true, true);
 						stopEvent(e);
 						return false;		
 					}
@@ -330,12 +330,12 @@ ACS.view = function(modelList, // ACS.modelList
 				}
 				stopEvent(e);
 				return false;											
-			} else if (actModelView.getListKeyboardMode() && $('#listPanel' + actModelView.getModelContainerId()).is(':focus')) {
+			} else if (actModelView.getListKeyboardMode() && $('#listPanel' + actModelView.getModelContainerId()).find('*').is(':focus')) {
 				if (!dropStartedChannel()) {
 					if (actModelView.getListChannelMode()) {
 						actModelView.setListChannelMode(false);
 					} else if (actModelView.getListPortMode()) {
-						actModelView.setListPortMode(false);
+						actModelView.setListPortMode(false, false);
 					}
 				}				
 				stopEvent(e);
@@ -354,7 +354,6 @@ ACS.view = function(modelList, // ACS.modelList
 					stopEvent(e);
 					return false;								
 				} else if ($('#listTab' + actModelView.getModelContainerId()).attr('aria-selected') === 'true') {
-					$('#listPanel' + actModelView.getModelContainerId()).focus(); // set keyboardFocus to listPanel (otherwise tabPanel would consume the arrow-keys)
 					if (!actModelView.getListKeyboardMode()) actModelView.setListKeyboardMode(true);
 					stopEvent(e);
 					return false;								

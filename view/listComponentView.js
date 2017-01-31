@@ -36,6 +36,10 @@
 // ***********************************************************************************************************************
 	var $listElem = $(document.createElement('li'));
 	var $subList = $(document.createElement('ul'));
+	var completePortList = [];
+	var focussedPortIndex = -1;
+	var actPortChannelList = [];
+	var focussedChannelIndex = -1;
 
 // ***********************************************************************************************************************
 // ************************************************** private methods ****************************************************
@@ -73,6 +77,7 @@
 		var $le = $(document.createElement('li'));
 		$le.attr('id', containerId + '_' + dataCh.getId().replace(/\s+/g, '').replace(/\.+/g, '') + '_AT_' + component.getId().replace(/\s+/g, '').replace(/\.+/g, ''));
 		$le.attr('tabindex', '0');
+		$le.addClass('listPanelFocusableElement');
 		$le.append('port ');
 		var $btn = $(document.createElement('button'));
 		$btn.attr('type', 'button');
@@ -91,13 +96,14 @@
 		$le.append($btn);
 		$le.focus(function() {
 			model.deSelectAll();
-			model.addItemToSelection(dataCh);			
+			model.addItemToSelection(dataCh);
+			returnObj.events.fireEvent('listComponentViewSelectedEvent', returnObj);
 		});
 		return $le;
 	}		
 
 	var addIncomingDataConnection = function($div, inChannel) {
-		$div.text(' connected to port ');
+		$div.text('connected to port ');
 		var $btn = $(document.createElement('button'));
 		$btn.attr('type', 'button');
 		$btn.text(inChannel.getOutputPort().getId());
@@ -114,10 +120,11 @@
 		}(inChannel.getOutputPort()));
 		// make channel focusable and select channel on focus
 		$div.attr('tabindex', '0');
-		$div.addClass('additionalFocusableElement');
+		$div.addClass('listPanelFocusableElement');
 		$div.focus(function() {
 			model.deSelectAll();
-			model.addItemToSelection(inChannel);			
+			model.addItemToSelection(inChannel);	
+			returnObj.events.fireEvent('listComponentViewSelectedEvent', returnObj);
 		});
 		$div.append($btn);
 	}
@@ -129,9 +136,11 @@
 			var $li = $(document.createElement('li'));
 			$li.attr('id', containerId + '_' + portList[i].getId().replace(/\s+/g, '').replace(/\.+/g, '') + '_AT_' + component.getId().replace(/\s+/g, '').replace(/\.+/g, ''));
 			$li.attr('tabindex', '0');
+			$li.addClass('listPanelFocusableElement');
 			$li.focus(function() {
 				model.deSelectAll();
 				model.addItemToSelection(component);
+				returnObj.events.fireEvent('listComponentViewSelectedEvent', returnObj);
 			});
 			$list.append($li);
 			$li.text(portList[i].getId());
@@ -185,6 +194,7 @@
 		$('#' + id).focus(function() {
 			model.deSelectAll();
 			model.addItemToSelection(component);
+			returnObj.events.fireEvent('listComponentViewSelectedEvent', returnObj);
 		});	
 	}
 	
@@ -192,10 +202,12 @@
 		var $li = $(document.createElement('li'));
 		$li.attr('id', containerId + '_' + channel.getId().replace(/\s+/g, '').replace(/\.+/g, '') + '_AT_' + component.getId().replace(/\s+/g, '').replace(/\.+/g, ''));
 		$li.attr('tabindex', '0');
+		$li.addClass('listPanelFocusableElement');
 		$li.focus(function(evtChannel) {
 			return function() {
 				model.deSelectAll();
 				model.addItemToSelection(evtChannel);
+				returnObj.events.fireEvent('listComponentViewSelectedEvent', returnObj);
 			};
 		}(channel));
 		// create button that links to other end of eventChannel
@@ -212,10 +224,6 @@
 			return function() {$('#' + containerId + '_' + compId.replace(/\s+/g, '').replace(/\.+/g, '')).focus();};
 		}(linkToCompId));
 		$li.append($btn);
-		$li.focus(function() {
-			model.deSelectAll();
-			model.addItemToSelection(channel);
-		});		
 		return $li;
 	}
 	
@@ -239,10 +247,20 @@
 		}
 	}
 	
+	var focusPort = function(port) {
+		if (typeof port.getId != 'undefined') { // must be a dataPort
+			$('#' + containerId + '_' + port.getId().replace(/\s+/g, '').replace(/\.+/g, '') + '_AT_' + component.getId().replace(/\s+/g, '').replace(/\.+/g, '')).focus();
+		} else { // must be an eventPort
+			$('#' + containerId + '_' + port + '_AT_' + component.getId().replace(/\s+/g, '').replace(/\.+/g, '')).focus();
+		}
+	}
+	
 // ***********************************************************************************************************************
 // ************************************************** public stuff *******************************************************
 // ***********************************************************************************************************************
 	var returnObj = {};
+	
+	returnObj.events = ACS.eventManager();
 
 	returnObj.getComponent = function() {
 		return component;
@@ -256,12 +274,85 @@
 		$('#' + containerId + '_' + component.getId().replace(/\s+/g, '').replace(/\.+/g, '')).focus();
 	}
 	
-	returnObj.focusOutgoingEventConnection = function(evtCh) {
-		$('#' + containerId + '_' + evtCh.getId().replace(/\s+/g, '').replace(/\.+/g, '') + '_AT_' + component.getId().replace(/\s+/g, '').replace(/\.+/g, '')).focus();
+	returnObj.focusFirstPort = function() {
+		if (completePortList.length > 0) {
+			focusPort(completePortList[0]);
+			focussedPortIndex = 0;
+		} else {
+			focussedPortIndex = -1;
+		}
 	}
 	
-	returnObj.focusOutgoingDataChannel = function(dataCh) {	
-		$('#' + containerId + '_' + dataCh.getId().replace(/\s+/g, '').replace(/\.+/g, '') + '_AT_' + component.getId().replace(/\s+/g, '').replace(/\.+/g, '')).focus();
+	returnObj.focusNextPort = function(direction) {
+		var nextIndex;
+		if (direction === 'right' || direction === 'down') {
+			nextIndex = focussedPortIndex + 1;
+		} else {
+			nextIndex = focussedPortIndex - 1;
+		}
+		if (nextIndex > -1 && nextIndex < completePortList.length) {
+			focusPort(completePortList[nextIndex]);
+			focussedPortIndex = nextIndex;
+		}
+	}
+	
+	returnObj.focusFirstChannel = function() {
+		// make list of all channels connected to currently focussed port
+		if (completePortList[focussedPortIndex] === 'eventOutput') {
+			for (var i = 0; i < model.eventChannelList.length; i++) {
+				if (model.eventChannelList[i].startComponent === component) actPortChannelList.push(model.eventChannelList[i]);
+			}
+		} else if (completePortList[focussedPortIndex] === 'eventInput') {
+			for (var i = 0; i < model.eventChannelList.length; i++) {
+				if (model.eventChannelList[i].endComponent === component) actPortChannelList.push(model.eventChannelList[i]);
+			}
+		} else if (completePortList[focussedPortIndex].getType() === ACS.portType.INPUT) {
+			for (var i = 0; i < model.dataChannelList.length; i++) {
+				if (model.dataChannelList[i].getInputPort() === completePortList[focussedPortIndex]) actPortChannelList.push(model.dataChannelList[i]);
+			}
+		} else if (completePortList[focussedPortIndex].getType() === ACS.portType.OUTPUT) {
+			for (var i = 0; i < model.dataChannelList.length; i++) {
+					if (model.dataChannelList[i].getOutputPort() === completePortList[focussedPortIndex]) actPortChannelList.push(model.dataChannelList[i]);
+			}
+		}
+		// focus first channel in list
+		if (actPortChannelList.length > 0) {
+			returnObj.focusConnection(actPortChannelList[0]);
+			focussedChannelIndex = 0;
+			return true;
+		}
+		return false;
+	}
+	
+	returnObj.focusNextChannel = function(direction) {
+		if (direction === 'right' || direction === 'down') {
+			if (focussedChannelIndex + 1 < actPortChannelList.length) {
+				focussedChannelIndex++;
+			}
+		} else {
+			if (focussedChannelIndex - 1 > -1) {
+				focussedChannelIndex--;
+			}
+		}
+		returnObj.focusConnection(actPortChannelList[focussedChannelIndex]);
+	}
+
+	returnObj.deactivateChannelMode = function() {
+		// unfocus channels, select component again
+		model.deSelectAll();
+		model.addItemToSelection(component);
+		actPortChannelList = [];
+		focussedChannelIndex = -1;
+		// focus the port we came from
+		focusPort(completePortList[focussedPortIndex]);
+	}
+	
+	returnObj.focusConnection = function(ch) {
+		if ((typeof ch.getInputPort !== 'undefined') && (ch.getInputPort().getParentComponent() === component)) { // must be a dataChannel and must be an incoming connection
+			$('#' + containerId + '_' + ch.getInputPort().getId().replace(/\s+/g, '').replace(/\.+/g, '') + '_AT_' + component.getId().replace(/\s+/g, '').replace(/\.+/g, '') + '_connections').focus();
+		} else {
+			$('#' + containerId + '_' + ch.getId().replace(/\s+/g, '').replace(/\.+/g, '') + '_AT_' + component.getId().replace(/\s+/g, '').replace(/\.+/g, '')).focus();
+		}
 	}
 	
 	returnObj.addOutgoingDataChannel = function(dataCh) {
@@ -298,7 +389,7 @@
 		$inPortDiv.text('');
 		$inPortDiv.unbind();
 		$inPortDiv.removeAttr('tabindex');
-		$inPortDiv.removeClass('additionalFocusableElement');
+		$inPortDiv.removeClass('listPanelFocusableElement');
 	}
 
 	returnObj.addOutgoingEventChannel = function(eventCh) {
@@ -353,6 +444,7 @@
 // ************************************************** constructor code ***************************************************
 // ***********************************************************************************************************************
 	$listElem.attr('tabindex', '0');
+	$listElem.addClass('listPanelFocusableElement');
 	$listElem.attr('id', containerId + '_' + component.getId().replace(/\s+/g, '').replace(/\.+/g, ''));
 	$listElem.text(component.getId());
 	$subList.addClass('componentSublist');
@@ -360,19 +452,23 @@
 	$listElem.focus(function() {
 		model.deSelectAll();
 		model.addItemToSelection(component);
+		returnObj.events.fireEvent('listComponentViewSelectedEvent', returnObj);
 	});	
 	$(mainList).append($listElem);
 	
 	if (component.inputPortList.length > 0) {
-		$subList.append('<li id="' + containerId + '_inputPorts_AT_' + component.getId().replace(/\s+/g, '').replace(/\.+/g, '') + '" tabindex="0">Input Ports:</li>');
+		$subList.append('<li id="' + containerId + '_inputPorts_AT_' + component.getId().replace(/\s+/g, '').replace(/\.+/g, '') + '" class="listPanelFocusableElement" tabindex="0">Input Ports:</li>');
 		generatePortList(containerId + '_inputPorts_AT_' + component.getId().replace(/\s+/g, '').replace(/\.+/g, ''), component.inputPortList);
+		completePortList = completePortList.concat(component.inputPortList);
 	}
 	if (component.outputPortList.length > 0) {
-		$subList.append('<li id="' + containerId + '_outputPorts_AT_' + component.getId().replace(/\s+/g, '').replace(/\.+/g, '') + '" tabindex="0">Output Ports:</li>');
+		$subList.append('<li id="' + containerId + '_outputPorts_AT_' + component.getId().replace(/\s+/g, '').replace(/\.+/g, '') + '" class="listPanelFocusableElement" tabindex="0">Output Ports:</li>');
 		generatePortList(containerId + '_outputPorts_AT_' + component.getId().replace(/\s+/g, '').replace(/\.+/g, ''), component.outputPortList);
+		completePortList = completePortList.concat(component.outputPortList);
 	}
 	if (component.listenEventList.length > 0) {
-		$subList.append('<li id="' + containerId + '_eventInput_AT_' + component.getId().replace(/\s+/g, '').replace(/\.+/g, '') + '" tabindex="0">Event input port</li>');
+		$subList.append('<li id="' + containerId + '_eventInput_AT_' + component.getId().replace(/\s+/g, '').replace(/\.+/g, '') + '" class="listPanelFocusableElement" tabindex="0">Event input port</li>');
+		completePortList.push('eventInput');
 		var $div = $(document.createElement('div'));
 		$div.attr('id', containerId + '_eventInput_AT_' + component.getId().replace(/\s+/g, '').replace(/\.+/g, '') + '_connections');
 		var $btn = $(document.createElement('button'));
@@ -396,7 +492,8 @@
 		addEventConnections($div, true);
 	}
 	if (component.triggerEventList.length > 0) {
-		$subList.append('<li id="' + containerId + '_eventOutput_AT_' + component.getId().replace(/\s+/g, '').replace(/\.+/g, '') + '" tabindex="0">Event output port</li>');
+		$subList.append('<li id="' + containerId + '_eventOutput_AT_' + component.getId().replace(/\s+/g, '').replace(/\.+/g, '') + '" class="listPanelFocusableElement" tabindex="0">Event output port</li>');
+		completePortList.push('eventOutput');
 		var $div = $(document.createElement('div'));
 		$div.attr('id', containerId + '_eventOutput_AT_' + component.getId().replace(/\s+/g, '').replace(/\.+/g, '') + '_connections');
 		var $btn = $(document.createElement('button'));

@@ -53,9 +53,13 @@
 	var sensorViewList = []; // Array<ACS.listComponentView>
 	var processorViewList = []; // Array<ACS.listComponentView>
 	var actuatorViewList = []; // Array<ACS.listComponentView>
+	var focussedListComponentView = null;
 	var sensorList = document.createElement('ul');
 	var processorList = document.createElement('ul');
-	var actuatorList = document.createElement('ul');	
+	var actuatorList = document.createElement('ul');
+	var listKeyboardMode = false;
+	var listPortMode = false;
+	var listChannelMode = false;
 	
 // ***********************************************************************************************************************
 // ************************************************** private methods ****************************************************
@@ -71,19 +75,26 @@
 		// load all components to their dedicated lists (first sensors, then processors, then actuators, to give the list-user a clearer idea of the dataflow)
 		for (var i = 0; i < model.componentList.length; i++) {
 			switch (model.componentList[i].getType()) {
-				case ACS.componentType.SENSOR: sensorViewList.push(ACS.listComponentView(containerId, sensorList, model.componentList[i], model)); break;
-				case ACS.componentType.PROCESSOR: processorViewList.push(ACS.listComponentView(containerId, processorList, model.componentList[i], model)); break;
-				case ACS.componentType.ACTUATOR: actuatorViewList.push(ACS.listComponentView(containerId, actuatorList, model.componentList[i], model)); break;
+				case ACS.componentType.SENSOR:	sensorViewList.push(ACS.listComponentView(containerId, sensorList, model.componentList[i], model)); 
+												sensorViewList[sensorViewList.length - 1].events.registerHandler('listComponentViewSelectedEvent', listComponentViewSelectedEventHandler);
+												break;
+				case ACS.componentType.PROCESSOR:	processorViewList.push(ACS.listComponentView(containerId, processorList, model.componentList[i], model)); 
+													processorViewList[processorViewList.length - 1].events.registerHandler('listComponentViewSelectedEvent',listComponentViewSelectedEventHandler);
+													break;
+				case ACS.componentType.ACTUATOR:	actuatorViewList.push(ACS.listComponentView(containerId, actuatorList, model.componentList[i], model)); 
+													actuatorViewList[actuatorViewList.length - 1].events.registerHandler('listComponentViewSelectedEvent',listComponentViewSelectedEventHandler);
+													break;
 			}
 		}
 	}
 	
 	var focusSelectedItem = function() {
 		// select the selected item; if more than one item is selected, select only the first one in the list; 
-		// in the case of a channel, select the outport of the "left" component;
+		// in the case of a channel, select it at the "left" component;
 		// in case there is an incomplete channel (i.e. being drawn right now), select nothing and focus the actionInfo
-		if ($('#' + containerId + '_actionInfo').text() != 'none') {
+		if ($('#' + containerId + '_actionInfo').text() != 'none' || model.selectedItemsList.length === 0) {
 			$('#' + containerId + '_actionInfo').focus();
+			focussedListComponentView = null;
 		} else {
 			if (model.selectedItemsList.length > 0)	{
 				if (typeof(model.selectedItemsList[0].getComponentTypeId) !== 'undefined') {
@@ -93,6 +104,7 @@
 					while (!done && (i < sensorViewList.length)) {
 						if (sensorViewList[i].getComponent() === model.selectedItemsList[0]) {
 							sensorViewList[i].focusComponent();
+							focussedListComponentView = sensorViewList[i];
 							done = true;
 						}
 						i++;
@@ -101,6 +113,7 @@
 					while (!done && (i < processorViewList.length)) {
 						if (processorViewList[i].getComponent() === model.selectedItemsList[0]) {
 							processorViewList[i].focusComponent();
+							focussedListComponentView = processorViewList[i];
 							done = true;
 						}
 						i++;
@@ -109,6 +122,7 @@
 					while (!done && (i < actuatorViewList.length)) {
 						if (actuatorViewList[i].getComponent() === model.selectedItemsList[0]) {
 							actuatorViewList[i].focusComponent();
+							focussedListComponentView = actuatorViewList[i];
 							done = true;
 						}
 						i++;
@@ -119,7 +133,8 @@
 					var i = 0;
 					while (!done && (i < sensorViewList.length)) {
 						if (sensorViewList[i].getComponent() === model.selectedItemsList[0].startComponent) {
-							sensorViewList[i].focusOutgoingEventConnection(model.selectedItemsList[0]);
+							sensorViewList[i].focusConnection(model.selectedItemsList[0]);
+							focussedListComponentView = sensorViewList[i];
 							done = true;
 						}
 						i++;
@@ -127,7 +142,8 @@
 					i = 0;
 					while (!done && (i < processorViewList.length)) {
 						if (processorViewList[i].getComponent() === model.selectedItemsList[0].startComponent) {
-							processorViewList[i].focusOutgoingEventConnection(model.selectedItemsList[0]);
+							processorViewList[i].focusConnection(model.selectedItemsList[0]);
+							focussedListComponentView = processorViewList[i];
 							done = true;
 						}
 						i++;
@@ -135,7 +151,8 @@
 					i = 0;
 					while (!done && (i < actuatorViewList.length)) {
 						if (actuatorViewList[i].getComponent() === model.selectedItemsList[0].startComponent) {
-							actuatorViewList[i].focusOutgoingEventConnection(model.selectedItemsList[0]);
+							actuatorViewList[i].focusConnection(model.selectedItemsList[0]);
+							focussedListComponentView = actuatorViewList[i];
 							done = true;
 						}
 						i++;
@@ -146,7 +163,8 @@
 					var i = 0;
 					while (!done && (i < sensorViewList.length)) {
 						if (sensorViewList[i].getComponent() === model.selectedItemsList[0].getOutputPort().getParentComponent()) {
-							sensorViewList[i].focusOutgoingDataChannel(model.selectedItemsList[0]);
+							sensorViewList[i].focusConnection(model.selectedItemsList[0]);
+							focussedListComponentView = sensorViewList[i];
 							done = true;
 						}
 						i++;
@@ -154,7 +172,8 @@
 					i = 0;
 					while (!done && (i < processorViewList.length)) {
 						if (processorViewList[i].getComponent() === model.selectedItemsList[0].getOutputPort().getParentComponent()) {
-							processorViewList[i].focusOutgoingDataChannel(model.selectedItemsList[0]);
+							processorViewList[i].focusConnection(model.selectedItemsList[0]);
+							focussedListComponentView = processorViewList[i];
 							done = true;
 						}
 						i++;
@@ -162,7 +181,8 @@
 					i = 0;
 					while (!done && (i < actuatorViewList.length)) {
 						if (actuatorViewList[i].getComponent() === model.selectedItemsList[0].getOutputPort().getParentComponent()) {
-							actuatorViewList[i].focusOutgoingDataChannel(model.selectedItemsList[0]);
+							actuatorViewList[i].focusConnection(model.selectedItemsList[0]);
+							focussedListComponentView = atuatorViewList[i];
 							done = true;
 						}
 						i++;
@@ -185,6 +205,18 @@
 			if (!found) {
 				viewList[i].destroy();
 				viewList.splice(i, 1);
+				if ($('#' + tabId).attr('aria-selected')) {
+					// if listView active, focus next component in list (if any)
+					if (typeof viewList[i] != 'undefined') {
+						viewList[i].focusComponent();
+						focussedListComponentView = viewList[i];
+					} else if (typeof viewList[i - 1] != 'undefined') {
+						viewList[i - 1].focusComponent();
+						focussedListComponentView = viewList[i - 1];
+					}
+				} else {
+					focussedListComponentView = null;
+				}
 			}
 			i++;
 		}
@@ -235,27 +267,84 @@
 	// ********************************************** handlers ***********************************************************
 	var modelChangedEventHandler = function() {
 		reloadListView();
+		if ($('#' + tabId).attr('aria-selected')) $('#' + containerId + '_actionInfo').focus();
+		focussedListComponentView = null;
 	}
 	
 	var componentAddedEventHandler = function() {
 		switch (model.componentList[model.componentList.length - 1].getType()) {
-			case ACS.componentType.SENSOR: sensorViewList.push(ACS.listComponentView(containerId, sensorList, model.componentList[model.componentList.length - 1], model)); break;
-			case ACS.componentType.PROCESSOR: processorViewList.push(ACS.listComponentView(containerId, processorList, model.componentList[model.componentList.length - 1], model)); break;
-			case ACS.componentType.ACTUATOR: actuatorViewList.push(ACS.listComponentView(containerId, actuatorList, model.componentList[model.componentList.length - 1], model)); break;
+			case ACS.componentType.SENSOR:		sensorViewList.push(ACS.listComponentView(containerId, sensorList, model.componentList[model.componentList.length - 1], model)); 
+												if (listKeyboardMode) {
+													sensorViewList[sensorViewList.length - 1].focusComponent();
+													focussedListComponentView = sensorViewList[sensorViewList.length - 1];
+												}
+												break;
+			case ACS.componentType.PROCESSOR:	processorViewList.push(ACS.listComponentView(containerId, processorList, model.componentList[model.componentList.length - 1], model)); 
+												if (listKeyboardMode) {
+													processorViewList[processorViewList.length - 1].focusComponent();
+													focussedListComponentView = processorViewList[processorViewList.length - 1];
+												}
+												break;
+			case ACS.componentType.ACTUATOR: 	actuatorViewList.push(ACS.listComponentView(containerId, actuatorList, model.componentList[model.componentList.length - 1], model));
+												if (listKeyboardMode) {
+													actuatorViewList[actuatorViewList.length - 1].focusComponent();
+													focussedListComponentView = actuatorViewList[actuatorViewList.length - 1];
+												}
+												break;
 		}
 	}
 	
 	var componentRemovedEventHandler = function() {
 		if (!removeComponent(sensorViewList)) {
 			if (!removeComponent(processorViewList)) {
-				removeComponent(actuatorViewList);
+				if (removeComponent(actuatorViewList)) {
+		// in case nothing has been selected by removeComponent, select item from neighbouring list or select actionInfo
+					if ($('#' + tabId).attr('aria-selected') && model.selectedItemsList.length === 0) {
+						if (processorViewList.length > 0) {
+							processorViewList[processorViewList.length - 1].focusComponent();
+							focussedListComponentView = processorViewList[processorViewList.length - 1];
+						} else if (sensorViewList.length > 0) {
+							sensorViewList[sensorViewList.length - 1].focusComponent();
+							focussedListComponentView = sensorViewList[sensorViewList.length - 1];
+						} else {
+							$('#' + containerId + '_actionInfo').focus();
+							focussedListComponentView = null;
+						}
+					}							
+				}
+			} else {
+				if ($('#' + tabId).attr('aria-selected') && model.selectedItemsList.length === 0) {
+					if (actuatorViewList.length > 0) {
+						actuatorViewList[0].focusComponent();
+						focussedListComponentView = actuatorViewList[0];
+					} else if (sensorViewList.length > 0) {
+						sensorViewList[sensorViewList.length - 1].focusComponent();
+						focussedListComponentView = sensorViewList[sensorViewList.length - 1];
+					} else {
+						$('#' + containerId + '_actionInfo').focus();
+						focussedListComponentView = null;
+					}
+				}					
 			}
-		}	
+		} else {
+			if ($('#' + tabId).attr('aria-selected') && model.selectedItemsList.length === 0) {
+				if (processorViewList.length > 0) {
+					processorViewList[0].focusComponent();
+					focussedListComponentView = processorViewList[0];
+				} else if (actuatorViewList.length > 0) {
+					actuatorViewList[0].focusComponent();
+					focussedListComponentView = actuatorViewList[0];
+				} else {
+					$('#' + containerId + '_actionInfo').focus();
+					focussedListComponentView = null;
+				}
+			}
+		}
 	}
 	
 	var dataChannelCompletedEventHandler = function() {
 		findListComponentView(model.dataChannelList[model.dataChannelList.length - 1].getOutputPort().getParentComponent()).addOutgoingDataChannel(model.dataChannelList[model.dataChannelList.length - 1]);
-		findListComponentView(model.dataChannelList[model.dataChannelList.length - 1].getOutputPort().getParentComponent()).focusOutgoingDataChannel(model.dataChannelList[model.dataChannelList.length - 1]);
+		findListComponentView(model.dataChannelList[model.dataChannelList.length - 1].getOutputPort().getParentComponent()).focusConnection(model.dataChannelList[model.dataChannelList.length - 1]);
 		findListComponentView(model.dataChannelList[model.dataChannelList.length - 1].getInputPort().getParentComponent()).addIncomingDataChannel(model.dataChannelList[model.dataChannelList.length - 1]);
 		// delete pending action
 		$('#' + containerId + '_actionInfo').text('none');
@@ -279,6 +368,7 @@
 			$('.' + containerId + '_eventInPortBtn').attr('disabled', '');
 			$('.' + containerId + '_eventOutPortBtn').attr('disabled', '');
 			$('#' + containerId + '_actionInfo').focus();
+			focussedListComponentView = null;
 		}
 	}
 	
@@ -309,7 +399,7 @@
 
 	var eventChannelCompletedEventHandler = function() {
 		findListComponentView(model.eventChannelList[model.eventChannelList.length - 1].startComponent).addOutgoingEventChannel(model.eventChannelList[model.eventChannelList.length - 1]);
-		findListComponentView(model.eventChannelList[model.eventChannelList.length - 1].startComponent).focusOutgoingEventConnection(model.eventChannelList[model.eventChannelList.length - 1]);
+		findListComponentView(model.eventChannelList[model.eventChannelList.length - 1].startComponent).focusConnection(model.eventChannelList[model.eventChannelList.length - 1]);
 		findListComponentView(model.eventChannelList[model.eventChannelList.length - 1].endComponent).addIncomingEventChannel(model.eventChannelList[model.eventChannelList.length - 1]);
 		// delete pending action
 		$('#' + containerId + '_actionInfo').text('none');
@@ -333,6 +423,7 @@
 			$('.' + containerId + '_eventInPortBtn').removeAttr('disabled');
 			$('.' + containerId + '_eventOutPortBtn').attr('disabled', '');
 			$('#' + containerId + '_actionInfo').focus();
+			focussedListComponentView = null;
 		}
 	}
 	
@@ -362,13 +453,93 @@
 	}
 	
 	var tabSwitchedEventHandler = function() {
-		//if ($('#' + tabId).attr('aria-selected')) focusSelectedItem();
+		if ($('#' + tabId).attr('aria-selected')) focusSelectedItem();
+	}
+	
+	var listComponentViewSelectedEventHandler = function(sender) {
+		focussedListComponentView = sender;
 	}
 	
 // ***********************************************************************************************************************
 // ************************************************** public stuff *******************************************************
 // ***********************************************************************************************************************
 	var returnObj = {};
+	
+	returnObj.setListKeyboardMode = function(newMode) {
+		if (newMode) {
+			if (model.selectedItemsList.length === 0) {
+				$('#' + containerId + '_actionInfo').focus();
+				focussedListComponentView = null;
+			} else {
+				if (focussedListComponentView) focussedListComponentView.focusComponent();
+			}
+		}
+		listKeyboardMode = newMode;
+	}
+	
+	returnObj.focusNextListComponent = function(direction) {
+		var fullList = sensorViewList.concat(processorViewList).concat(actuatorViewList);
+		if ($('#' + containerId + '_actionInfo').is(':focus')) {
+			if (direction === 'down' || direction === 'right') {
+				if (fullList.length > 0) {
+					fullList[0].focusComponent();
+					focussedListComponentView = fullList[0];
+				}
+			}
+		} else {
+			var focusIndex = -1;
+			var i = 0;
+			while (i < fullList.length && focusIndex === -1) {
+				if (model.selectedItemsList[0] === fullList[i].getComponent()) focusIndex = i;
+				i++;
+			}
+			if (direction === 'down' || direction === 'right') {
+				if (focusIndex + 1 < fullList.length) fullList[focusIndex + 1].focusComponent();
+			} else {
+				if (focusIndex > 0) {
+					fullList[focusIndex - 1].focusComponent();
+					focussedListComponentView = fullList[focusIndex - 1];
+				} else {
+					$('#' + containerId + '_actionInfo').focus();
+					focussedListComponentView = null;
+				}
+			}
+		}
+	}
+	
+	returnObj.setListPortMode = function(newMode, focusFirst) {
+		if (newMode) {
+			if (focussedListComponentView) {
+				if (focusFirst) focussedListComponentView.focusFirstPort();
+			} else {
+				newMode = false;
+			}
+		} else {
+			if (focussedListComponentView && !listChannelMode) focussedListComponentView.focusComponent();
+		}
+		listPortMode = newMode;
+	}
+	
+	returnObj.focusNextListPort = function(direction) {
+		if (focussedListComponentView) focussedListComponentView.focusNextPort(direction);
+	}
+	
+	returnObj.setListChannelMode = function(newMode) {
+		if (newMode) {
+			if (!focussedListComponentView.focusFirstChannel()) {
+				newMode = false; // avoid channelMode if there are no channels connected to current port
+				return false;
+			}
+		} else {
+			focussedListComponentView.deactivateChannelMode();
+		}		
+		listChannelMode = newMode;
+		return true;
+	}
+	
+	returnObj.focusNextListChannel = function(direction) {
+		if (focussedListComponentView) focussedListComponentView.focusNextChannel(direction);
+	}
 	
 	returnObj.getModel = function() {
 		return model;
@@ -382,7 +553,7 @@
 // ************************************************** constructor code ***************************************************
 // ***********************************************************************************************************************
 	$('#' + containerId).append('<h2>Action pending:</h2>');
-	$('#' + containerId).append('<div id="' + containerId + '_actionInfo" class="additionalFocusableElement" tabindex="0">none</div>');
+	$('#' + containerId).append('<div id="' + containerId + '_actionInfo" class="listPanelFocusableElement" tabindex="0">none</div>');
 	$('#' + containerId).append('<h2>List of components:</h2>');
 	$('#' + containerId).append('<h3>Sensors:</h3>');
 	$(sensorList).attr('id', containerId + '_sensorList');
@@ -393,7 +564,6 @@
 	$('#' + containerId).append('<h3>Actuators:</h3>');
 	$(actuatorList).attr('id', containerId + '_actuatorList');
 	$('#' + containerId).append(actuatorList);
-	$('#' + containerId).append('<div id="' + containerId + '_arePropertyDiv" class="additionalFocusableElement" tabindex="0">ARE properties (see property editor for details)</div>');
 	reloadListView();
 
 	// register event-handlers
