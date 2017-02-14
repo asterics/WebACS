@@ -169,7 +169,7 @@ ACS.view = function(modelList, // ACS.modelList
 	var handleKeydown = function(e) {
 		// catch Del to delete selected items
 		if (e.keyCode === 46) { // Del can't be caught by keyPress for not all browsers act consistently (see: http://unixpapa.com/js/key.html)
-			if ($('#' + ACS.vConst.CANVASVIEW_MOTHERPANEL).is(':focus')) { // if focus somewhere inside canvasMotherPanel (otherwise Del could not be used in propertyEditor)
+			if (!$('#' + ACS.vConst.PROPERTYEDITOR_MOTHERPANEL).find('*').is(':focus')) { // if focus is not somewhere inside propertyEditor (otherwise Del could not be used in propertyEditor)
 				deleteSelectionHandler();
 				stopEvent(e);
 				return false;
@@ -320,7 +320,7 @@ ACS.view = function(modelList, // ACS.modelList
 	}
 	
 	var handleKeyup = function(e) {
-		// ECS and ENTER need to be caught on keyup, since firefox does not send the keydown event
+		// ESC and ENTER need to be caught on keyup, since firefox does not send the keydown event
 		if (e.keyCode === 27) { // one step back up in the hierarchy of keyboard modes
 			if (actModelView.getKeyboardMode() && $('#modelPanel' + actModelView.getModelContainerId()).is(':focus')) {
 				if (!dropStartedChannel()) {
