@@ -64,19 +64,19 @@
 	}	
 	
 	returnObj.getX = function() {
-		return x;
+		return Number(x);
 	}
 	
 	returnObj.getY = function() {
-		return y;
+		return Number(y);
 	}
 	
 	returnObj.getWidth = function() {
-		return width;
+		return Number(width);
 	}	
 
 	returnObj.getHeight = function() {
-		return height;
+		return Number(height);
 	}		
 
 // ***********************************************************************************************************************

@@ -27,15 +27,14 @@
  */
  
 ACS.view = function(modelList, // ACS.modelList
-					clipBoard, // ACS.clipBoard
-					areStatus) { // ACS.areStatus
+					clipBoard) { // ACS.clipBoard
 
 // ***********************************************************************************************************************
 // ************************************************** private variables **************************************************
 // ***********************************************************************************************************************
-	var menu = ACS.menuView(modelList, areStatus);
+	var menu = ACS.menuView(modelList);
 	var canvas = ACS.canvasView(modelList, clipBoard);
-	var propertyEditor = ACS.propertyEditor(modelList,canvas.getCanvasModelViewList(),canvas.getEditorProperties(), areStatus);
+	var propertyEditor = ACS.propertyEditor(modelList,canvas.getCanvasModelViewList(),canvas.getEditorProperties());
 	var actModelView;
 
 // ***********************************************************************************************************************
@@ -422,7 +421,7 @@ ACS.view = function(modelList, // ACS.modelList
 	}
 	
 	var AREStatusChangedEventHandler = function() {
-		switch (areStatus.getStatus()) {
+		switch (ACS.areStatus.getStatus()) {
 			case ACS.statusType.DISCONNECTED: document.getElementById('AREstatus').textContent = 'Disconnected'; break;
 			case ACS.statusType.CONNECTING:	document.getElementById('AREstatus').textContent = 'Trying to connect'; break;
 			case ACS.statusType.CONNECTED: document.getElementById('AREstatus').textContent = 'Connected'; break;
@@ -438,10 +437,10 @@ ACS.view = function(modelList, // ACS.modelList
 	}
 	
 	var ARESynchronisationChangedEventHandler = function() {
-		if ((areStatus.getStatus() === ACS.statusType.DISCONNECTED) || (areStatus.getStatus() === ACS.statusType.CONNECTIONLOST) || (areStatus.getStatus() === ACS.statusType.CONNECTING)) {
+		if ((ACS.areStatus.getStatus() === ACS.statusType.DISCONNECTED) || (ACS.areStatus.getStatus() === ACS.statusType.CONNECTIONLOST) || (ACS.areStatus.getStatus() === ACS.statusType.CONNECTING)) {
 			document.getElementById('synchronisationStatus').textContent = '';
 		} else {
-			switch (areStatus.getSynchronised()) {
+			switch (ACS.areStatus.getSynchronised()) {
 				case true: document.getElementById('synchronisationStatus').textContent = ' / synchronised';
 						   break;
 				case false: document.getElementById('synchronisationStatus').textContent = ' / NOT synchronised';
@@ -477,8 +476,8 @@ ACS.view = function(modelList, // ACS.modelList
 	menu.events.registerHandler('undoBtnPressedEvent', undoHandler);
 	menu.events.registerHandler('redoBtnPressedEvent', redoHandler);
 	// register handlers for areStatus events
-	areStatus.events.registerHandler('AREStatusChangedEvent', AREStatusChangedEventHandler);
-	areStatus.events.registerHandler('ARESynchronisationChangedEvent', ARESynchronisationChangedEventHandler);
+	ACS.areStatus.events.registerHandler('AREStatusChangedEvent', AREStatusChangedEventHandler);
+	ACS.areStatus.events.registerHandler('ARESynchronisationChangedEvent', ARESynchronisationChangedEventHandler);
 	// register handlers for shortcuts
 	$('#AKmenu').click(handleMenuShortcutClick).keypress(function(e) {if (e.keyCode === 13) handleMenuShortcutClick();});
 	$('#AKactModelPanel').click(handleModelPanelShortcutClick).keypress(function(e) {if (e.keyCode === 13) handleModelPanelShortcutClick();});

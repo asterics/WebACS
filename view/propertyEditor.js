@@ -28,8 +28,7 @@
 
 ACS.propertyEditor = function (modelList, // ACS.modelList
 	modelViewListtemp, // Array<ACS.modelView>
-	editorPropsTemp, // ACS.editorProperties
-	areStatus) { // ACS.areStatus
+	editorPropsTemp) { // ACS.editorProperties
 
 	// ***********************************************************************************************************************
 	// ************************************************** private variables **************************************************
@@ -1009,10 +1008,10 @@ ACS.propertyEditor = function (modelList, // ACS.modelList
 			});
 		}
 		// if ARE is connected and synchronised, write value directly to ARE via REST
-		if ((areStatus.getStatus != ACS.statusType.DISCONNECTED) &&
-			(areStatus.getStatus != ACS.statusType.CONNECTING) &&
-			(areStatus.getStatus != ACS.statusType.CONNECTIONLOST) &&
-			areStatus.getSynchronised()) {
+		if ((ACS.areStatus.getStatus != ACS.statusType.DISCONNECTED) &&
+			(ACS.areStatus.getStatus != ACS.statusType.CONNECTING) &&
+			(ACS.areStatus.getStatus != ACS.statusType.CONNECTIONLOST) &&
+			ACS.areStatus.getSynchronised()) {
 			setRuntimeComponentProperty(SRCP_successCallback, SRCP_errorCallback, actModel.componentList[selectedElement].getId(), actModel.componentList[selectedElement].propertyList[splitId].getKey(), t);
 
 			function SRCP_successCallback(data, HTTPstatus) {
@@ -1104,6 +1103,7 @@ ACS.propertyEditor = function (modelList, // ACS.modelList
 			selectedChan.eventConnections.splice(insertPosition, 1);
 		}
 		previousDropDownEntry = splitIdTriggerName;
+		ACS.areStatus.checkAndSetSynchronisation();
 	}
 
 	var writeChannelDescription = function (evt) {
@@ -1152,6 +1152,7 @@ ACS.propertyEditor = function (modelList, // ACS.modelList
 			document.getElementById(evt.target.id).value = 'false';
 		}
 		actModel.componentList[selectedElement].inputPortList[splitId].sync = t;
+		ACS.areStatus.setSynchronised(false);
 	}
 
 	var writeGuiEditorProperties = function (evt) {
@@ -1182,22 +1183,27 @@ ACS.propertyEditor = function (modelList, // ACS.modelList
 			if (idStringSplit === '0') {
 				var tempbool = actModel.modelGui.getDecoration();
 				actModel.modelGui.setDecoration(!tempbool);
+				ACS.areStatus.checkAndSetSynchronisation();
 			}
 			if (idStringSplit === '1') {
 				var tempbool = actModel.modelGui.getFullScreen();
 				actModel.modelGui.setFullScreen(!tempbool);
+				ACS.areStatus.checkAndSetSynchronisation();
 			}
 			if (idStringSplit === '2') {
 				var tempbool = actModel.modelGui.getAlwaysOnTop();
 				actModel.modelGui.setAlwaysOnTop(!tempbool);
+				ACS.areStatus.checkAndSetSynchronisation();
 			}
 			if (idStringSplit === '3') {
 				var tempbool = actModel.modelGui.getToSystemTray();
 				actModel.modelGui.setToSystemTray(!tempbool);
+				ACS.areStatus.checkAndSetSynchronisation();
 			}
 			if (idStringSplit === '4') {
 				var tempbool = actModel.modelGui.getShowControlPanel();
 				actModel.modelGui.setShowControlPanel(!tempbool);
+				ACS.areStatus.checkAndSetSynchronisation();
 			}
 		}
 	}

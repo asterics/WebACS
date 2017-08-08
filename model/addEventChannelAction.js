@@ -44,11 +44,13 @@ ACS.addEventChannelAction = function(parentModel, // ACS.model
 	
 	returnObj.execute = function() {
 		parentModel.addEventChannel(ec);
+		ACS.areStatus.checkAndSetSynchronisation();
 		parentModel.undoStack.push(returnObj);
 	}
 	
 	returnObj.undo = function() {
 		parentModel.removeEventChannel(ec);
+		ACS.areStatus.checkAndSetSynchronisation();
 		parentModel.redoStack.push(returnObj);
 	}
 	

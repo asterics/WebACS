@@ -44,11 +44,13 @@ ACS.addDataChannelAction = function(parentModel, // ACS.model
 	
 	returnObj.execute = function() {
 		parentModel.addDataChannel(dc);
+		ACS.areStatus.checkAndSetSynchronisation();
 		parentModel.undoStack.push(returnObj);
 	}
 	
 	returnObj.undo = function() {
 		parentModel.removeDataChannel(dc);
+		ACS.areStatus.checkAndSetSynchronisation();
 		parentModel.redoStack.push(returnObj);
 	}
 	

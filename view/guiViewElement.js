@@ -70,19 +70,19 @@
 	}
 	
 	var xToScreenRes = function(x) { // takes a normalised x-coordinate and returns that coordinate mapped to the currently set resolution of the gui designer
-		return Math.round(x / ACS.vConst.GUIVIEWELEMENT_NORMSCREENRES_X * editorProperties.getGuiDesignerSize().width);
+		return x / ACS.vConst.GUIVIEWELEMENT_NORMSCREENRES_X * editorProperties.getGuiDesignerSize().width;
 	}
 	
 	var yToScreenRes = function(y) { // takes a normalised y-coordinate and returns that coordinate mapped to the currently set resolution of the gui designer
-		return Math.round(y / ACS.vConst.GUIVIEWELEMENT_NORMSCREENRES_Y * editorProperties.getGuiDesignerSize().height);
+		return y / ACS.vConst.GUIVIEWELEMENT_NORMSCREENRES_Y * editorProperties.getGuiDesignerSize().height;
 	}
 	
 	var xToNormRes = function(x) { // takes an x-coordinate and returns that coordinate mapped to the normalised resolution that is used for storing coordinates
-		return Math.round(x / editorProperties.getGuiDesignerSize().width * ACS.vConst.GUIVIEWELEMENT_NORMSCREENRES_X);
+		return x / editorProperties.getGuiDesignerSize().width * ACS.vConst.GUIVIEWELEMENT_NORMSCREENRES_X;
 	}
 	
 	var yToNormRes = function(y) { // takes an y-coordinate and returns that coordinate mapped to the normalised resolution that is used for storing coordinates
-		return Math.round(y / editorProperties.getGuiDesignerSize().height * ACS.vConst.GUIVIEWELEMENT_NORMSCREENRES_Y);
+		return y / editorProperties.getGuiDesignerSize().height * ACS.vConst.GUIVIEWELEMENT_NORMSCREENRES_Y;
 	}	
 
 	var setNewSize = function(newWidth, newHeight) {
@@ -91,7 +91,7 @@
 		nameText.setAbsolutePosition({x: nameText.getAbsolutePosition().x,
 									  y: mainRect.getAbsolutePosition().y + newHeight/2 - 5});
 		anchor.setAbsolutePosition({x: mainRect.getAbsolutePosition().x + newWidth,
-									y: mainRect.getAbsolutePosition().y + newHeight});									  
+									y: mainRect.getAbsolutePosition().y + newHeight});	
 		if (decoration) decoration.width(newWidth - 2);
 		if (controls) {
 			var childNodes = controls.getChildren();
@@ -137,8 +137,8 @@
 			anchor.setAbsolutePosition({x: mainRect.getAbsolutePosition().x + newWidth,
 									    y: mainRect.getAbsolutePosition().y + newHeight});
 		}
-		gui.setNewSize({width: xToNormRes(newWidth),
-						height: yToNormRes(newHeight)});
+		gui.setNewSize({width: Math.round(xToNormRes(newWidth)),
+						height: Math.round(yToNormRes(newHeight))});
 	};
 	
 	var getGridStep = function() {
@@ -350,8 +350,8 @@
 	}
 	
 	returnObj.updatePosition = function() {
-		gui.setNewPosition({x: xToNormRes(mainRect.getAbsolutePosition().x),
-							y: yToNormRes(mainRect.getAbsolutePosition().y)});
+		gui.setNewPosition({x: Math.round(xToNormRes(mainRect.getAbsolutePosition().x)),
+							y: Math.round(yToNormRes(mainRect.getAbsolutePosition().y))});
 	}
 	
 	returnObj.resize = function(direction) {
@@ -449,8 +449,8 @@
 	sizeBoundsMax = {width: xToScreenRes(sizeBoundsMaxIn.width), height: yToScreenRes(sizeBoundsMaxIn.height)};
 	dragBounds = {left: xToScreenRes(dragBoundsIn.left), right: xToScreenRes(dragBoundsIn.right), upper: yToScreenRes(dragBoundsIn.upper), lower: yToScreenRes(dragBoundsIn.lower)};
 
-	decorHeight = yToScreenRes(ACS.vConst.GUIVIEW_DECORATIONHEIGHT);
-	controlWidth = xToScreenRes(ACS.vConst.GUIVIEW_CONTROLSWIDTH);
+	decorHeight = Math.round(yToScreenRes(ACS.vConst.GUIVIEW_DECORATIONHEIGHT));
+	controlWidth = Math.round(xToScreenRes(ACS.vConst.GUIVIEW_CONTROLSWIDTH));
 	
 	
 	mainRect = new Kinetic.Rect({x: xToScreenRes(gui.getX()),
@@ -460,7 +460,7 @@
 								 fill: backgroundColor});
 	nameText = new Kinetic.Text({x: xToScreenRes(gui.getX()),
 								 y: yToScreenRes(gui.getY()) + yToScreenRes(gui.getHeight())/2 - 5,
-								 width: xToScreenRes(gui.getWidth()),
+								 width: Math.round(xToScreenRes(gui.getWidth())),
 								 text: name,
 								 fontSize: ACS.vConst.GUIVIEWELEMENT_FONTSIZE,
 								 wrap: 'char',
@@ -492,8 +492,8 @@
 	group = new Kinetic.Group({	draggable: true,
 								dragBoundFunc: function(pos) {
 									if ((dragOffsetX === null) || (dragOffsetY === null)) {
-										dragOffsetX = Math.floor(mainRect.getAbsolutePosition().x - pos.x);
-										dragOffsetY = Math.floor(mainRect.getAbsolutePosition().y - pos.y);
+										dragOffsetX = mainRect.getAbsolutePosition().x - pos.x;
+										dragOffsetY = mainRect.getAbsolutePosition().y - pos.y;
 									}
 									var newPos = {x: pos.x,
 												  y: pos.y};

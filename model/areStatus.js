@@ -25,20 +25,112 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- 
- ACS.areStatus = function(modelList) { // ACS.modelList
+
+ ACS.areStatus = function() {
 
 // ***********************************************************************************************************************
 // ************************************************** private variables **************************************************
 // ***********************************************************************************************************************
 	var status = ACS.statusType.DISCONNECTED;
 	var synchronised = undefined;
+	var modelList;
 
 // ***********************************************************************************************************************
 // ************************************************** private methods ****************************************************
 // ***********************************************************************************************************************
 	var actModelChangedEventHandler = function() {
 		returnObj.checkAndSetSynchronisation();
+	}
+	
+	var isSameModel = function(actModel, deployedModelXML) {
+		var $depMod = $(deployedModelXML);
+		var isSame = true;
+		// count event connections in current model
+		eventConnectionsInCurrentModel = 0;
+		for (var i = 0; i < actModel.eventChannelList.length; i++) {
+			for (var j = 0; j < actModel.eventChannelList[i].eventConnections.length; j++) {
+				eventConnectionsInCurrentModel++;
+			}
+		}
+		// compare model name, amount of components, amount of dataChannels and amount of event connections
+		if (actModel.modelName !== $depMod.find('model').attr('modelName') ||
+			actModel.componentList.length !== $depMod.find('components').children().length ||
+			actModel.dataChannelList.length !== $depMod.find('channel').length ||
+			eventConnectionsInCurrentModel !== $depMod.find('eventChannel').length){
+			isSame = false;
+		} else {
+			// compare components, their input ports and their GUI (if they have one)
+			$depMod.find('components').each(function() {
+				$(this).children().each(function() {
+					var found = false;
+					var i = 0;
+					while (!found && i<actModel.componentList.length) {
+						if ($(this).attr('id') === actModel.componentList[i].getId()) {
+							if (actModel.componentList[i].gui) {  // since not all components have a gui
+								if (actModel.componentList[i].gui.getX() === Number($(this).find('gui').find('posX').text()) && actModel.componentList[i].gui.getY() === Number($(this).find('gui').find('posY').text()) &&
+									actModel.componentList[i].gui.getWidth() === Number($(this).find('width').text()) && actModel.componentList[i].gui.getHeight() === Number($(this).find('height').text())) {
+										found = true;
+									}
+							} else {
+								found = true;
+							}
+						}
+						i++;
+					}
+					if (!found) isSame = false;
+				});
+			});
+			// compare dataChannels
+			if (isSame) {
+				$depMod.find('channel').each(function() {
+					var found = false;
+					var i = 0;
+					while (!found && i<actModel.dataChannelList.length) {
+						if (actModel.dataChannelList[i].getId() === $(this).attr('id')) {
+							found = true;
+						}
+						i++
+					}
+					if (!found) isSame = false;
+				});
+			}
+			// compare event connections
+			if (isSame) {
+				$depMod.find('eventChannel').each(function() {
+					var found = false;
+					var i = 0;
+					while (!found && i<actModel.eventChannelList.length) {
+						if (actModel.eventChannelList[i].startComponent.getId() === $(this).find('sources').find('component').attr('id') && 
+							actModel.eventChannelList[i].endComponent.getId() === $(this).find('targets').find('component').attr('id')) {
+							for (var j = 0; j < actModel.eventChannelList[i].eventConnections.length; j++) {
+								if (actModel.eventChannelList[i].eventConnections[j].trigger.getId() === $(this).find('sources').find('eventPort').attr('id') &&
+									actModel.eventChannelList[i].eventConnections[j].listener.getId() === $(this).find('targets').find('eventPort').attr('id')) {
+									found = true;
+								}
+							}
+						}
+						i++
+					}
+					if (!found) isSame = false;
+				});
+			}
+			// compare model GUI
+			if (isSame) {
+				if (actModel.modelGui.getDecoration().toString() !== $depMod.find('Decoration').text() ||
+					actModel.modelGui.getFullScreen().toString() !== $depMod.find('Fullscreen').text() ||
+					actModel.modelGui.getAlwaysOnTop().toString() !== $depMod.find('AlwaysOnTop').text() ||
+					actModel.modelGui.getToSystemTray().toString() !== $depMod.find('ToSystemTray').text() ||
+					actModel.modelGui.getShowControlPanel().toString() !== $depMod.find('ShopControlPanel').text() ||
+					// (accepting +-1 in the following lines, because there might be rounding errors)
+					(Math.round(actModel.modelGui.areGuiWindow.getX()) < Number($depMod.find('AREGUIWindow').find('posX').text()) - 1 && Math.round(actModel.modelGui.areGuiWindow.getX()) > Number($depMod.find('AREGUIWindow').find('posX').text()) + 1) ||
+					(Math.round(actModel.modelGui.areGuiWindow.getY()) < Number($depMod.find('AREGUIWindow').find('posY').text()) - 1 && Math.round(actModel.modelGui.areGuiWindow.getY()) > Number($depMod.find('AREGUIWindow').find('posY').text()) + 1) ||
+					(Math.round(actModel.modelGui.areGuiWindow.getWidth()) < Number($depMod.find('AREGUIWindow').find('width').text()) - 1 && Math.round(actModel.modelGui.areGuiWindow.getWidth()) > Number($depMod.find('AREGUIWindow').find('width').text()) + 1) ||
+					(Math.round(actModel.modelGui.areGuiWindow.getHeight()) < Number($depMod.find('AREGUIWindow').find('height').text()) - 1 && Math.round(actModel.modelGui.areGuiWindow.getHeight()) > Number($depMod.find('AREGUIWindow').find('height').text()) + 1)) {
+					isSame = false;
+				}
+			}			
+		}
+		return isSame;
 	}
 	
 // ***********************************************************************************************************************
@@ -48,18 +140,19 @@
 	
 	returnObj.events = ACS.eventManager();
 	
+	returnObj.setModelList = function(mList) {
+		modelList = mList;
+		modelList.events.registerHandler('actModelChangedEvent', actModelChangedEventHandler);
+	}
+	
 	returnObj.checkAndSetSynchronisation = function() {
-		if ((status != ACS.statusType.DISCONNECTED) && (status != ACS.statusType.CONNECTIONLOST) && (status != ACS.statusType.CONNECTING)) {
+		if ((typeof modelList != 'undefined') && (status != ACS.statusType.DISCONNECTED) && (status != ACS.statusType.CONNECTIONLOST) && (status != ACS.statusType.CONNECTING)) {
 						
 			function DDM_successCallback(data, HTTPstatus) {
 				var newSync;
 				var deployedModelXML = $.parseXML(data);
 				// compare actModel with deployed model to determine synchronisation status
-				if (modelList.getActModel().modelName === deployedModelXML.getElementsByTagName('model')[0].attributes.getNamedItem('modelName').textContent) {
-					newSync = true;
-				} else {
-					newSync = false;
-				}
+				newSync = isSameModel(modelList.getActModel(), deployedModelXML);
 				if (synchronised != newSync) {
 					synchronised = newSync;
 					returnObj.events.fireEvent('ARESynchronisationChangedEvent');
@@ -99,7 +192,6 @@
 // ***********************************************************************************************************************
 // ************************************************** constructor code ***************************************************
 // ***********************************************************************************************************************
-	modelList.events.registerHandler('actModelChangedEvent', actModelChangedEventHandler);
 	
 	return returnObj;
-}
+}();

@@ -326,15 +326,13 @@
 		if (modelXML.getElementsByTagName('modelGUI').item(0)) {
 			var modelGui = modelXML.getElementsByTagName('modelGUI').item(0);
 			returnObj.modelGui.setDecoration(modelGui.getElementsByTagName('Decoration').item(0).textContent === 'true');
-			returnObj.modelGui.setDecoration(modelGui.getElementsByTagName('Fullscreen').item(0).textContent === 'true');
-			returnObj.modelGui.setDecoration(modelGui.getElementsByTagName('AlwaysOnTop').item(0).textContent === 'true');
-			returnObj.modelGui.setDecoration(modelGui.getElementsByTagName('ToSystemTray').item(0).textContent === 'true');
-			returnObj.modelGui.setDecoration(modelGui.getElementsByTagName('ShopControlPanel').item(0).textContent === 'true'); // TODO: change to "ShowControlPanel", when changed in XML
+			returnObj.modelGui.setFullScreen(modelGui.getElementsByTagName('Fullscreen').item(0).textContent === 'true');
+			returnObj.modelGui.setAlwaysOnTop(modelGui.getElementsByTagName('AlwaysOnTop').item(0).textContent === 'true');
+			returnObj.modelGui.setToSystemTray(modelGui.getElementsByTagName('ToSystemTray').item(0).textContent === 'true');
+			returnObj.modelGui.setShowControlPanel(modelGui.getElementsByTagName('ShopControlPanel').item(0).textContent === 'true'); // TODO: change to "ShowControlPanel", when changed in XML
 			var guiWindow = modelGui.getElementsByTagName('AREGUIWindow').item(0);
-			returnObj.modelGui.areGuiWindow.x = guiWindow.getElementsByTagName('posX').item(0).textContent;
-			returnObj.modelGui.areGuiWindow.y = guiWindow.getElementsByTagName('posY').item(0).textContent;
-			returnObj.modelGui.areGuiWindow.width = guiWindow.getElementsByTagName('width').item(0).textContent;
-			returnObj.modelGui.areGuiWindow.height = guiWindow.getElementsByTagName('height').item(0).textContent;
+			returnObj.modelGui.areGuiWindow.setNewPosition({x: guiWindow.getElementsByTagName('posX').item(0).textContent, y: guiWindow.getElementsByTagName('posY').item(0).textContent});
+			returnObj.modelGui.areGuiWindow.setNewSize({width: guiWindow.getElementsByTagName('width').item(0).textContent, height: guiWindow.getElementsByTagName('height').item(0).textContent});
 		}
 	}
 	

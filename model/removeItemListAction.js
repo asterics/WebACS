@@ -72,6 +72,7 @@
 				}
 			}
 		}
+		ACS.areStatus.checkAndSetSynchronisation();
 		parentModel.undoStack.push(returnObj);
 	}
 	
@@ -87,6 +88,7 @@
 				}
 			}
 		}
+		ACS.areStatus.checkAndSetSynchronisation();
 		parentModel.redoStack.push(returnObj);
 	}
 

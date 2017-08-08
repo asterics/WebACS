@@ -33,8 +33,7 @@
 // ***********************************************************************************************************************
 	var modelList = ACS.modelList();
 	var clipBoard = ACS.clipBoard();
-	var areStatus = ACS.areStatus(modelList);
-	var view = ACS.view(modelList, clipBoard, areStatus);
+	var view = ACS.view(modelList, clipBoard);
 
 // ***********************************************************************************************************************
 // ************************************************** private methods ****************************************************
@@ -49,6 +48,7 @@
 // ************************************************** constructor code ***************************************************
 // ***********************************************************************************************************************
 	log.setLevel(log.levels.TRACE); // loglevel usage log.trace(msg), log.debug(msg), log.info(msg), log.warn(msg), log.error(msg) (https://github.com/pimterry/loglevel)
-		
+	ACS.areStatus.setModelList(modelList);
+	
 	return returnObj;
 }

@@ -26,8 +26,7 @@
  * limitations under the License.
  */
  
- ACS.menuView = function(	modelList, // ACS.modelList
-							areStatus) { // ACS.areStatus
+ ACS.menuView = function(modelList) { // ACS.modelList
 
 // ***********************************************************************************************************************
 // ************************************************** private variables **************************************************
@@ -111,7 +110,7 @@
 	}
 	
 	var AREStatusChangedEventHandler = function() {
-		switch (areStatus.getStatus()) {
+		switch (ACS.areStatus.getStatus()) {
 			case ACS.statusType.DISCONNECTED: 
 			case ACS.statusType.CONNECTIONLOST:
 				$('#connectAREBtn').removeAttr('disabled');
@@ -209,7 +208,7 @@
 	// Menu-Button-Handlers - System-Menu
 	var handleConnectARE = function(e) {
 		log.debug('menuView: connectAREBtn has been clicked');
-		areStatus.setStatus(ACS.statusType.CONNECTING);
+		ACS.areStatus.setStatus(ACS.statusType.CONNECTING);
 		setBaseURI(ACS.vConst.MENUVIEW_AREBASEURI);
 		// check and show current status of ARE (the rest of the connection process takes place in the successcallback, because only when this is a success,
 		// we can be sure that an ARE is actually there)
@@ -218,16 +217,16 @@
 		function MS_successCallback(data, HTTPstatus) {
 			switch (data) {
 				case 'started':	
-					areStatus.setStatus(ACS.statusType.STARTED);
+					ACS.areStatus.setStatus(ACS.statusType.STARTED);
 					break;
 				case 'paused':	
-					areStatus.setStatus(ACS.statusType.PAUSED);
+					ACS.areStatus.setStatus(ACS.statusType.PAUSED);
 					break;
 				default:
-					areStatus.setStatus(ACS.statusType.CONNECTED);
+					ACS.areStatus.setStatus(ACS.statusType.CONNECTED);
 					break;
 			}
-			areStatus.checkAndSetSynchronisation();
+			ACS.areStatus.checkAndSetSynchronisation();
 			// subscribe to changes of the model state and the model itself
 			subscribe(SUBSCRIBE_STATECHANGE_successCallback, SUBSCRIBE_EVENTS_errorCallback, 'model_state_changed');
 			subscribe(SUBSCRIBE_MODELCHANGE_successCallback, SUBSCRIBE_EVENTS_errorCallback, 'model_changed');
@@ -235,43 +234,43 @@
 			function SUBSCRIBE_STATECHANGE_successCallback(data, HTTPstatus) {
 				switch (data) {
 					case 'pre_start_event':
-						areStatus.setStatus(ACS.statusType.STARTING);
+						ACS.areStatus.setStatus(ACS.statusType.STARTING);
 						break;				
 					case 'post_start_event':	
-						areStatus.setStatus(ACS.statusType.STARTED);
+						ACS.areStatus.setStatus(ACS.statusType.STARTED);
 						break;
 					case 'pre_pause_event':	
-						areStatus.setStatus(ACS.statusType.PAUSING);
+						ACS.areStatus.setStatus(ACS.statusType.PAUSING);
 						break;					
 					case 'post_pause_event':	
-						areStatus.setStatus(ACS.statusType.PAUSED);
+						ACS.areStatus.setStatus(ACS.statusType.PAUSED);
 						break;
 					case 'pre_resume_event':
-						areStatus.setStatus(ACS.statusType.RESUMING);
+						ACS.areStatus.setStatus(ACS.statusType.RESUMING);
 						break;				
 					case 'post_resume_event':	
-						areStatus.setStatus(ACS.statusType.STARTED);
+						ACS.areStatus.setStatus(ACS.statusType.STARTED);
 						break;					
 					case 'pre_stop_event':	
-						areStatus.setStatus(ACS.statusType.STOPPING);
+						ACS.areStatus.setStatus(ACS.statusType.STOPPING);
 						break;					
 					case 'post_stop_event':	
-						areStatus.setStatus(ACS.statusType.STOPPED);
+						ACS.areStatus.setStatus(ACS.statusType.STOPPED);
 						break;
 				}
 			}
 			
 			function SUBSCRIBE_MODELCHANGE_successCallback(data, HTTPstatus) {
-				if (data === 'post_deploy_event') areStatus.checkAndSetSynchronisation();
+				if (data === 'post_deploy_event') ACS.areStatus.checkAndSetSynchronisation();
 			}		
 			
 			function SUBSCRIBE_EVENTS_errorCallback(HTTPstatus, AREerrorMessage) {
 				if (AREerrorMessage === 'connectionLost') {
-					areStatus.setStatus(ACS.statusType.CONNECTIONLOST);
+					ACS.areStatus.setStatus(ACS.statusType.CONNECTIONLOST);
 				} else {
-					areStatus.setStatus(ACS.statusType.DISCONNECTED);
+					ACS.areStatus.setStatus(ACS.statusType.DISCONNECTED);
 				}
-				areStatus.setSynchronised(undefined);
+				ACS.areStatus.setSynchronised(undefined);
 				log.debug(AREerrorMessage);
 			}			
 		}
@@ -279,7 +278,7 @@
 		function MS_errorCallback(HTTPstatus, AREerrorMessage) {
 			log.debug(AREerrorMessage);
 			alert('Unable to connect to ARE - make sure the baseURL is set correctly and ARE is up and running.')
-			areStatus.setStatus(ACS.statusType.DISCONNECTED);
+			ACS.areStatus.setStatus(ACS.statusType.DISCONNECTED);
 		}		
 	}
 	
@@ -287,8 +286,8 @@
 		log.debug('menuView: DisconnectAREBtn has been clicked');
 		unsubscribe('ModelStateChanged');
 		unsubscribe('ModelChanged');
-		areStatus.setStatus(ACS.statusType.DISCONNECTED);
-		areStatus.setSynchronised(undefined);
+		ACS.areStatus.setStatus(ACS.statusType.DISCONNECTED);
+		ACS.areStatus.setSynchronised(undefined);
 	}
 	
 	var handleUploadModel = function(e) {
@@ -344,7 +343,7 @@
 			if (modelList.getActModel().componentList.length > 0) modelList.addNewModel();
 			// load the model
 			modelList.getActModel().loadModel(modelXML);
-			areStatus.setSynchronised(true);
+			ACS.areStatus.setSynchronised(true);
 		}
 		
 		function DDM_errorCallback(HTTPstatus, AREerrorMessage) {
@@ -793,7 +792,7 @@
 	// register handlers
 	modelList.getActModel().events.registerHandler('componentCollectionChangedEvent', componentCollectionChangedEventHandler);
 	modelList.events.registerHandler('actModelChangedEvent', actModelChangedEventHandler);
-	areStatus.events.registerHandler('AREStatusChangedEvent', AREStatusChangedEventHandler);
+	ACS.areStatus.events.registerHandler('AREStatusChangedEvent', AREStatusChangedEventHandler);
 	fileSelector.addEventListener('change', handleSelectedFile);
 	document.getElementById('connectAREBtn').addEventListener('click', handleConnectARE);
 	document.getElementById('disconnectAREBtn').addEventListener('click', handleDisconnectARE);
@@ -846,7 +845,7 @@
 	}
 	
 	// set initial status of ARE
-	areStatus.setStatus(ACS.statusType.DISCONNECTED); // to make sure the correct buttons are activated to start with - this will trigger the AREStatusChangedEventHandler and set buttons correctly
+	ACS.areStatus.setStatus(ACS.statusType.DISCONNECTED); // to make sure the correct buttons are activated to start with - this will trigger the AREStatusChangedEventHandler and set buttons correctly
 	
 	return returnObj;
 }

@@ -55,6 +55,7 @@ ACS.addItemsAction = function(	parentModel, // ACS.model
 		for (var i = 0; i < eventChannels.length; i++) {
 			parentModel.addEventChannel(eventChannels[i]);
 		}
+		ACS.areStatus.checkAndSetSynchronisation();
 		parentModel.undoStack.push(returnObj);
 	}
 	
@@ -67,7 +68,8 @@ ACS.addItemsAction = function(	parentModel, // ACS.model
 		}
 		for (var i = 0; i < eventChannels.length; i++) {
 			parentModel.removeEventChannel(eventChannels[i]);
-		}	
+		}
+		ACS.areStatus.checkAndSetSynchronisation();		
 		parentModel.redoStack.push(returnObj);
 	}
 

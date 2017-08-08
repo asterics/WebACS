@@ -45,9 +45,9 @@
 // ***********************************************************************************************************************
 // ************************************************** private methods ****************************************************
 // ***********************************************************************************************************************
-	var addComponent = function(comp) {
+	var addComponent = function(comp, isNewComponent) {
 		if (comp.gui) {
-			if (model.modelGui.getDecoration()) { // if decoration enabled, position componentGUI below
+			if (isNewComponent && model.modelGui.getDecoration()) { // if decoration enabled, position componentGUI below
 				comp.gui.setNewPosition({x: comp.gui.getX(), y: comp.gui.getY() + ACS.vConst.GUIVIEW_DECORATIONHEIGHT});
 			}
 			if (comp.gui.getIsExternal()) { // external components can be dragged and resized on the whole canvas
@@ -172,7 +172,7 @@
 	// ********************************************** handlers ***********************************************************
 	var componentAddedEventHandler = function() {
 		if (model.componentList.length > 0) {
-			addComponent(model.componentList[model.componentList.length - 1]);
+			addComponent(model.componentList[model.componentList.length - 1], true);
 			guiLayer.draw();
 		}
 	}
@@ -205,7 +205,7 @@
 		areGUI.reCalcSizeBoundsMin();
 		// add new components
 		for (var i = 0; i < model.componentList.length; i++) {
-			addComponent(model.componentList[i]);
+			addComponent(model.componentList[i], false);
 		}
 		guiLayer.draw();
 	}
@@ -346,7 +346,7 @@
 	areGUI.setDecoration(model.modelGui.getDecoration());
 	if (model.modelGui.getShowControlPanel()) areGUI.setAREControls(true);
 	for (var i = 0; i < model.componentList.length; i++) {
-		addComponent(model.componentList[i]);
+		addComponent(model.componentList[i], false);
 	}
 	guiLayer.draw();
 	

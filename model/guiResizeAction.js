@@ -51,12 +51,14 @@ ACS.guiResizeAction = function(parentModel, 	// ACS.model
 			// assume that this is a redo and resize the gui
 			gui.setNewSize(endSize);
 		}
+		ACS.areStatus.checkAndSetSynchronisation();
 		parentModel.guiUndoStack.push(returnObj);
 	}
 	
 	returnObj.undo = function() {
 		// reset gui to original size
 		gui.setNewSize(startSize);
+		ACS.areStatus.checkAndSetSynchronisation();
 		parentModel.guiRedoStack.push(returnObj);
 	}
 

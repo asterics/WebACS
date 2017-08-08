@@ -44,11 +44,13 @@ ACS.addComponentAction = function(parentModel, // ACS.model
 	
 	returnObj.execute = function() {
 		parentModel.addComponent(c);
+		ACS.areStatus.checkAndSetSynchronisation();
 		parentModel.undoStack.push(returnObj);
 	}
 	
 	returnObj.undo = function() {
 		parentModel.removeComponent(c);
+		ACS.areStatus.checkAndSetSynchronisation();
 		parentModel.redoStack.push(returnObj);
 	}
 

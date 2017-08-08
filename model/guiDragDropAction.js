@@ -55,6 +55,7 @@ ACS.guiDragDropAction = function(parentModel, 	// ACS.model
 				guis[i].setNewPosition(endCoord[i]);
 			}
 		}
+		ACS.areStatus.checkAndSetSynchronisation();
 		parentModel.guiUndoStack.push(returnObj);
 	}
 	
@@ -63,6 +64,7 @@ ACS.guiDragDropAction = function(parentModel, 	// ACS.model
 		for (var i = 0; i <guis.length; i++) {
 			guis[i].setNewPosition(startCoord[i]);
 		}
+		ACS.areStatus.checkAndSetSynchronisation();
 		parentModel.guiRedoStack.push(returnObj);
 	}
 
