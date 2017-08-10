@@ -525,14 +525,16 @@
 	}
 	
 	returnObj.setListChannelMode = function(newMode) {
-		if (newMode) {
-			if (!focussedListComponentView.focusFirstChannel()) {
-				newMode = false; // avoid channelMode if there are no channels connected to current port
-				return false;
+		if (focussedListComponentView) {
+			if (newMode) {
+				if (!focussedListComponentView.focusFirstChannel()) {
+					newMode = false; // avoid channelMode if there are no channels connected to current port
+					return false;
+				}
+			} else {
+				focussedListComponentView.deactivateChannelMode();
 			}
-		} else {
-			focussedListComponentView.deactivateChannelMode();
-		}		
+		}
 		listChannelMode = newMode;
 		return true;
 	}

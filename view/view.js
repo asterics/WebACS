@@ -83,8 +83,8 @@ ACS.view = function(modelList, // ACS.modelList
 				actModelView.focusNextGuiElement(direction);
 				return true;
 			} else if (actModelView.getListKeyboardMode() && $('#listPanel' + actModelView.getModelContainerId()).find('*').is(':focus')) { // switch components in listview
-				actModelView.focusNextListComponent(direction);
-				return true;
+					actModelView.focusNextListComponent(direction);
+					return true;
 			}
 		}
 		return false;
@@ -255,6 +255,13 @@ ACS.view = function(modelList, // ACS.modelList
 					return false;					
 				}
 				break;
+			case 100: // Ctrl-d for drop channel
+				if (e.ctrlKey) {
+					dropStartedChannel();
+					stopEvent(e);
+					return false;					
+				}
+				break;
 			case 32: // SPACE
 				if (actModelView.getKeyboardMode() && $('#modelPanel' + actModelView.getModelContainerId()).is(':focus')) {
 					if (actModelView.getPortMode()) {
@@ -322,23 +329,19 @@ ACS.view = function(modelList, // ACS.modelList
 		// ESC and ENTER need to be caught on keyup, since firefox does not send the keydown event
 		if (e.keyCode === 27) { // one step back up in the hierarchy of keyboard modes
 			if (actModelView.getKeyboardMode() && $('#modelPanel' + actModelView.getModelContainerId()).is(':focus')) {
-				if (!dropStartedChannel()) {
-					if (actModelView.getChannelMode()) {
-						actModelView.setChannelMode(false);
-					} else if (actModelView.getPortMode()) {
-						actModelView.setPortMode(false);
-					}
+				if (actModelView.getChannelMode()) {
+					actModelView.setChannelMode(false);
+				} else if (actModelView.getPortMode()) {
+					actModelView.setPortMode(false);
 				}
 				stopEvent(e);
 				return false;											
 			} else if (actModelView.getListKeyboardMode() && $('#listPanel' + actModelView.getModelContainerId()).find('*').is(':focus')) {
-				if (!dropStartedChannel()) {
-					if (actModelView.getListChannelMode()) {
-						actModelView.setListChannelMode(false);
-					} else if (actModelView.getListPortMode()) {
-						actModelView.setListPortMode(false, false);
-					}
-				}				
+				if (actModelView.getListChannelMode()) {
+					actModelView.setListChannelMode(false);
+				} else if (actModelView.getListPortMode()) {
+					actModelView.setListPortMode(false, false);
+				}
 				stopEvent(e);
 				return false;						
 			}

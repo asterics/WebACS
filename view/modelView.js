@@ -310,6 +310,11 @@
 		if (!model.dataChannelList[model.dataChannelList.length - 1].getInputPort() && portMode) {
 			dataChannelViewList[dataChannelViewList.length - 1].setEndPoint(50, 0);
 		}
+		// if the WebACS is currently in listview using keyboardmode, make sure portmode is deactivated, so that the user can navigate components again
+		if (listKeyboardMode) {
+			if (listChannelMode) returnObj.setListChannelMode(false);
+			if (listPortMode) returnObj.setListPortMode(false, false);
+		}
 		modelLayer.draw();
 	}
 	
@@ -332,6 +337,11 @@
 		// if the channel is currently being drawn and the user is using the keyboard, set a default endpoint to make unfinished channel visible to the user
 		if (!model.eventChannelList[model.eventChannelList.length - 1].endComponent && portMode) {
 			eventChannelViewList[eventChannelViewList.length - 1].setEndPoint(50, 0);
+		}
+		// if the WebACS is currently in listview using keyboardmode, make sure portmode is deactivated, so that the user can navigate components again
+		if (listKeyboardMode) {
+			if (listChannelMode) returnObj.setListChannelMode(false);
+			if (listPortMode) returnObj.setListPortMode(false, false);
 		}		
 		modelLayer.draw();
 	}
