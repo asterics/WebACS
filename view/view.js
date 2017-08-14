@@ -51,7 +51,7 @@ ACS.view = function(modelList, // ACS.modelList
 	
 	var catchArrowKey = function(e, direction) {
 		if (e.shiftKey) {
-			if (actModelView.getKeyboardMode() && $('#modelPanel' + actModelView.getModelContainerId()).is(':focus')) { // move component
+			if (actModelView.getKeyboardMode() && !actModelView.getPortMode() && !actModelView.getChannelMode() && $('#modelPanel' + actModelView.getModelContainerId()).is(':focus')) { // move component
 				actModelView.moveComponent(direction);
 				return true;
 			} else if (actModelView.getGuiKeyboardMode() && $('#guiPanel' + actModelView.getModelContainerId()).is(':focus')) { // move GUI
