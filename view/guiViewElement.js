@@ -125,15 +125,11 @@
 	var updateSize = function() {
 		var newWidth = anchor.getAbsolutePosition().x - mainRect.getAbsolutePosition().x;
 		var newHeight = anchor.getAbsolutePosition().y - mainRect.getAbsolutePosition().y;
-		if ((newWidth < sizeBoundsMin.width) || (newHeight < sizeBoundsMin.height)) {
-			if (newWidth < sizeBoundsMin.width) {
-				newWidth = sizeBoundsMin.width;
-				if (newWidth > sizeBoundsMax.width) newWidth = sizeBoundsMax.width;
-			}
-			if (newHeight < sizeBoundsMin.height) {
-				newHeight = sizeBoundsMin.height;
-				if (newHeight > sizeBoundsMax.height) newHeight = sizeBoundsMax.height;
-			}
+		if ((newWidth < sizeBoundsMin.width) || (newHeight < sizeBoundsMin.height) || (newWidth > sizeBoundsMax.width) || (newHeight > sizeBoundsMax.height)) {
+			if (newWidth < sizeBoundsMin.width) newWidth = sizeBoundsMin.width;
+			if (newHeight < sizeBoundsMin.height) newHeight = sizeBoundsMin.height;
+			if (newWidth > sizeBoundsMax.width) newWidth = sizeBoundsMax.width;
+			if (newHeight > sizeBoundsMax.height) newHeight = sizeBoundsMax.height;
 			anchor.setAbsolutePosition({x: mainRect.getAbsolutePosition().x + newWidth,
 									    y: mainRect.getAbsolutePosition().y + newHeight});
 		}
@@ -369,6 +365,9 @@
 							break;
 		}
 		var newPos = updatePosAccordingToGrid({x: anchor.getAbsolutePosition().x, y: anchor.getAbsolutePosition().y});
+		// check the bounds
+		
+		// actually update size
 		anchor.x(newPos.x);
 		anchor.y(newPos.y);
 		updateSize();
@@ -380,9 +379,12 @@
 		for (var i = 0; i < children.length; i++) {
 			guis.push(children[i].getGui());
 		}
-		dragAct = ACS.guiDragDropAction(model, guis);		
+		dragAct = ACS.guiDragDropAction(model, guis);
 		var moveStep = 1;
 		if (editorProperties.getEnableGrid()) moveStep = getGridStep();
+		// remember old coordinates to calculate actually moved pixels for positioning children
+		var oldPos = {x: mainRect.getAbsolutePosition().x, y: mainRect.getAbsolutePosition().y};
+		// move the element
 		switch (direction) {
 			case 'up':		mainRect.move({x: 0, y: -moveStep});
 							break;
@@ -394,8 +396,21 @@
 							break;
 		}
 		var newPos = updatePosAccordingToGrid({x: mainRect.getAbsolutePosition().x, y: mainRect.getAbsolutePosition().y});
+		// check the bounds
+		if (newPos.x < dragBounds.left) newPos.x = dragBounds.left;
+		if (newPos.x + mainRect.width() > dragBounds.right) newPos.x = dragBounds.right - mainRect.width();
+		if (newPos.y < dragBounds.upper) newPos.y = dragBounds.upper;
+		if (newPos.y + mainRect.height() > dragBounds.lower) newPos.y = dragBounds.lower - mainRect.height();		
+		// actually update the position
 		mainRect.x(newPos.x);
 		mainRect.y(newPos.y);
+		// calculate actually moved pixels for positioning children
+		var moved = {x: newPos.x - oldPos.x, y: newPos.y - oldPos.y};
+		// reposition the children
+		for (var i = 0; i < children.length; i++) {
+			children[i].setX(children[i].getX() + xToNormRes(moved.x));
+			children[i].setY(children[i].getY() + yToNormRes(moved.y));
+		}		
 		updateChildrensPosition();
 		returnObj.updatePosition();
 		updateSizeBounds();
@@ -409,10 +424,18 @@
 	returnObj.getX = function() {
 		return xToNormRes(mainRect.getAbsolutePosition().x);
 	}
+
+	returnObj.setX = function(newX) {
+		mainRect.x(xToScreenRes(newX));
+	}
 	
 	returnObj.getY = function() {
 		return yToNormRes(mainRect.getAbsolutePosition().y);
 	}
+	
+	returnObj.setY = function(newY) {
+		mainRect.y(yToScreenRes(newY));
+	}	
 
 	returnObj.getWidth = function() {
 		return xToNormRes(mainRect.width());
