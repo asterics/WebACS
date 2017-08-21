@@ -544,10 +544,10 @@
 			for (var i = 0; i < componentViewList.length; i++) {
 				centerOfOtherComponent = {x: componentViewList[i].getComponent().getX() + (ACS.vConst.COMPONENTVIEW_ELEMENTWIDTH / 2),
 										  y: componentViewList[i].getComponent().getY() + (ACS.vConst.COMPONENTVIEW_ELEMENTHEIGHT / 2)}; // deliberately using center of standard-size component, ignoring different heights				
-				if ((direction === 'up' && centerOfOtherComponent.y < centerOfOtherComponent.x + n1 && centerOfOtherComponent.y < -centerOfOtherComponent.x + n2) ||
-					(direction === 'right' && centerOfOtherComponent.y < centerOfOtherComponent.x + n1 && centerOfOtherComponent.y > -centerOfOtherComponent.x + n2) ||
-					(direction === 'down' && centerOfOtherComponent.y > centerOfOtherComponent.x + n1 && centerOfOtherComponent.y > -centerOfOtherComponent.x + n2) ||
-					(direction === 'left' && centerOfOtherComponent.y > centerOfOtherComponent.x + n1 && centerOfOtherComponent.y < -centerOfOtherComponent.x + n2)) {
+				if ((direction === 'up' && centerOfOtherComponent.y <= centerOfOtherComponent.x + n1 && centerOfOtherComponent.y < -centerOfOtherComponent.x + n2) ||
+					(direction === 'right' && centerOfOtherComponent.y < centerOfOtherComponent.x + n1 && centerOfOtherComponent.y >= -centerOfOtherComponent.x + n2) ||
+					(direction === 'down' && centerOfOtherComponent.y >= centerOfOtherComponent.x + n1 && centerOfOtherComponent.y > -centerOfOtherComponent.x + n2) ||
+					(direction === 'left' && centerOfOtherComponent.y > centerOfOtherComponent.x + n1 && centerOfOtherComponent.y <= -centerOfOtherComponent.x + n2)) {
 					closestComponent = getCloserComponent(closestComponent, componentViewList[i].getComponent(), centerOfThisComponent, centerOfOtherComponent);
 				}
 			}
