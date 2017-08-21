@@ -951,7 +951,11 @@ ACS.propertyEditor = function (modelList, // ACS.modelList
 	var writeProperty = function (evt) {
 		changeNotSaved = false;
 		lastModiviedElement = selectedElement;
-		var t = document.getElementById(evt.target.id).value;
+		if (evt.target.type === 'checkbox') {
+			var t = evt.target.checked.toString(); // a checkbox's "checked" field of seems to be more reliable than its "value"
+		} else {
+			var t = document.getElementById(evt.target.id).value;
+		}
 		var t_temp = document.getElementById(evt.target.id);
 		var completeId = evt.target.id;
 		lastEditFieldId = evt.target.id;
@@ -975,17 +979,9 @@ ACS.propertyEditor = function (modelList, // ACS.modelList
 				}
 			}
 		}
-
-		// toggle t in case of a boolean value
+		// write the values
 		if (!generateAlert) {
 			if (splitId !== 'xx_descr' && splitId !== 'xx_name') {
-				if (t === 'false') {
-					t = 'true';
-					document.getElementById(evt.target.id).value = 'true';
-				} else if (t === 'true') {
-					t = 'false';
-					document.getElementById(evt.target.id).value = 'false';
-				}
 				actModel.componentList[selectedElement].propertyList[splitId].setValue(t);
 			} else {
 				if (splitId === 'xx_name') {
