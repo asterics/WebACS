@@ -274,18 +274,21 @@
 	var componentAddedEventHandler = function() {
 		switch (model.componentList[model.componentList.length - 1].getType()) {
 			case ACS.componentType.SENSOR:		sensorViewList.push(ACS.listComponentView(containerId, sensorList, model.componentList[model.componentList.length - 1], model, returnObj)); 
+												sensorViewList[sensorViewList.length - 1].events.registerHandler('listComponentViewSelectedEvent', listComponentViewSelectedEventHandler);
 												if (listKeyboardMode) {
 													sensorViewList[sensorViewList.length - 1].focusComponent();
 													focussedListComponentView = sensorViewList[sensorViewList.length - 1];
 												}
 												break;
 			case ACS.componentType.PROCESSOR:	processorViewList.push(ACS.listComponentView(containerId, processorList, model.componentList[model.componentList.length - 1], model, returnObj)); 
+												processorViewList[processorViewList.length - 1].events.registerHandler('listComponentViewSelectedEvent',listComponentViewSelectedEventHandler);
 												if (listKeyboardMode) {
 													processorViewList[processorViewList.length - 1].focusComponent();
 													focussedListComponentView = processorViewList[processorViewList.length - 1];
 												}
 												break;
 			case ACS.componentType.ACTUATOR: 	actuatorViewList.push(ACS.listComponentView(containerId, actuatorList, model.componentList[model.componentList.length - 1], model, returnObj));
+												actuatorViewList[actuatorViewList.length - 1].events.registerHandler('listComponentViewSelectedEvent',listComponentViewSelectedEventHandler);
 												if (listKeyboardMode) {
 													actuatorViewList[actuatorViewList.length - 1].focusComponent();
 													focussedListComponentView = actuatorViewList[actuatorViewList.length - 1];
