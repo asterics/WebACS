@@ -75,13 +75,13 @@
 		// load all components to their dedicated lists (first sensors, then processors, then actuators, to give the list-user a clearer idea of the dataflow)
 		for (var i = 0; i < model.componentList.length; i++) {
 			switch (model.componentList[i].getType()) {
-				case ACS.componentType.SENSOR:	sensorViewList.push(ACS.listComponentView(containerId, sensorList, model.componentList[i], model)); 
+				case ACS.componentType.SENSOR:	sensorViewList.push(ACS.listComponentView(containerId, sensorList, model.componentList[i], model, returnObj));
 												sensorViewList[sensorViewList.length - 1].events.registerHandler('listComponentViewSelectedEvent', listComponentViewSelectedEventHandler);
 												break;
-				case ACS.componentType.PROCESSOR:	processorViewList.push(ACS.listComponentView(containerId, processorList, model.componentList[i], model)); 
+				case ACS.componentType.PROCESSOR:	processorViewList.push(ACS.listComponentView(containerId, processorList, model.componentList[i], model, returnObj)); 
 													processorViewList[processorViewList.length - 1].events.registerHandler('listComponentViewSelectedEvent',listComponentViewSelectedEventHandler);
 													break;
-				case ACS.componentType.ACTUATOR:	actuatorViewList.push(ACS.listComponentView(containerId, actuatorList, model.componentList[i], model)); 
+				case ACS.componentType.ACTUATOR:	actuatorViewList.push(ACS.listComponentView(containerId, actuatorList, model.componentList[i], model, returnObj)); 
 													actuatorViewList[actuatorViewList.length - 1].events.registerHandler('listComponentViewSelectedEvent',listComponentViewSelectedEventHandler);
 													break;
 			}
@@ -273,19 +273,19 @@
 	
 	var componentAddedEventHandler = function() {
 		switch (model.componentList[model.componentList.length - 1].getType()) {
-			case ACS.componentType.SENSOR:		sensorViewList.push(ACS.listComponentView(containerId, sensorList, model.componentList[model.componentList.length - 1], model)); 
+			case ACS.componentType.SENSOR:		sensorViewList.push(ACS.listComponentView(containerId, sensorList, model.componentList[model.componentList.length - 1], model, returnObj)); 
 												if (listKeyboardMode) {
 													sensorViewList[sensorViewList.length - 1].focusComponent();
 													focussedListComponentView = sensorViewList[sensorViewList.length - 1];
 												}
 												break;
-			case ACS.componentType.PROCESSOR:	processorViewList.push(ACS.listComponentView(containerId, processorList, model.componentList[model.componentList.length - 1], model)); 
+			case ACS.componentType.PROCESSOR:	processorViewList.push(ACS.listComponentView(containerId, processorList, model.componentList[model.componentList.length - 1], model, returnObj)); 
 												if (listKeyboardMode) {
 													processorViewList[processorViewList.length - 1].focusComponent();
 													focussedListComponentView = processorViewList[processorViewList.length - 1];
 												}
 												break;
-			case ACS.componentType.ACTUATOR: 	actuatorViewList.push(ACS.listComponentView(containerId, actuatorList, model.componentList[model.componentList.length - 1], model));
+			case ACS.componentType.ACTUATOR: 	actuatorViewList.push(ACS.listComponentView(containerId, actuatorList, model.componentList[model.componentList.length - 1], model, returnObj));
 												if (listKeyboardMode) {
 													actuatorViewList[actuatorViewList.length - 1].focusComponent();
 													focussedListComponentView = actuatorViewList[actuatorViewList.length - 1];
@@ -465,6 +465,8 @@
 // ***********************************************************************************************************************
 	var returnObj = {};
 	
+	returnObj.events = ACS.eventManager();
+	
 	returnObj.setListKeyboardMode = function(newMode) {
 		if (newMode) {
 			if (model.selectedItemsList.length === 0) {
@@ -475,6 +477,7 @@
 			}
 		}
 		listKeyboardMode = newMode;
+		returnObj.events.fireEvent('listKeyboardModeChangedEvent');
 	}
 	
 	returnObj.focusNextListComponent = function(direction) {
@@ -549,6 +552,10 @@
 	
 	returnObj.getContainerId = function() {
 		return containerId;
+	}
+	
+	returnObj.getListKeyboardMode = function() {
+		return listKeyboardMode;
 	}
 	
 // ***********************************************************************************************************************

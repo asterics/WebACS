@@ -29,7 +29,8 @@
  ACS.listComponentView = function(	containerId, // String
 									mainList, // DOM Element
 									component, // ACS.component
-									model) { // ACS.model
+									model, // ACS.model
+									listView) { // ACS.listView
 								
 // ***********************************************************************************************************************
 // ************************************************** private variables **************************************************
@@ -40,6 +41,7 @@
 	var focussedPortIndex = -1;
 	var actPortChannelList = [];
 	var focussedChannelIndex = -1;
+	var focusableElementClassName;
 
 // ***********************************************************************************************************************
 // ************************************************** private methods ****************************************************
@@ -77,7 +79,7 @@
 		var $le = $(document.createElement('li'));
 		$le.attr('id', containerId + '_' + dataCh.getId().replace(/\s+/g, '').replace(/\.+/g, '') + '_AT_' + component.getId().replace(/\s+/g, '').replace(/\.+/g, ''));
 		$le.attr('tabindex', '0');
-		$le.addClass('listPanelFocusableElement');
+		$le.addClass(focusableElementClassName);
 		$le.append('port ');
 		var $btn = $(document.createElement('button'));
 		$btn.attr('type', 'button');
@@ -120,7 +122,7 @@
 		}(inChannel.getOutputPort()));
 		// make channel focusable and select channel on focus
 		$div.attr('tabindex', '0');
-		$div.addClass('listPanelFocusableElement');
+		$div.addClass(focusableElementClassName);
 		$div.focus(function() {
 			model.deSelectAll();
 			model.addItemToSelection(inChannel);	
@@ -136,7 +138,7 @@
 			var $li = $(document.createElement('li'));
 			$li.attr('id', containerId + '_' + portList[i].getId().replace(/\s+/g, '').replace(/\.+/g, '') + '_AT_' + component.getId().replace(/\s+/g, '').replace(/\.+/g, ''));
 			$li.attr('tabindex', '0');
-			$li.addClass('listPanelFocusableElement');
+			$li.addClass(focusableElementClassName);
 			$li.focus(function() {
 				model.deSelectAll();
 				model.addItemToSelection(component);
@@ -202,7 +204,7 @@
 		var $li = $(document.createElement('li'));
 		$li.attr('id', containerId + '_' + channel.getId().replace(/\s+/g, '').replace(/\.+/g, '') + '_AT_' + component.getId().replace(/\s+/g, '').replace(/\.+/g, ''));
 		$li.attr('tabindex', '0');
-		$li.addClass('listPanelFocusableElement');
+		$li.addClass(focusableElementClassName);
 		$li.focus(function(evtChannel) {
 			return function() {
 				model.deSelectAll();
@@ -252,6 +254,15 @@
 			$('#' + containerId + '_' + port.getId().replace(/\s+/g, '').replace(/\.+/g, '') + '_AT_' + component.getId().replace(/\s+/g, '').replace(/\.+/g, '')).focus();
 		} else { // must be an eventPort
 			$('#' + containerId + '_' + port + '_AT_' + component.getId().replace(/\s+/g, '').replace(/\.+/g, '')).focus();
+		}
+	}
+	
+	// ********************************************** handlers ***********************************************************
+	var listKeyboardModeChangedEventHandler = function() {
+		if (listView.getListKeyboardMode()) {
+			focusableElementClassName = 'listPanelFocusableElementKeyboardMode';
+		} else {
+			focusableElementClassName = 'listPanelFocusableElement';
 		}
 	}
 	
@@ -389,7 +400,7 @@
 		$inPortDiv.text('');
 		$inPortDiv.unbind();
 		$inPortDiv.removeAttr('tabindex');
-		$inPortDiv.removeClass('listPanelFocusableElement');
+		$inPortDiv.removeClass(focusableElementClassName);
 	}
 
 	returnObj.addOutgoingEventChannel = function(eventCh) {
@@ -443,8 +454,13 @@
 // ***********************************************************************************************************************
 // ************************************************** constructor code ***************************************************
 // ***********************************************************************************************************************
+	if (listView.getListKeyboardMode()) {
+		focusableElementClassName = 'listPanelFocusableElementKeyboardMode';
+	} else {
+		focusableElementClassName = 'listPanelFocusableElement';
+	}
 	$listElem.attr('tabindex', '0');
-	$listElem.addClass('listPanelFocusableElement');
+	$listElem.addClass(focusableElementClassName);
 	$listElem.attr('id', containerId + '_' + component.getId().replace(/\s+/g, '').replace(/\.+/g, ''));
 	$listElem.text(component.getId());
 	$subList.addClass('componentSublist');
@@ -457,17 +473,17 @@
 	$(mainList).append($listElem);
 	
 	if (component.inputPortList.length > 0) {
-		$subList.append('<li id="' + containerId + '_inputPorts_AT_' + component.getId().replace(/\s+/g, '').replace(/\.+/g, '') + '" class="listPanelFocusableElement" tabindex="0">Input Ports:</li>');
+		$subList.append('<li id="' + containerId + '_inputPorts_AT_' + component.getId().replace(/\s+/g, '').replace(/\.+/g, '') + '" class="' + focusableElementClassName + '" tabindex="0">Input Ports:</li>');
 		generatePortList(containerId + '_inputPorts_AT_' + component.getId().replace(/\s+/g, '').replace(/\.+/g, ''), component.inputPortList);
 		completePortList = completePortList.concat(component.inputPortList);
 	}
 	if (component.outputPortList.length > 0) {
-		$subList.append('<li id="' + containerId + '_outputPorts_AT_' + component.getId().replace(/\s+/g, '').replace(/\.+/g, '') + '" class="listPanelFocusableElement" tabindex="0">Output Ports:</li>');
+		$subList.append('<li id="' + containerId + '_outputPorts_AT_' + component.getId().replace(/\s+/g, '').replace(/\.+/g, '') + '" class="' + focusableElementClassName + '" tabindex="0">Output Ports:</li>');
 		generatePortList(containerId + '_outputPorts_AT_' + component.getId().replace(/\s+/g, '').replace(/\.+/g, ''), component.outputPortList);
 		completePortList = completePortList.concat(component.outputPortList);
 	}
 	if (component.listenEventList.length > 0) {
-		$subList.append('<li id="' + containerId + '_eventInput_AT_' + component.getId().replace(/\s+/g, '').replace(/\.+/g, '') + '" class="listPanelFocusableElement" tabindex="0">Event input port</li>');
+		$subList.append('<li id="' + containerId + '_eventInput_AT_' + component.getId().replace(/\s+/g, '').replace(/\.+/g, '') + '" class="' + focusableElementClassName + '" tabindex="0">Event input port</li>');
 		completePortList.push('eventInput');
 		var $div = $(document.createElement('div'));
 		$div.attr('id', containerId + '_eventInput_AT_' + component.getId().replace(/\s+/g, '').replace(/\.+/g, '') + '_connections');
@@ -492,7 +508,7 @@
 		addEventConnections($div, true);
 	}
 	if (component.triggerEventList.length > 0) {
-		$subList.append('<li id="' + containerId + '_eventOutput_AT_' + component.getId().replace(/\s+/g, '').replace(/\.+/g, '') + '" class="listPanelFocusableElement" tabindex="0">Event output port</li>');
+		$subList.append('<li id="' + containerId + '_eventOutput_AT_' + component.getId().replace(/\s+/g, '').replace(/\.+/g, '') + '" class="' + focusableElementClassName + '" tabindex="0">Event output port</li>');
 		completePortList.push('eventOutput');
 		var $div = $(document.createElement('div'));
 		$div.attr('id', containerId + '_eventOutput_AT_' + component.getId().replace(/\s+/g, '').replace(/\.+/g, '') + '_connections');
@@ -510,6 +526,8 @@
 		$('#' + containerId + '_eventOutput_AT_' + component.getId().replace(/\s+/g, '').replace(/\.+/g, '')).append($btn);
 		addEventConnections($div, false);
 	}
+	
+	listView.events.registerHandler('listKeyboardModeChangedEvent', listKeyboardModeChangedEventHandler);
 
 	return returnObj;
 }
