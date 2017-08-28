@@ -253,6 +253,14 @@ li[aria-selected='true'] {
 	margin: 0 1px 0 1px;
 }
 
+.buttonList li:hover {
+	background-color: blue;
+}
+
+.menuButton:active {
+	background-color: blue;
+}
+
 .buttonGroup input {
 	top: -5em;
 }
