@@ -217,6 +217,23 @@ li[aria-selected='true'] {
 	overflow: visible;
 	padding: 0 0.5em 0 0.5em;
 	height: 6em;
+	margin: 0 1px 0 1px;
+	font-size: 80%;	
+	border-width: 3px;
+	background-color: lightgrey;
+	opacity: 1;
+}
+
+.menuButton:disabled {
+	opacity: 0.5;
+}
+
+.menuButton:hover {
+	border-color: blue;
+}
+
+.menuButton:active {
+	background-color: blue;
 }
 
 .menuButton img {
@@ -247,18 +264,6 @@ li[aria-selected='true'] {
 	list-style-type: none;
 	margin: 0;
 	padding: 0;
-}
-
-.buttonList button {
-	margin: 0 1px 0 1px;
-}
-
-.buttonList li:hover {
-	background-color: blue;
-}
-
-.menuButton:active {
-	background-color: blue;
 }
 
 .buttonGroup input {
