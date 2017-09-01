@@ -168,7 +168,7 @@ ACS.view = function(modelList, // ACS.modelList
 	var handleKeydown = function(e) {
 		// catch Del to delete selected items
 		if (e.keyCode === 46) { // Del can't be caught by keyPress for not all browsers act consistently (see: http://unixpapa.com/js/key.html)
-			if (!$('#' + ACS.vConst.PROPERTYEDITOR_MOTHERPANEL).find('*').is(':focus')) { // if focus is not somewhere inside propertyEditor (otherwise Del could not be used in propertyEditor)
+			if (!$('#' + ACS.vConst.PROPERTYEDITOR_MOTHERPANEL).find('*').is(':focus')) { // if focus is not somewhere inside propertyEditor (otherwise key could not be used in propertyEditor)
 				deleteSelectionHandler();
 				stopEvent(e);
 				return false;
@@ -222,37 +222,47 @@ ACS.view = function(modelList, // ACS.modelList
 				break;
 			case 120: // Ctrl-x for cut
 				if (e.ctrlKey) {
-					cutHandler();
-					stopEvent(e);
-					return false;					
+					if (!$('#' + ACS.vConst.PROPERTYEDITOR_MOTHERPANEL).find('*').is(':focus')) { // if focus is not somewhere inside propertyEditor (otherwise key could not be used in propertyEditor)
+						cutHandler();
+						stopEvent(e);
+						return false;	
+					}						
 				}
 				break;
 			case 99: // Ctrl-c for copy
 				if (e.ctrlKey) {
-					copyHandler();
-					stopEvent(e);
-					return false;					
+					if (!$('#' + ACS.vConst.PROPERTYEDITOR_MOTHERPANEL).find('*').is(':focus')) { // if focus is not somewhere inside propertyEditor (otherwise key could not be used in propertyEditor)
+						copyHandler();
+						stopEvent(e);
+						return false;	
+					}						
 				}
 				break;
 			case 118: // Ctrl-v for paste
 				if (e.ctrlKey) {
-					pasteHandler();
-					stopEvent(e);
-					return false;					
+					if (!$('#' + ACS.vConst.PROPERTYEDITOR_MOTHERPANEL).find('*').is(':focus')) { // if focus is not somewhere inside propertyEditor (otherwise key could not be used in propertyEditor)
+						pasteHandler();
+						stopEvent(e);
+						return false;	
+					}						
 				}
 				break;
 			case 122: // Ctrl-z for undo
 				if (e.ctrlKey) {
-					undoHandler();
-					stopEvent(e);
-					return false;					
+					if (!$('#' + ACS.vConst.PROPERTYEDITOR_MOTHERPANEL).find('*').is(':focus')) { // if focus is not somewhere inside propertyEditor (otherwise key could not be used in propertyEditor)
+						undoHandler();
+						stopEvent(e);
+						return false;		
+					}						
 				}
 				break;
 			case 121: // Ctrl-y for redo
 				if (e.ctrlKey) {
-					redoHandler();
-					stopEvent(e);
-					return false;					
+					if (!$('#' + ACS.vConst.PROPERTYEDITOR_MOTHERPANEL).find('*').is(':focus')) { // if focus is not somewhere inside propertyEditor (otherwise key could not be used in propertyEditor)
+						redoHandler();
+						stopEvent(e);
+						return false;	
+					}						
 				}
 				break;
 			case 100: // Ctrl-d for drop channel
