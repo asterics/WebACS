@@ -1,7 +1,12 @@
+If you need to save really large files bigger then the blob's size limitation or don't have 
+enough RAM, then have a look at the more advanced [StreamSaver.js](https://github.com/jimmywarting/StreamSaver.js)
+that can save data directly to the hard drive asynchronously with the power of the new streams API. That will have
+support for progress, cancelation and knowing when it's done writing
+
 FileSaver.js
 ============
 
-FileSaver.js implements the HTML5 W3C `saveAs()` FileSaver interface in browsers that do
+FileSaver.js implements the `saveAs()` FileSaver interface in browsers that do
 not natively support it. There is a [FileSaver.js demo][1] that demonstrates saving
 various media types.
 
@@ -10,7 +15,7 @@ webapps that need to generate files, or for saving sensitive information that sh
 sent to an external server.
 
 Looking for `canvas.toBlob()` for saving canvases? Check out
-[canvas-toBlob.js](https://github.com/eligrey/canvas-toBlob.js) for a cross-browser implementation.
+[canvas-toBlob.js][2] for a cross-browser implementation.
 
 Supported browsers
 ------------------
@@ -19,13 +24,15 @@ Supported browsers
 | -------------- | ------------- | ------------ | ------------- | ------------ |
 | Firefox 20+    | Blob          | Yes          | 800 MiB       | None         |
 | Firefox < 20   | data: URI     | No           | n/a           | [Blob.js](https://github.com/eligrey/Blob.js) |
-| Chrome         | Blob          | Yes          | 345 MiB       | None         |
-| Chrome for Android | Blob      | Yes          | 345 MiB       | None         |
+| Chrome         | Blob          | Yes          | [500 MiB][3]  | None         |
+| Chrome for Android | Blob      | Yes          | [500 MiB][3]  | None         |
+| Edge           | Blob          | Yes          | ?             | None         |
 | IE 10+         | Blob          | Yes          | 600 MiB       | None         |
-| Opera 15+      | Blob          | Yes          | 345 MiB       | None         |
+| Opera 15+      | Blob          | Yes          | 500 MiB       | None         |
 | Opera < 15     | data: URI     | No           | n/a           | [Blob.js](https://github.com/eligrey/Blob.js) |
 | Safari 6.1+*   | Blob          | No           | ?             | None         |
 | Safari < 6     | data: URI     | No           | n/a           | [Blob.js](https://github.com/eligrey/Blob.js) |
+| Safari 10.1+   | Blob          | Yes          | n/a           | None         |
 
 Feature detection is possible:
 
@@ -53,11 +60,20 @@ Syntax
 ------
 
 ```js
-FileSaver saveAs(in Blob data, in DOMString filename)
+FileSaver saveAs(Blob/File data, optional DOMString filename, optional Boolean disableAutoBOM)
 ```
+
+Pass `true` for `disableAutoBOM` if you don't want FileSaver.js to automatically provide Unicode text encoding hints (see: [byte order mark](https://en.wikipedia.org/wiki/Byte_order_mark)).
 
 Examples
 --------
+
+### Saving text using with require
+```js
+var FileSaver = require('file-saver');
+var blob = new Blob(["Hello, world!"], {type: "text/plain;charset=utf-8"});
+FileSaver.saveAs(blob, "hello world.txt");
+```
 
 ### Saving text
 
@@ -66,8 +82,8 @@ var blob = new Blob(["Hello, world!"], {type: "text/plain;charset=utf-8"});
 saveAs(blob, "hello world.txt");
 ```
 
-The standard W3C File API [`Blob`][3] interface is not available in all browsers.
-[Blob.js][4] is a cross-browser `Blob` implementation that solves this.
+The standard W3C File API [`Blob`][4] interface is not available in all browsers.
+[Blob.js][5] is a cross-browser `Blob` implementation that solves this.
 
 ### Saving a canvas
 
@@ -80,15 +96,30 @@ canvas.toBlob(function(blob) {
 ```
 
 Note: The standard HTML5 `canvas.toBlob()` method is not available in all browsers.
-[canvas-toBlob.js][5] is a cross-browser `canvas.toBlob()` that polyfills this.
+[canvas-toBlob.js][6] is a cross-browser `canvas.toBlob()` that polyfills this.
+
+### Saving File
+
+You can save a File constructor without specifying a filename. The
+File itself already contains a name, There is a hand full of ways to get a file
+instance (from storage, file input, new constructor)
+But if you still want to change the name, then you can change it in the 2nd argument
+
+```js
+var file = new File(["Hello, world!"], "hello world.txt", {type: "text/plain;charset=utf-8"});
+saveAs(file);
+```
+
 
 
 ![Tracking image](https://in.getclicky.com/212712ns.gif)
 
   [1]: http://eligrey.com/demos/FileSaver.js/
-  [3]: https://developer.mozilla.org/en-US/docs/DOM/Blob
-  [4]: https://github.com/eligrey/Blob.js
-  [5]: https://github.com/eligrey/canvas-toBlob.js
+  [2]: https://github.com/eligrey/canvas-toBlob.js
+  [3]: https://code.google.com/p/chromium/issues/detail?id=375297
+  [4]: https://developer.mozilla.org/en-US/docs/DOM/Blob
+  [5]: https://github.com/eligrey/Blob.js
+  [6]: https://github.com/eligrey/canvas-toBlob.js
 
 Contributing
 ------------
@@ -96,7 +127,23 @@ Contributing
 The `FileSaver.js` distribution file is compiled with Uglify.js like so:
 
 ```bash
-uglifyjs FileSaver.js --comments /@source/ > FileSaver.min.js
+uglifyjs FileSaver.js --mangle --comments /@source/ > FileSaver.min.js
+# or simply:
+npm run build
 ```
 
 Please make sure you build a production version before submitting a pull request.
+
+Installation
+------------------
+
+```bash
+npm install file-saver --save
+bower install file-saver
+```
+
+Additionally, typscript definitions can be installed via:
+
+```bash
+npm install @types/file-saver --save-dev
+```
