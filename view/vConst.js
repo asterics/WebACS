@@ -97,6 +97,9 @@ ACS.vConst = {
 	MENUVIEW_BEFOREUNLOADMESSAGE: 'At least one model has not been saved. If you leave now, you will loose all unsaved changes!',
 	MENUVIEW_AREBASEURI: 'http://localhost:8081/rest/',
 	MENUVIEW_ALERTSTRINGPORTSMUSTBECONNECTED: 'Cannot upload model - the following ports\nneed an incoming data connection first:\n\n',
+	MENUVIEW_CONFIRMNEWCOMPONENTCOLLECTIONDELETE: 'The following components are no longer part of the component collection and will be deleted from the model:\n\n',
+	MENUVIEW_CONFIRMNEWCOMPONENTCOLLECTIONMODIFY: 'The definiton of the following components does not match the new component collection -\nundefined properties or ports will be reset to default values:\n\n',
+	MENUVIEW_ALERTNEWCOMPONENTCOLLECTIONSET: 'The new component collection has been set -\nthe menu has been updated accordingly.',
 	// modelView
 	MODELVIEW_CLASSOFTAB: 'modelTab',
 	MODELVIEW_CLASSOFPANEL: 'modelPanel',

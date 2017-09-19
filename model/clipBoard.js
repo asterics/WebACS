@@ -304,7 +304,7 @@ ACS.clipBoard = function() {
 			// check components
 			var i = 0;
 			while (i < pasteComponents.length) {
-				var fullComponent = model.findComponentInCollection(pasteComponents[i].getComponentTypeId());
+				var fullComponent = model.findComponentInCollection(pasteComponents[i].getComponentTypeId(), model.getComponentCollection());
 				if (fullComponent) {
 					// check if component is singleton and if yes, if it can be pasted or if it would be the second of its kind
 					if (!singletonAndAlreadyInModel(model, fullComponent, pasteComponents[i])) {

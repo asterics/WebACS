@@ -197,7 +197,7 @@
 	var modelChangedEventHandler = function() {
 		// destroy all old components
 		while (componentGUIs.length > 0) {
-			componentGUIs.pop().destroy();
+			componentGUIs.pop().guiViewElement.destroy();
 		}
 		// set decoration and controls
 		areGUI.setDecoration(model.modelGui.getDecoration());

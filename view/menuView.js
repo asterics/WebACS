@@ -356,7 +356,38 @@
 		getComponentDescriptorsAsXml(CREATED_COMPONENTS_DSCR_successCallback, CREATED_COMPONENTS_DSCR_errorCallback);
 					
 		function CREATED_COMPONENTS_DSCR_successCallback(data, HTTPstatus) {
-			modelList.getActModel().setComponentCollection(data);
+			var actMod = modelList.getActModel();
+			var deleteList = actMod.getDeleteListForNewComponentCollection(data);
+			var modifyList = actMod.getModifyListForNewComponentCollection(data);
+			var confirmString = '';
+			if (deleteList.length > 0) {
+				confirmString += ACS.vConst.MENUVIEW_CONFIRMNEWCOMPONENTCOLLECTIONDELETE;
+				for (var i = 0; i < deleteList.length; i++) {
+					confirmString += deleteList[i].getId() + '\n';
+				}
+				confirmString += '\n';
+			}
+			if (modifyList.length > 0) {
+				confirmString += ACS.vConst.MENUVIEW_CONFIRMNEWCOMPONENTCOLLECTIONMODIFY;
+				for (var i = 0; i < modifyList.length; i++) {
+					confirmString += modifyList[i].getId() + '\n';
+				}
+			}		
+			if (confirmString !== '') {
+				confirmString += '\nProceed?'
+				if (confirm(confirmString)) {
+					actMod.setComponentCollection(data);
+					if (deleteList.length > 0) {
+						var remAct = ACS.removeItemListAction(actMod, deleteList);
+						remAct.execute();
+					}
+					if (modifyList.length > 0) actMod.modifyComponentsAccordingToComponentCollection(modifyList);
+					alert(ACS.vConst.MENUVIEW_ALERTNEWCOMPONENTCOLLECTIONSET);
+				}
+			} else {
+				actMod.setComponentCollection(data);
+				alert(ACS.vConst.MENUVIEW_ALERTNEWCOMPONENTCOLLECTIONSET);
+			}
 		}
 		
 		function CREATED_COMPONENTS_DSCR_errorCallback(HTTPstatus, AREerrorMessage) {
@@ -652,6 +683,7 @@
 
 	var handleNewModel = function(e) {
 		modelList.addNewModel();
+		modelList.getActModel().events.registerHandler('componentCollectionChangedEvent', componentCollectionChangedEventHandler);
 	}
 
 	var handleSelectedFile = function(e) {
@@ -683,7 +715,13 @@
 		if ((m.hasBeenChanged) && (confirm('Save changes to ' + m.getFilename() + ' before closing?'))) {
 			m.saveModel();
 		}
+		if (modelList.getLength() === 1) {
+			var wasLastModelInList = true;
+		} else {
+			var wasLastModelInList = false;
+		}
 		modelList.removeModel();
+		if (wasLastModelInList) modelList.getActModel().events.registerHandler('componentCollectionChangedEvent', componentCollectionChangedEventHandler);
 	}
 	
 	var handleSaveModel = function(e) {

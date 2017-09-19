@@ -26,7 +26,7 @@
  * limitations under the License.
  */
  
- ACS.event = function(id, // String; can be changed, but must be unique
+ ACS.event = function(id, // String; unique, defined in component collection
 					 description, // String
 					 parentComponent) { // ACS.component
 

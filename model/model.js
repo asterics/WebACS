@@ -62,7 +62,7 @@
 				var description = null;
 				if (components.item(i).getElementsByTagName('description')) description = components.item(i).getElementsByTagName('description').item(0).textContent;
 				// seek the component in the componentCollection, since not all information is saved in the model
-				var fullComponent = returnObj.findComponentInCollection(compTypeId);
+				var fullComponent = returnObj.findComponentInCollection(compTypeId, componentCollection);
 				if (fullComponent === null) { // i.e. component was not found in componentCollection
 					componentList[i] = ACS.component(	components.item(i).attributes.getNamedItem('id').textContent,
 														compTypeId,
@@ -234,6 +234,13 @@
 		}
 		return null;
 	}
+	
+	var findPropertyByKey = function(comp, propertyKey) {
+		for (var i = 0; i < comp.propertyList.length; i++) {
+			if (comp.propertyList[i].getKey() === propertyKey) return comp.propertyList[i];
+		}
+		return null;
+	}	
 	
 	var loadDataChannelList = function(modelXML, componentList) {
 		var dataChannelList = [];
@@ -439,8 +446,8 @@
 		this.events.fireEvent('filenameBeingChangedEvent');
 	}
 	
-	returnObj.findComponentInCollection = function(compTypeId) {
-		var allComponents = componentCollection.getElementsByTagName('componentType');
+	returnObj.findComponentInCollection = function(compTypeId, actCompColl) {
+		var allComponents = actCompColl.getElementsByTagName('componentType');
 		for (var j = 0; j < allComponents.length; j++) {
 			if (allComponents.item(j).attributes.getNamedItem('id').textContent === compTypeId) return allComponents.item(j);
 		}
@@ -674,7 +681,7 @@
 		} else {
 			compTypeId = 'asterics.' + compName;
 		}
-		var compXml = returnObj.findComponentInCollection(compTypeId);
+		var compXml = returnObj.findComponentInCollection(compTypeId, componentCollection);
 		if (compXml) {
 			// check whether the component is a singleton and if yes, avoid multiple instances by returning 'singleton' instead of a component object
 			if (compXml.getElementsByTagName('singleton').item(0).textContent === 'true') {
@@ -746,7 +753,7 @@
 			}
 			// build propertyList:
 			var properties = compXml.getElementsByTagName('property');
-			for (j = 0; j < properties.length; j++) {
+			for (var j = 0; j < properties.length; j++) {
 				newComp.propertyList.push(ACS.property(properties.item(j).attributes.getNamedItem('name').textContent, 
 													   returnObj.getDataType(properties.item(j).attributes.getNamedItem('type').textContent), 
 													   properties.item(j).attributes.getNamedItem('value').textContent));
@@ -834,6 +841,271 @@
 		// set menu to new collection...
 		this.events.fireEvent('componentCollectionChangedEvent');
 		return componentCollection; // (XML document)
+	}
+	
+	returnObj.getDeleteListForNewComponentCollection = function(newColl) { // XML document
+		var theList = [];
+		for (var i = 0; i < returnObj.componentList.length; i++) {
+			if (!returnObj.findComponentInCollection(returnObj.componentList[i].getComponentTypeId(), newColl)) theList.push(returnObj.componentList[i]);
+		}
+		return theList;
+	}
+	
+	returnObj.getModifyListForNewComponentCollection = function(newColl) { // XML document
+		var theList = [];
+		for (var i = 0; i < returnObj.componentList.length; i++) {
+			var needsModification = false;
+			var fullComponent = returnObj.findComponentInCollection(returnObj.componentList[i].getComponentTypeId(), newColl);
+			if (fullComponent) {
+				// check the inputPorts
+				var inputPortsFull = fullComponent.getElementsByTagName('inputPort');
+				if (returnObj.componentList[i].inputPortList.length !== inputPortsFull.length) {
+					needsModification = true;
+				} else {
+					var j = 0;
+					while (!needsModification && j < inputPortsFull.length) {
+						if (!findPortById(returnObj.componentList[i], inputPortsFull.item(j).attributes.getNamedItem('id').textContent, true)) {
+							needsModification = true;
+						}
+						j++;
+					}			
+				}
+				// check the outputPorts
+				var outputPortsFull = fullComponent.getElementsByTagName('outputPort');
+				if (returnObj.componentList[i].outputPortList.length !== outputPortsFull.length) {
+					needsModification = true;
+				} else {
+					var j = 0;
+					while (!needsModification && j < outputPortsFull.length) {
+						if (!findPortById(returnObj.componentList[i], outputPortsFull.item(j).attributes.getNamedItem('id').textContent, false)) {
+							needsModification = true;
+						}
+						j++;
+					}			
+				}
+				// check the listener events
+				var listenEventsFull = fullComponent.getElementsByTagName('eventListenerPort');
+				if (returnObj.componentList[i].listenEventList.length !== listenEventsFull.length) {
+					needsModification = true;
+				} else {
+					var j = 0;
+					while (!needsModification && j < listenEventsFull.length) {
+						if (!findEventById(returnObj.componentList[i], listenEventsFull.item(j).attributes.getNamedItem('id').textContent, true)) {
+							needsModification = true;
+						}
+						j++;
+					}			
+				}
+				// check the trigger events
+				var triggerEventsFull = fullComponent.getElementsByTagName('eventTriggererPort');
+				if (returnObj.componentList[i].triggerEventList.length !== triggerEventsFull.length) {
+					needsModification = true;
+				} else {
+					var j = 0;
+					while (!needsModification && j < triggerEventsFull.length) {
+						if (!findEventById(returnObj.componentList[i], triggerEventsFull.item(j).attributes.getNamedItem('id').textContent, false)) {
+							needsModification = true;
+						}
+						j++;
+					}			
+				}
+				// check the properties
+				var propertiesFull = fullComponent.getElementsByTagName('property');
+				if (returnObj.componentList[i].propertyList.length !== propertiesFull.length) {
+					needsModification = true;
+				} else {
+					var j = 0;
+					while (!needsModification && j < propertiesFull.length) {
+						if (!findPropertyByKey(returnObj.componentList[i], propertiesFull.item(j).attributes.getNamedItem('name').textContent)) {
+							needsModification = true;
+						}
+						j++;
+					}			
+				}
+				if (needsModification) {
+					theList.push(returnObj.componentList[i]);
+				}				
+			}
+		}
+		return theList;
+	}
+	
+	returnObj.modifyComponentsAccordingToComponentCollection = function(modifyList) {
+		for (var i = 0; i < modifyList.length; i++) {
+			var fullComponent = returnObj.findComponentInCollection(modifyList[i].getComponentTypeId(), componentCollection);
+			modifyList[i].matchesComponentCollection = false;
+			if (fullComponent) {
+				// check the inputPorts
+				var inputPortsFull = fullComponent.getElementsByTagName('inputPort');
+				var inputPortsNew = [];
+				for (var j = 0; j < inputPortsFull.length; j++) {
+					var actPort = findPortById(modifyList[i], inputPortsFull.item(j).attributes.getNamedItem('id').textContent, true);
+					if (actPort) {
+						inputPortsNew.push(actPort);
+					} else {
+						inputPortsNew[inputPortsNew.length] = ACS.port(	inputPortsFull.item(j).attributes.getNamedItem('id').textContent,
+																		modifyList[i],
+																		ACS.portType.INPUT,
+																		returnObj.getDataType(inputPortsFull.item(j).getElementsByTagName('dataType').item(0).textContent),
+																		j,
+																		inputPortsFull.item(j).getElementsByTagName('mustBeConnected').item(0).textContent);
+					}
+				}
+				modifyList[i].inputPortList = inputPortsNew;
+				// check the outputPorts
+				var outputPortsFull = fullComponent.getElementsByTagName('outputPort');
+				var outputPortsNew = [];
+				for (var j = 0; j < outputPortsFull.length; j++) {
+					var actPort = findPortById(modifyList[i], outputPortsFull.item(j).attributes.getNamedItem('id').textContent, false);
+					if (actPort) {
+						outputPortsNew.push(actPort);
+					} else {
+						outputPortsNew[outputPortsNew.length] = ACS.port(	outputPortsFull.item(j).attributes.getNamedItem('id').textContent,
+																			modifyList[i],
+																			ACS.portType.OUTPUT,
+																			returnObj.getDataType(outputPortsFull.item(j).getElementsByTagName('dataType').item(0).textContent),
+																			j,
+																			false);
+					}
+				}
+				modifyList[i].outputPortList = outputPortsNew;				
+				// delete channels if their input- or output port has been deleted
+				var j = 0;
+				while (j < returnObj.dataChannelList.length) {
+					if (returnObj.dataChannelList[j].getInputPort().getParentComponent() === modifyList[i]) {
+						var found = false;
+						var k = 0;
+						while (!found && k < modifyList[i].inputPortList.length) {
+							if (returnObj.dataChannelList[j].getInputPort() === modifyList[i].inputPortList[k]) {
+								found = true;
+							}
+							k++;
+						}
+						if (!found) {
+							removeDataChannel(returnObj.dataChannelList[j]);
+						} else {
+							j++;
+						}
+					} else if (returnObj.dataChannelList[j].getOutputPort().getParentComponent() === modifyList[i]) {
+						var found = false;
+						var k = 0;
+						while (!found && k < modifyList[i].outputPortList.length) {
+							if (returnObj.dataChannelList[j].getOutputPort() === modifyList[i].outputPortList[k]) {
+								found = true;
+							}
+							k++;
+						}
+						if (!found) {
+							removeDataChannel(returnObj.dataChannelList[j]);
+						} else {
+							j++;
+						}
+					} else {
+						j++;
+					}
+				}
+				// check eventListeners
+				var listenEventsFull = fullComponent.getElementsByTagName('eventListenerPort');
+				var listenEventsNew = [];
+				for (var j = 0; j < listenEventsFull.length; j++) {
+					var actEvent = findEventById(modifyList[i], listenEventsFull.item(j).attributes.getNamedItem('id').textContent, true);
+					if (actEvent) {
+						listenEventsNew.push(actEvent);
+					} else {
+						listenEventsNew[listenEventsNew.length] = ACS.event(listenEventsFull.item(j).attributes.getNamedItem('id').textContent,
+																			listenEventsFull.item(j).getElementsByTagName('description').item(0).textContent,
+																			modifyList[i]);
+					}
+				}
+				modifyList[i].listenEventList = listenEventsNew;	
+				// check eventTriggers
+				var triggerEventsFull = fullComponent.getElementsByTagName('eventTriggererPort');
+				var triggerEventsNew = [];
+				for (var j = 0; j < triggerEventsFull.length; j++) {
+					var actEvent = findEventById(modifyList[i], triggerEventsFull.item(j).attributes.getNamedItem('id').textContent, false);
+					if (actEvent) {
+						triggerEventsNew.push(actEvent);
+					} else {
+						triggerEventsNew[triggerEventsNew.length] = ACS.event(	triggerEventsFull.item(j).attributes.getNamedItem('id').textContent,
+																				triggerEventsFull.item(j).getElementsByTagName('description').item(0).textContent,
+																				modifyList[i]);
+					}
+				}
+				modifyList[i].triggerEventList = triggerEventsNew;
+				// delete eventConnections if their listener or trigger has been deleted
+				var j = 0;
+				while (j < returnObj.eventChannelList.length) {
+					if (returnObj.eventChannelList[j].endComponent === modifyList[i]) {
+						var l = 0;
+						while (l < returnObj.eventChannelList[j].eventConnections.length) {
+							var found = false;
+							var k = 0;
+							while (!found && k < modifyList[i].listenEventList.length) {
+								if (returnObj.eventChannelList[j].eventConnections[l].listener === modifyList[i].listenEventList[k]) {
+									found = true;
+								}
+								k++;
+							}
+							if (!found) {
+								returnObj.eventChannelList[j].eventConnections.splice(l, 1);
+							} else {
+								l++;
+							}
+						}
+						if (returnObj.eventChannelList[j].eventConnections.length === 0) {
+							removeEventChannel(returnObj.eventChannelList[j]);
+						} else {
+							j++;
+						}
+					} else if (returnObj.eventChannelList[j].startComponent === modifyList[i]) {
+						var l = 0;
+						while (l < returnObj.eventChannelList[j].eventConnections.length) {
+							var found = false;
+							var k = 0;
+							while (!found && k < modifyList[i].triggerEventList.length) {
+								if (returnObj.eventChannelList[j].eventConnections[l].trigger === modifyList[i].triggerEventList[k]) {
+									found = true;
+								}
+								k++;
+							}
+							if (!found) {
+								returnObj.eventChannelList[j].eventConnections.splice(l, 1);
+							} else {
+								l++;
+							}
+						}
+						if (returnObj.eventChannelList[j].eventConnections.length === 0) {
+							removeEventChannel(returnObj.eventChannelList[j]);
+						} else {
+							j++;
+						}
+					} else {
+						j++;
+					}
+				}
+				// check the properties
+				var propertiesFull = fullComponent.getElementsByTagName('property');
+				var propertiesNew = [];
+				for (var j = 0; j < propertiesFull.length; j++) {
+					var actProperty = findPropertyByKey(modifyList[i], propertiesFull.item(j).attributes.getNamedItem('name').textContent);
+					if (actProperty) {
+						propertiesNew.push(actProperty);
+					} else {
+						propertiesNew[propertiesNew.length] = ACS.property(	propertiesFull.item(j).attributes.getNamedItem('name').textContent,
+																			returnObj.getDataType(propertiesFull.item(j).attributes.getNamedItem('type').textContent),
+																			propertiesFull.item(j).attributes.getNamedItem('value').textContent);
+						if (propertiesFull.item(j).attributes.getNamedItem('description'))
+							propertiesNew[propertiesNew.length - 1].description = propertiesFull.item(j).attributes.getNamedItem('description').textContent;
+						if (propertiesFull.item(j).attributes.getNamedItem('combobox'))
+							propertiesNew[propertiesNew.length - 1].combobox = propertiesFull.item(j).attributes.getNamedItem('combobox').textContent;
+						if (propertiesFull.item(j).attributes.getNamedItem('getStringList'))
+							propertiesNew[propertiesNew.length - 1].getStringList = propertiesFull.item(j).attributes.getNamedItem('getStringList').textContent;		
+					}
+				}
+				modifyList[i].propertyList = propertiesNew;
+			}
+		}
+		returnObj.events.fireEvent('modelChangedEvent');
 	}
 	
 	returnObj.addItemToSelection = function(item) {

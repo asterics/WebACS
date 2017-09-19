@@ -57,6 +57,7 @@
 	returnObj.addNewModel = function() {
 		this.actIndex = (list.push(ACS.model('newFile' + filenameCounter))) - 1;
 		filenameCounter++;
+		
 		this.events.fireEvent('newModelAddedEvent');		
 		this.events.fireEvent('actModelChangedEvent');
 		list[this.actIndex].events.registerHandler('filenameBeingChangedEvent', filenameBeingChangedEventHandler);

@@ -26,7 +26,7 @@
  * limitations under the License.
  */
  
- ACS.property = function(key, // String
+ ACS.property = function(key, // String; must be unique
 						type, // ACS.dataType
 						value) { // String
 

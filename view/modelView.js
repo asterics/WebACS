@@ -232,6 +232,7 @@
 			for (j = 0; j < changedComponents.length; j++) {
 				var compTypeId = changedComponents[j].getComponentTypeId();
 				alertString = alertString + changedComponents[j].getId() + ' ('	+ compTypeId.substring(9, compTypeId.length) + ')\n';
+				changedComponents[j].matchesComponentCollection = true;
 			}
 			alert(alertString);
 		}

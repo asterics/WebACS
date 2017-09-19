@@ -26,7 +26,7 @@
  * limitations under the License.
  */
  
- ACS.port = function(id, // String; can be changed, but must be unique
+ ACS.port = function(id, // String; unique, defined in component collection
 					parentComponent, // ACS.component
 					type, // ACS.portType
 					dataType, // ACS.dataType
