@@ -50,6 +50,13 @@
 		return xmlObj; 
 	}
 	
+	var findPortByNameInXML = function(portName, portsXML) {
+		for (var i = 0; i < portsXML.length; i++) {
+			if (portsXML.item(i).attributes.getNamedItem('portTypeID').textContent === portName) return portsXML.item(i);
+		}
+		return null;
+	}
+	
 	var loadComponentList = function(modelXML) {
 		var componentList = [];
 		var components_section = modelXML.getElementsByTagName('components').item(0); // needed so that the component-tags of the channels-sections are not confused with the components of the model
@@ -99,84 +106,86 @@
 					// build inputPortList:
 					var inputPortsFull = fullComponent.getElementsByTagName('inputPort');
 					var inputPortsModel = components.item(i).getElementsByTagName('inputPort');
-					var numInPorts = inputPortsFull.length;
-					if (numInPorts < inputPortsModel.length) numInPorts = inputPortsModel.length; // in case the amount of ports has been reduced by developer in component collection
-					for (var j = 0; j < numInPorts; j++) {
-						if (inputPortsFull[j]) {
-							var portDataType = returnObj.getDataType(inputPortsFull.item(j).getElementsByTagName('dataType').item(0).textContent);
-							var portTypeId = '';
-							if (inputPortsModel.item(j)) {
-								portTypeId = inputPortsModel.item(j).attributes.getNamedItem('portTypeID').textContent;
-							} else {
-								// in case new ports have been added to component in collection
-								portTypeId = inputPortsFull.item(j).attributes.getNamedItem('id').textContent;
-								componentList[i].matchesComponentCollection = false;
-							}
-							// build the port object:
-							componentList[i].inputPortList[j] = ACS.port(	portTypeId,
-																			componentList[i],
-																			ACS.portType.INPUT,
-																			portDataType,
-																			j,
-																			inputPortsFull.item(j).getElementsByTagName('mustBeConnected').item(0).textContent);
-							// TODO: add the port's properties
-							if (inputPortsModel.item(j) && (inputPortsModel.item(j).attributes.getNamedItem('sync'))) {
-								componentList[i].inputPortList[j].sync = inputPortsModel.item(j).attributes.getNamedItem('sync').textContent;
-							}
-						} else { // if the port was deleted by developer
+					if (inputPortsFull.length !== inputPortsModel.length) {
+						componentList[i].matchesComponentCollection = false;
+					}
+					for (var j = 0; j < inputPortsFull.length; j++) {
+						var portInModel = findPortByNameInXML(inputPortsFull.item(j).attributes.getNamedItem('id').textContent, inputPortsModel);
+						if (portInModel) {
+							//take portTypeId from model
+							var portTypeId = portInModel.attributes.getNamedItem('portTypeID').textContent;
+						} else {
 							componentList[i].matchesComponentCollection = false;
+							//take it from full
+							var portTypeId = inputPortsFull.item(j).attributes.getNamedItem('id').textContent;
+						}
+						var portDataType = returnObj.getDataType(inputPortsFull.item(j).getElementsByTagName('dataType').item(0).textContent);
+						// build the port object:
+						componentList[i].inputPortList[j] = ACS.port(	portTypeId,
+																		componentList[i],
+																		ACS.portType.INPUT,
+																		portDataType,
+																		j,
+																		inputPortsFull.item(j).getElementsByTagName('mustBeConnected').item(0).textContent);
+						if (portInModel && (portInModel.attributes.getNamedItem('sync'))) {
+							componentList[i].inputPortList[j].sync = portInModel.attributes.getNamedItem('sync').textContent;
 						}
 					}
 					
 					// build outputPortList:
 					var outputPortsFull = fullComponent.getElementsByTagName('outputPort');
 					var outputPortsModel = components.item(i).getElementsByTagName('outputPort');
-					var numOutPorts = outputPortsFull.length;
-					if (numOutPorts < outputPortsModel.length) numOutPorts = outputPortsModel.length; // in case the amount of ports has been reduced by developer in component collection
-					for (var j = 0; j < numOutPorts; j++) {
-						if (outputPortsFull[j]) {
-							var portDataType = returnObj.getDataType(outputPortsFull.item(j).getElementsByTagName('dataType').item(0).textContent);
-							var portTypeId = '';
-							if (outputPortsModel.item(j)) {
-								portTypeId = outputPortsModel.item(j).attributes.getNamedItem('portTypeID').textContent;
-							} else {
-								// in case new ports have been added to component in collection
-								portTypeId = outputPortsFull.item(j).attributes.getNamedItem('id').textContent;
-								componentList[i].matchesComponentCollection = false;
-							}
-							// build the port object:
-							componentList[i].outputPortList[j] = ACS.port(	portTypeId,
-																			componentList[i],
-																			ACS.portType.OUTPUT,
-																			portDataType,
-																			j,
-																			false);
-							// TODO: add the port's properties
-						} else { // if the port was deleted by developer
+					if (outputPortsFull.length !== outputPortsModel.length) {
+						componentList[i].matchesComponentCollection = false;
+					}					
+					for (var j = 0; j < outputPortsFull.length; j++) {
+						var portInModel = findPortByNameInXML(outputPortsFull.item(j).attributes.getNamedItem('id').textContent, outputPortsModel);
+						if (portInModel) {
+							//take portTypeId from model
+							var portTypeId = portInModel.attributes.getNamedItem('portTypeID').textContent;
+						} else {
 							componentList[i].matchesComponentCollection = false;
+							//take it from full
+							var portTypeId = outputPortsFull.item(j).attributes.getNamedItem('id').textContent;
 						}
+						var portDataType = returnObj.getDataType(outputPortsFull.item(j).getElementsByTagName('dataType').item(0).textContent);
+						// build the port object:
+						componentList[i].outputPortList[j] = ACS.port(	portTypeId,
+																		componentList[i],
+																		ACS.portType.OUTPUT,
+																		portDataType,
+																		j,
+																		false);
 					}
 					
 					// build listenEventList:
-					var listenEvents = fullComponent.getElementsByTagName('eventListenerPort');
-					for (var j = 0; j < listenEvents.length; j++) {
-						componentList[i].listenEventList[j] = ACS.event(listenEvents.item(j).attributes.getNamedItem('id').textContent,
-																		listenEvents.item(j).getElementsByTagName('description').item(0).textContent,
+					// Note: since the eventTriggers and eventListeners are not saved in deployment model, it is not possible at this point to determine whether they match the component collection;
+					// instead this is checked in "loadEventChannelList" for all triggers and listeners that are in use (i.e. connected by a channel)
+					var listenEventsFull = fullComponent.getElementsByTagName('eventListenerPort');
+					for (var j = 0; j < listenEventsFull.length; j++) {
+						// build the event object:
+						componentList[i].listenEventList[j] = ACS.event(listenEventsFull.item(j).attributes.getNamedItem('id').textContent,
+																		listenEventsFull.item(j).getElementsByTagName('description').item(0).textContent,
 																		componentList[i]);
-					}
+					}					
 					
 					// build triggerEventList:
-					var triggerEvents = fullComponent.getElementsByTagName('eventTriggererPort');
-					for (var j = 0; j < triggerEvents.length; j++) {
-						componentList[i].triggerEventList[j] = ACS.event(	triggerEvents.item(j).attributes.getNamedItem('id').textContent,
-																			triggerEvents.item(j).getElementsByTagName('description').item(0).textContent,
+					// Note: since the eventTriggers and eventListeners are not saved in deployment model, it is not possible at this point to determine whether they match the component collection;
+					// instead this is checked in "loadEventChannelList" for all triggers and listeners that are in use (i.e. connected by a channel)					
+					var triggerEventsFull = fullComponent.getElementsByTagName('eventTriggererPort');
+					for (var j = 0; j < triggerEventsFull.length; j++) {
+						// build the event object:
+						componentList[i].triggerEventList[j] = ACS.event(	triggerEventsFull.item(j).attributes.getNamedItem('id').textContent,
+																			triggerEventsFull.item(j).getElementsByTagName('description').item(0).textContent,
 																			componentList[i]);
-					}
+					}				
 
 					// build propertyList:
 					var propertiesFull = fullComponent.getElementsByTagName('property');
 					var propertiesModel = components.item(i).getElementsByTagName('property');
-					if (propertiesFull.length != propertiesModel.length) componentList[i].matchesComponentCollection = false;
+					if (propertiesFull.length != propertiesModel.length) {
+						componentList[i].matchesComponentCollection = false;
+					}
 					for (var j = 0; j < propertiesFull.length; j++) {
 						var propIdx = indexOfPropertyInModel(propertiesFull.item(j).attributes.getNamedItem('name').textContent, propertiesModel);
 						var propertyValue = '';
@@ -196,6 +205,7 @@
 						if (propertiesFull.item(j).attributes.getNamedItem('getStringList'))
 							componentList[i].propertyList[componentList[i].propertyList.length - 1].getStringList = propertiesFull.item(j).attributes.getNamedItem('getStringList').textContent;				
 					}
+					
 					// build the gui object:
 					if (components.item(i).getElementsByTagName('gui')) {
 						var isExternal = false;
@@ -308,21 +318,29 @@
 				var startComp = findComponentById(componentList, startCompId);
 				var endComp = findComponentById(componentList, endCompId);
 				if ((startComp && startComp.foundInComponentCollection) && (endComp && endComp.foundInComponentCollection)) { // component might have been removed, because not in componentCollection
-					var channelId = startCompId + '_' + endCompId;
-					var actChannel = seekChannelInList(eventChannelList, channelId);
-					if (!actChannel) {
-						eventChannelList.push(ACS.eventChannel(channelId));
-						eventChannelList[eventChannelList.length-1].startComponent = startComp;
-						eventChannelList[eventChannelList.length-1].endComponent = endComp;
-						actChannel = eventChannelList[eventChannelList.length-1];
-					}
 					var triggerEventId = eventChannels.item(i).getElementsByTagName('source').item(0).getElementsByTagName('eventPort').item(0).attributes.getNamedItem('id').textContent;
-					var listenerEventId = eventChannels.item(i).getElementsByTagName('target').item(0).getElementsByTagName('eventPort').item(0).attributes.getNamedItem('id').textContent;
-					var desc = '';
-					if (eventChannels.item(i).getElementsByTagName('description').item(0)) desc = eventChannels.item(i).getElementsByTagName('description').item(0).textContent;
-					actChannel.eventConnections.push({	trigger: findEventById(actChannel.startComponent, triggerEventId, false),
-														listener: findEventById(actChannel.endComponent, listenerEventId, true),
-														description: desc});
+					var listenerEventId = eventChannels.item(i).getElementsByTagName('target').item(0).getElementsByTagName('eventPort').item(0).attributes.getNamedItem('id').textContent;				
+					var triggerEvent = findEventById(startComp, triggerEventId, false);
+					var listenerEvent = findEventById(endComp, listenerEventId, true);
+					if (!triggerEvent) {
+						startComp.matchesComponentCollection = false;
+					} else if (!listenerEvent) {
+						endComp.matchesComponentCollection = false;
+					} else {
+						var channelId = startCompId + '_' + endCompId;
+						var actChannel = seekChannelInList(eventChannelList, channelId);
+						if (!actChannel) {
+							eventChannelList.push(ACS.eventChannel(channelId));
+							eventChannelList[eventChannelList.length-1].startComponent = startComp;
+							eventChannelList[eventChannelList.length-1].endComponent = endComp;
+							actChannel = eventChannelList[eventChannelList.length-1];
+						}
+						var desc = '';
+						if (eventChannels.item(i).getElementsByTagName('description').item(0)) desc = eventChannels.item(i).getElementsByTagName('description').item(0).textContent;
+						actChannel.eventConnections.push({	trigger: triggerEvent,
+															listener: listenerEvent,
+															description: desc});
+					}
 				}
 			}
 		}
