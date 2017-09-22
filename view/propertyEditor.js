@@ -114,7 +114,7 @@ ACS.propertyEditor = function (modelList, // ACS.modelList
 					}
 				}
 			}
-			if (selectedNumberOfComponents === 0 && selectedNumberOfEventChannels === 1) { //check if only one component is selected
+			if (selectedNumberOfComponents === 0 && selectedNumberOfEventChannels === 1) { //check if only one element is selected
 				//get selected component
 				for (var i = 0; i < actModel.eventChannelList.length; i++) {
 					if (actModel.eventChannelList[i].getIsSelected()) {
@@ -543,7 +543,7 @@ ACS.propertyEditor = function (modelList, // ACS.modelList
 		document.getElementById('listenerPanel').appendChild(wrapperDivListener);
 	}
 
-	//generate the event fileds for the channel based on startcompoment and endcomponent
+	//generate the event fields for the channel based on startcompoment and endcomponent
 	var generateChannelEventsForChannel = function () {
 		eventPanelCaptions.innerHTML = 'Channel';
 		eventPanelCaptions.setAttribute("class", "propertyeditorCaptions");
@@ -562,7 +562,7 @@ ACS.propertyEditor = function (modelList, // ACS.modelList
 		headerCell1.innerHTML = endcomp.getId();
 		row[0].appendChild(headerCell1);
 		var headerCell2 = document.createElement("TH");
-		headerCell2.innerHTML = endcomp.getId();
+		headerCell2.innerHTML = startcomp.getId();
 		row[0].appendChild(headerCell2);
 		var headerCell3 = document.createElement("TH");
 		headerCell3.innerHTML = "Description";
