@@ -312,6 +312,20 @@
 		if (focussedGUI) focussedGUI.reposition(direction);
 	}
 	
+	returnObj.destroy = function() {
+		while (componentGUIs.length > 0) {
+			componentGUIs.pop().guiViewElement.destroy();
+		}
+		areGUI.destroy();
+		areGUI = null;
+		guiLayer.destroyChildren();
+		guiLayer.destroy();
+		guiLayer = null;
+		guiStage.destroyChildren();
+		guiStage.destroy();
+		guiStage = null;
+	}	
+	
 // ***********************************************************************************************************************
 // ************************************************** constructor code ***************************************************
 // ***********************************************************************************************************************

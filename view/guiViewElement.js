@@ -464,6 +464,11 @@
 		group.destroyChildren();
 		group.destroy();
 		group = null;
+		mainRect = null;
+		nameText = null;
+		anchor = null;
+		controls = null;
+		decoration = null;		
 	}
 	
 // ***********************************************************************************************************************

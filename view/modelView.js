@@ -631,6 +631,16 @@
 		if (portMode) findCompView(model.selectedItemsList[0]).connectChannelAtActPort();
 	}	
 	
+	returnObj.destroy = function() {
+		modelLayer.destroyChildren();
+		modelLayer.destroy();
+		modelLayer = null;
+		modelStage.destroyChildren();
+		modelStage.destroy();
+		modelStage = null;
+		guiView.destroy();
+	}
+	
 // ***********************************************************************************************************************
 // ************************************************** constructor code ***************************************************
 // ***********************************************************************************************************************

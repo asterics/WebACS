@@ -55,6 +55,7 @@
 		for (var i = 0; i < modelViewList.length; i++) {
 			if (modelViewList[i] && (modelViewList[i].getModel() === modelList.getActModel())) {
 				removePanel = modelViewList[i].getModelContainerId();
+				modelViewList[i].destroy();
 				modelViewList.splice(i, 1);
 			}
 		}
