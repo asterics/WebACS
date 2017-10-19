@@ -752,6 +752,15 @@
 	var handleRedo = function(e) {
 		returnObj.events.fireEvent('redoBtnPressedEvent');
 	}
+	
+	// Menu-Button-Handlers - Misc-Menu
+	var handleHelp = function(e) {
+		returnObj.events.fireEvent('helpBtnPressedEvent');
+	}
+	
+	var handleAbout = function(e) {
+		alert('About WebACS\n\nThe AsTeRICS Configuration Suite for Web Browsers (WebACS)\n is part of the AsTeRICS project.\nPlease visit www.asterics.eu for more information.');
+	}
 
 // ***********************************************************************************************************************
 // ************************************************** public stuff *******************************************************
@@ -855,6 +864,8 @@
 	document.getElementById('deleteSelectionBtn').addEventListener('click', handleDeleteSelection);
 	document.getElementById('undoBtn').addEventListener('click', handleUndo);
 	document.getElementById('redoBtn').addEventListener('click', handleRedo);
+	document.getElementById('helpBtn').addEventListener('click', handleHelp);
+	document.getElementById('aboutBtn').addEventListener('click', handleAbout);
 	
 	// handlers for the quickselect field and the corresponding insert-button
 	document.getElementById('quickselect').addEventListener('change', function() {

@@ -174,6 +174,12 @@ ACS.view = function(modelList, // ACS.modelList
 				return false;
 			}
 		}
+		if (e.key === "F1") {
+			helpHandler();
+			stopEvent(e);
+			return false;
+		}
+						
 	}
 	
 	var handleKeypress = function(e) {
@@ -433,6 +439,37 @@ ACS.view = function(modelList, // ACS.modelList
 		}
 	}
 	
+	var helpHandler = function() {
+		// using AJAX call to determine whether there is an external help system (i.e. on the ARE webservice)
+		var pathToHelp = '../../help/'; // path to help on the ARE webservice
+		httpRequest = new XMLHttpRequest();
+		httpRequest.onreadystatechange = function() {
+			if (httpRequest.readyState === XMLHttpRequest.DONE) {
+				if (httpRequest.status !== 200) { // no external help system found - use internal one
+					pathToHelp = './help/';
+				}
+				// load the help system
+				var actModel = modelList.getActModel();
+				if (actModel.selectedItemsList.length === 1 && typeof actModel.selectedItemsList[0].getComponentTypeId() !== 'undefined') { // thus there is one single item selectd and this item is a component
+					var directory;
+					switch (actModel.selectedItemsList[0].getType()) {
+						case ACS.componentType.SENSOR: directory = 'sensors'; break;
+						case ACS.componentType.PROCESSOR: directory = 'processors'; break;
+						case ACS.componentType.ACTUATOR: directory = 'actuators'; break;
+					}
+					var file = actModel.selectedItemsList[0].getComponentTypeId() + '.htm';
+					if (file.indexOf('Oska') === -1) file = file.slice(9); // the slice eliminates the "asterics."
+					window.open(pathToHelp + 'index.htm?' + directory + '/' + file);
+				} else {			
+					window.open(pathToHelp + 'index.htm');
+				}
+			}
+		}
+		// try to load help from ARE webserver
+		httpRequest.open('GET', pathToHelp + 'index.htm', true);
+		httpRequest.send();
+	}
+	
 	var AREStatusChangedEventHandler = function() {
 		switch (ACS.areStatus.getStatus()) {
 			case ACS.statusType.DISCONNECTED: document.getElementById('AREstatus').textContent = 'Disconnected'; break;
@@ -488,6 +525,7 @@ ACS.view = function(modelList, // ACS.modelList
 	menu.events.registerHandler('deleteBtnPressedEvent', deleteSelectionHandler);
 	menu.events.registerHandler('undoBtnPressedEvent', undoHandler);
 	menu.events.registerHandler('redoBtnPressedEvent', redoHandler);
+	menu.events.registerHandler('helpBtnPressedEvent', helpHandler);
 	// register handlers for areStatus events
 	ACS.areStatus.events.registerHandler('AREStatusChangedEvent', AREStatusChangedEventHandler);
 	ACS.areStatus.events.registerHandler('ARESynchronisationChangedEvent', ARESynchronisationChangedEventHandler);

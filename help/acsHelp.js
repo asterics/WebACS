@@ -172,7 +172,7 @@
 				alert('Could not find any component collection files. Please make sure the file "defaultComponentCollection_help.abd" exists in the ./help folder.');
 			} else {
 				// try to load the default component collection
-				httpRequest.open('GET', 'defaultComponentCollection_help.abd', true);
+				httpRequest.open('GET', './defaultComponentCollection_help.abd', true);
 				httpRequest.send();
 			}
 		} else if (httpRequest.readyState === XMLHttpRequest.DONE && httpRequest.status === 200) {
@@ -201,7 +201,7 @@
 		}
 	}
 	// try to load component collection from ARE webserver
-	httpRequest.open('GET', '../../componentCollections/defaultComponentCollection.abd', true);
+	httpRequest.open('GET', '../componentCollections/defaultComponentCollection.abd', true);
 	httpRequest.send();
 
 	return returnObj;
