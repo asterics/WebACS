@@ -39,70 +39,15 @@
 			<h6><a name="navigation" id="navigation"><span class="hidden">Navigation:</span></a></h6>
 			<div id="menuBlock">
 				<ul id="menu" class="menuList mainList">
-					<!--Each folder in the filesystem becomes a menu item with a submenu. The components' help files must be in folders according to their type (sensor, processor, actuator),
-					followed by an "s", i.e. "sensors", "processors", "actuators". The second level folder names must be identical 
-					with the subtypes of the associated components. If such a subtype contain spaces, underscores "_" 
-					should be used in the folder name and substituted by spaces when generating the menu.-->
-					<li class="menuItem">
-						ACS
-						<ul class="menuList">
-							<!--Each (.htm)file becomes a menu item with a special attribute "data-filename",
-							containing the complete path below "help_files" and the complete filename. The filenames
-							must be identical with the componenttypeId of the component, without the "asterics."-prefix, and end with ".htm".
-							For the text content of each such menu item, the title attribute of the associated .htm file should be used.-->
-							<li class="menuItem" data-filename="acs/acs_basic_functions.htm">ACS Basic Functions</li>
-						</ul>
-					</li>
-					<li class="menuItem">
-						Sensors
-						<ul id="sensorsList" class="menuList">
-							<li class="menuItem">
-								Graphical User Interface
-								<ul class="menuList">
-									<li class="menuItem" data-filename="sensors/graphical_user_interface/buttongrid.htm">Buttongrid</li>
-									<li class="menuItem" data-filename="sensors/graphical_user_interface/slider.htm">Slider</li>
-									<li class="menuItem" data-filename="sensors/graphical_user_interface/cellboard.htm">Cellboard</li>
-								</ul>
-							</li>
-							<li class="menu-item">
-								Simulation
-								<ul class="menuList">
-									<li class="menuItem" data-filename="sensors/simulation/timer.htm">Timer</li>
-									<li class="menuItem" data-filename="sensors/simulation/keycapture.htm">Key Capture</li>
-								</ul>
-							</li>
-							<li class="menuItem">
-								Inertial Measurement
-								<ul class="menuList">
-								</ul>
-							</li>					
-						</ul>
-					</li>
-					<li class="menuItem">
-						Processors
-						<ul id="processorsList" class="menuList">
-						</ul>
-					</li>
-					<li class="menuItem">
-						Actuators
-						<ul id="actuatorsList" class="menuList">
-						</ul>
-					</li>			
+					<!-- At this point the HTML-snippets for the menu items will be injected. -->
 				</ul>
-				<hr />
-				<div id="quickselectGroup">
-					<label for="quickselect" id="quickselectLabel">Quickselect</label>
-					<input id="quickselect" list="componentsDataList">
-					<datalist id="componentsDataList">
-					</datalist>
-					<input id="showButton" type="button" value="Show"></input>			
-				</div>
+				<!-- At this point the HTML-snippet for the quickselect field will be injected. -->
 			</div>
 		</div>
 		
 <!-- ****************************************************** content area ********************************************************* -->
 		<h6><a name="content" id="content"><span class="hidden">Content:</span></a></h6>
-		<iframe src="help_files/ACS/ACS_Basic_Functions.htm" name="contentFrame" id="mainContent" onload="javascript:acsHelp.resizeIframe(this);"></iframe>
+		<iframe src="startPage.htm" name="contentFrame" id="mainContent" onload="javascript:acsHelp.resizeIframe(this);"></iframe>
 		
 	</div>
 	

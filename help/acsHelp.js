@@ -97,7 +97,7 @@
 		document.getElementById('componentsDataList').appendChild(opt);
 	}	
 
-	var buildMenu = function() {
+	var buildComponentMenu = function() {
 		// first empty the menu...
 		var sensorsList = document.getElementById('sensorsList');
 		var processorsList = document.getElementById('processorsList');
@@ -144,15 +144,126 @@
 					break;
 			}
 		}
+	}
+	
+	var refreshMenu = function(jsonData) {
 		if ($('#menu').menu('instance')) $('#menu').menu('destroy');
 		$('#menu').menu({
 			select: function(evt, ui) {
 				if (ui.item[0].childElementCount === 0) {
-					var compName = ui.item.attr('data-filename');
-					$('#mainContent').attr('src', 'help_files/' + compName);
+					var pagePath = ui.item.attr('data-filename');
+					if (pagePath.includes('acs/')) {
+						$('#mainContent').attr('src', jsonData.ACS + pagePath);
+					} else if (pagePath.includes('are/')) {
+						$('#mainContent').attr('src', jsonData.ARE + pagePath);
+					} else {
+						$('#mainContent').attr('src', jsonData.plugins + pagePath);
+					}
 				}
 			}
-		});
+		});		
+	}
+	
+	var loadPluginMenuFromComponentCollection = function(jsonData) {
+		// load the component collection
+		var httpReq = new XMLHttpRequest();
+		httpReq.onreadystatechange = function() {
+			if (httpReq.readyState === XMLHttpRequest.DONE && (httpReq.status === 404 || httpReq.status === 0)) {
+				if (httpReq.responseURL.includes('defaultComponentCollection_help.abd')) {
+					// none of the possible component collections could be found
+					alert('Could not find any component collection files. Please make sure the file "defaultComponentCollection_help.abd" exists in the ./help/ folder.');
+				} else {
+					// try to load the default component collection
+					httpReq.open('GET', './defaultComponentCollection_help.abd', true);
+					httpReq.send();
+				}
+			} else if (httpReq.readyState === XMLHttpRequest.DONE && httpReq.status === 200) {
+				componentCollection = $.parseXML(httpReq.responseText);
+				// after having successfully loaded the componentCollection, build  and refresh the menu
+				buildComponentMenu();
+				refreshMenu(jsonData);
+				// set the handlers for the quickselect field and the corresponding show-button
+				document.getElementById('quickselect').addEventListener('change', function() {
+					var compName = this.value;
+					var file = document.getElementById('opt_' + compName).attributes.getNamedItem('data-filename').value;
+					$('#mainContent').attr('src', jsonData.plugins + file);
+					this.value = '';				
+				});
+				document.getElementById('showButton').addEventListener('click', function() {
+					var compName = document.getElementById('quickselect').value;
+					var file = document.getElementById('opt_' + compName).attributes.getNamedItem('data-filename').value;
+					$('#mainContent').attr('src', jsonData.plugins + file);
+					document.getElementById('quickselect').value = '';				
+				});			
+			}
+		}
+		// try to load component collection from the path specified in the json file (if there actually is one specified there)
+		var compCollPath = jsonData.componentCollection;
+		if (compCollPath) { 
+			httpReq.open('GET', compCollPath + 'defaultComponentCollection.abd', true);
+		} else {
+			httpReq.open('GET', './defaultComponentCollection_help.abd', true);
+		}
+		httpReq.send();	
+	}
+
+	var loadPluginHelp = function(jsonData) {
+		// load code snippets for plugin-help, if necessary (i.e. if path is not null) - then load plugin-help according to componentCollection
+		if (jsonData.plugins) {
+			var httpReq = new XMLHttpRequest();
+			httpReq.onreadystatechange = function() {
+				if (httpReq.readyState === XMLHttpRequest.DONE && (httpReq.status === 404 || httpReq.status === 0)) {
+					console.log('Error loading code snippets for plugin-help - maybe "plugin_help.htm" is missing at ' + jsonData.plugins + '?');
+					refreshMenu(jsonData);
+				} else if (httpReq.readyState === XMLHttpRequest.DONE && httpReq.status === 200) {
+					$('#menu').append(httpReq.responseText.substring(0, httpReq.responseText.lastIndexOf('</li>') + 4));
+					$('#menuBlock').append(httpReq.responseText.substring(httpReq.responseText.lastIndexOf('</li>') + 5, httpReq.responseText.length));
+					loadPluginMenuFromComponentCollection(jsonData);
+				}
+			}
+			httpReq.open('GET', jsonData.plugins + 'plugin_help.htm', true);
+			httpReq.send();
+		} else {
+			refreshMenu(jsonData);
+		}
+	}
+	
+	var loadACSAndPluginHelp = function(jsonData) {
+		// load misc. ACS-help, if necessary (i.e. if path is not null) - then (or otherwise) load plugin-help
+		if (jsonData.ACS) {
+			var httpReq = new XMLHttpRequest();
+			httpReq.onreadystatechange = function() {
+				if (httpReq.readyState === XMLHttpRequest.DONE && (httpReq.status === 404 || httpReq.status === 0)) {
+					console.log('Error loading code snippet for ACS-help - maybe "acs_help.htm" is missing at ' + jsonData.ACS + '?');
+					loadPluginHelp(jsonData);
+				} else if (httpReq.readyState === XMLHttpRequest.DONE && httpReq.status === 200) {
+					$('#menu').append(httpReq.responseText);
+					loadPluginHelp(jsonData);
+				}
+			}
+			httpReq.open('GET', jsonData.ACS + 'acs_help.htm', true);
+			httpReq.send();
+		} else {
+			loadPluginHelp(jsonData);
+		}
+	}
+	
+	var loadStartPage = function(jsonData) {
+		// make sure to load the correct file on startup, if a querystring has been given
+		if (window.location.search !== '') {
+			var qstr = window.location.search.substr(1, window.location.search.length-1).split('&');
+			if (qstr[0] === 'are' && jsonData.ARE) {
+				$('#mainContent').attr('src', jsonData.ARE + qstr[1]);
+			} else if (qstr[0] === 'acs' && jsonData.ACS) {
+				$('#mainContent').attr('src', jsonData.ACS + qstr[1]);
+			} else if (qstr[0] === 'plugins' && jsonData.plugins) {
+				$('#mainContent').attr('src', jsonData.plugins + qstr[1]);
+			} else {
+				$('#mainContent').attr('src', 'startPage.htm');
+			}
+		} else {
+			$('#mainContent').attr('src', 'startPage.htm');
+		}
 	}
 	
 // ***********************************************************************************************************************
@@ -163,46 +274,28 @@
 // ***********************************************************************************************************************
 // ************************************************** constructor code ***************************************************
 // ***********************************************************************************************************************
-	// load the component collection
-	httpRequest = new XMLHttpRequest();
-	httpRequest.onreadystatechange = function() {
-		if (httpRequest.readyState === XMLHttpRequest.DONE && (httpRequest.status === 404 || httpRequest.status === 0)) {
-			if (httpRequest.responseURL.includes('defaultComponentCollection_help.abd')) {
-				// none of the possible component collections could be found
-				alert('Could not find any component collection files. Please make sure the file "defaultComponentCollection_help.abd" exists in the ./help folder.');
-			} else {
-				// try to load the default component collection
-				httpRequest.open('GET', './defaultComponentCollection_help.abd', true);
-				httpRequest.send();
-			}
-		} else if (httpRequest.readyState === XMLHttpRequest.DONE && httpRequest.status === 200) {
-			componentCollection = $.parseXML(httpRequest.responseText);
-			// after having successfully loaded the componentCollection, build the menu
-			buildMenu();
-			// set the handlers for the quickselect field and the corresponding show-button
-			document.getElementById('quickselect').addEventListener('change', function() {
-				var compName = this.value;
-				var file = document.getElementById('opt_' + compName).attributes.getNamedItem('data-filename').value;
-				$('#mainContent').attr('src', 'help_files/' + file);
-				this.value = '';				
-			});
-			document.getElementById('showButton').addEventListener('click', function() {
-				var compName = document.getElementById('quickselect').value;
-				var file = document.getElementById('opt_' + compName).attributes.getNamedItem('data-filename').value;
-				$('#mainContent').attr('src', 'help_files/' + file);
-				document.getElementById('quickselect').value = '';				
-			});			
-			// make sure to load the correct file on startup, if a querystring with a filename has been given
-			if (window.location.search != '') {
-				$('#mainContent').attr('src', 'help_files/' + window.location.search.substr(1, window.location.search.length-1));
-			} else {
-				$('#mainContent').attr('src', 'help_files/ACS/ACS_Basic_Functions.htm');
-			}			
-		}
-	}
-	// try to load component collection from ARE webserver
-	httpRequest.open('GET', '../componentCollections/defaultComponentCollection.abd', true);
-	httpRequest.send();
 
+	// load the paths to the help files from json
+	$.getJSON('helpPaths.json', function(jsonData) {
+		// load misc. ARE-help, if necessary (i.e. if path is not null) - then (or otherwise) load ACS- and plugin-help
+		if (jsonData.ARE) {
+			httpRequest = new XMLHttpRequest();
+			httpRequest.onreadystatechange = function() {
+				if (httpRequest.readyState === XMLHttpRequest.DONE && (httpRequest.status === 404 || httpRequest.status === 0)) {
+					console.log('Error loading code snippet for ARE-help - maybe "are_help.htm" is missing at ' + jsonData.ARE + '?');
+					loadACSAndPluginHelp(jsonData);
+				} else if (httpRequest.readyState === XMLHttpRequest.DONE && httpRequest.status === 200) {
+					$('#menu').append(httpRequest.responseText);
+					loadACSAndPluginHelp(jsonData);
+				}
+			}
+			httpRequest.open('GET', jsonData.ARE + 'are_help.htm', true);
+			httpRequest.send();
+		} else {
+			loadACSAndPluginHelp(jsonData);
+		}
+		loadStartPage(jsonData);
+	}).fail(function() {console.log('Error: Could not read path information - might be a syntax error in helpPaths.json.');});
+	
 	return returnObj;
 }

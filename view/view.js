@@ -450,7 +450,7 @@ ACS.view = function(modelList, // ACS.modelList
 				}
 				// load the help system
 				var actModel = modelList.getActModel();
-				if (actModel.selectedItemsList.length === 1 && typeof actModel.selectedItemsList[0].getComponentTypeId() !== 'undefined') { // thus there is one single item selectd and this item is a component
+				if (actModel.selectedItemsList.length === 1 && typeof actModel.selectedItemsList[0].getComponentTypeId() !== 'undefined') { // thus there is one single item selected and this item is a component
 					var directory;
 					switch (actModel.selectedItemsList[0].getType()) {
 						case ACS.componentType.SENSOR: directory = 'sensors'; break;
@@ -459,9 +459,9 @@ ACS.view = function(modelList, // ACS.modelList
 					}
 					var file = actModel.selectedItemsList[0].getComponentTypeId() + '.htm';
 					if (file.indexOf('Oska') === -1) file = file.slice(9); // the slice eliminates the "asterics."
-					window.open(pathToHelp + 'index.htm?' + directory + '/' + file);
+					window.open(pathToHelp + 'index.htm?plugins&' + directory + '/' + file);
 				} else {			
-					window.open(pathToHelp + 'index.htm');
+					window.open(pathToHelp + 'index.htm?acs&' + ACS.vConst.VIEW_PATHTOACSHELPSTARTPAGE);
 				}
 			}
 		}
