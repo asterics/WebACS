@@ -208,7 +208,7 @@
 	}
 
 	var loadPluginHelp = function(jsonData) {
-		// load code snippets for plugin-help, if necessary (i.e. if path is not null) - then load plugin-help according to componentCollection
+		// load the code snippets for plugin-help, if necessary (i.e. if path is not null) - then load plugin-help according to componentCollection
 		if (jsonData.plugins) {
 			var httpReq = new XMLHttpRequest();
 			httpReq.onreadystatechange = function() {
@@ -216,8 +216,8 @@
 					console.log('Error loading code snippets for plugin-help - maybe "plugin_help.htm" is missing at ' + jsonData.plugins + '?');
 					refreshMenu(jsonData);
 				} else if (httpReq.readyState === XMLHttpRequest.DONE && httpReq.status === 200) {
-					$('#menu').append(httpReq.responseText.substring(0, httpReq.responseText.lastIndexOf('</li>') + 4));
-					$('#menuBlock').append(httpReq.responseText.substring(httpReq.responseText.lastIndexOf('</li>') + 5, httpReq.responseText.length));
+					$('#menu').append(httpReq.responseText.substring(0, httpReq.responseText.lastIndexOf('</li>') + 4)); // plugin submenu
+					$('#menuBlock').append(httpReq.responseText.substring(httpReq.responseText.lastIndexOf('</li>') + 5, httpReq.responseText.length)); // quickselect field
 					loadPluginMenuFromComponentCollection(jsonData);
 				}
 			}
