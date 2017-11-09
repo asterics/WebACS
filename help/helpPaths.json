@@ -2,5 +2,6 @@
 	"ARE": "help_files/ARE_help/",
 	"ACS": "help_files/ACS_help/",
 	"plugins": "help_files/plugins/",
-	"componentCollection": "../componentCollections/"
+	"componentCollection": "../componentCollections/",
+	"stylesheet": "styles/"
 }

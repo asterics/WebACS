@@ -48,6 +48,7 @@
 // ***********************************************************************************************************************
 	var componentCollection = null;
 	var httpRequest = null;
+	var URLToStyle = '';
 	
 // ***********************************************************************************************************************
 // ************************************************** private methods ****************************************************
@@ -145,12 +146,12 @@
 			}
 		}
 	}
-	
+
 	var refreshMenu = function(jsonData) {
 		if ($('#menu').menu('instance')) $('#menu').menu('destroy');
 		$('#menu').menu({
 			select: function(evt, ui) {
-				if (ui.item[0].childElementCount === 0) {
+				if (ui.item[0].childElementCount === 0) {					
 					var pagePath = ui.item.attr('data-filename');
 					if (pagePath.includes('acs/')) {
 						$('#mainContent').attr('src', jsonData.ACS + pagePath);
@@ -247,7 +248,7 @@
 			loadPluginHelp(jsonData);
 		}
 	}
-	
+
 	var loadStartPage = function(jsonData) {
 		// make sure to load the correct file on startup, if a querystring has been given
 		if (window.location.search !== '') {
@@ -277,6 +278,16 @@
 
 	// load the paths to the help files from json
 	$.getJSON('helpPaths.json', function(jsonData) {
+		// find the absolute URL to help.css (to inject into help files loaded into iFrame)
+		if (jsonData.stylesheet) {
+			URLToStyle = window.location.href.substring(0, window.location.href.lastIndexOf('/') + 1) + jsonData.stylesheet + 'help.css';
+		} else {
+			console.log('Error loading URL to stylesheet - please make sure the relative URL to help.css is specified in helpPaths.json');
+		}
+		$('#mainContent').load(function() {
+			// insert link to stylesheet into page loaded in iFrame
+			$(this).contents().find('head')[0].append($('<link rel="stylesheet" type="text/css" href="' + URLToStyle + '" />')[0]);				
+		});		
 		// load misc. ARE-help, if necessary (i.e. if path is not null) - then (or otherwise) load ACS- and plugin-help
 		if (jsonData.ARE) {
 			httpRequest = new XMLHttpRequest();
