@@ -49,6 +49,7 @@
 	var componentCollection = null;
 	var httpRequest = null;
 	var URLToStyle = '';
+	var jsonFileName = '';
 	
 // ***********************************************************************************************************************
 // ************************************************** private methods ****************************************************
@@ -170,14 +171,7 @@
 		var httpReq = new XMLHttpRequest();
 		httpReq.onreadystatechange = function() {
 			if (httpReq.readyState === XMLHttpRequest.DONE && (httpReq.status === 404 || httpReq.status === 0)) {
-				if (httpReq.responseURL.includes('defaultComponentCollection_help.abd')) {
-					// none of the possible component collections could be found
-					alert('Could not find any component collection files. Please make sure the file "defaultComponentCollection_help.abd" exists in the ./help/ folder.');
-				} else {
-					// try to load the default component collection
-					httpReq.open('GET', './defaultComponentCollection_help.abd', true);
-					httpReq.send();
-				}
+				alert('Could not find component collection file. Please make sure the file "defaultComponentCollection.abd" exists in the folder specified in helpPaths_*.json.');
 			} else if (httpReq.readyState === XMLHttpRequest.DONE && httpReq.status === 200) {
 				componentCollection = $.parseXML(httpReq.responseText);
 				// after having successfully loaded the componentCollection, build  and refresh the menu
@@ -198,12 +192,11 @@
 				});			
 			}
 		}
-		// try to load component collection from the path specified in the json file (if there actually is one specified there)
-		var compCollPath = jsonData.componentCollection;
-		if (compCollPath) { 
-			httpReq.open('GET', compCollPath + 'defaultComponentCollection.abd', true);
+		// try to load component collection from the path specified in the json file
+		if (jsonData.componentCollection) { 
+			httpReq.open('GET', jsonData.componentCollection + 'defaultComponentCollection.abd', true);
 		} else {
-			httpReq.open('GET', './defaultComponentCollection_help.abd', true);
+			alert('No component collection file specified. Please make sure to specify the path to "defaultComponentCollection.abd" in helpPaths_*.json.');
 		}
 		httpReq.send();	
 	}
@@ -276,8 +269,14 @@
 // ************************************************** constructor code ***************************************************
 // ***********************************************************************************************************************
 
+	// find out if help is being used locally or hosted on a webserver
+	if (window.location.href.includes('file:///')) {
+		jsonFileName = 'helpPaths-local.json';
+	} else {
+		jsonFileName = 'helpPaths-hosted.json';
+	}
 	// load the paths to the help files from json
-	$.getJSON('helpPaths.json', function(jsonData) {
+	$.getJSON(jsonFileName, function(jsonData) {
 		// find the absolute URL to help.css (to inject into help files loaded into iFrame)
 		if (jsonData.stylesheet) {
 			URLToStyle = window.location.href.substring(0, window.location.href.lastIndexOf('/') + 1) + jsonData.stylesheet + 'help.css';
