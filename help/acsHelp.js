@@ -222,7 +222,7 @@
 					loadPluginMenuFromComponentCollection(jsonData);
 				}
 			}
-			httpReq.open('GET', jsonData.plugins + 'plugin_help.htm', true);
+			httpReq.open('GET', jsonData.plugins + 'plugin_help.htm.menu', true);
 			httpReq.send();
 		} else {
 			refreshMenu(jsonData);
@@ -242,7 +242,7 @@
 					loadPluginHelp(jsonData);
 				}
 			}
-			httpReq.open('GET', jsonData.ACS + 'acs_help.htm', true);
+			httpReq.open('GET', jsonData.ACS + 'acs_help.htm.menu', true);
 			httpReq.send();
 		} else {
 			loadPluginHelp(jsonData);
@@ -300,7 +300,7 @@
 					loadACSAndPluginHelp(jsonData);
 				}
 			}
-			httpRequest.open('GET', jsonData.ARE + 'are_help.htm', true);
+			httpRequest.open('GET', jsonData.ARE + 'are_help.htm.menu', true);
 			httpRequest.send();
 		} else {
 			loadACSAndPluginHelp(jsonData);
