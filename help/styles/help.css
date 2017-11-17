@@ -22,10 +22,10 @@ body {
 }
 
 /* ********** header *********** */
-.header {
+header {
     height: 8em;
     margin-top: 10px;
-    margin-bottom: 4em;
+    margin-bottom: 0.5em;
 	width: 29em;
 }
 
@@ -45,7 +45,7 @@ body {
 }
 
 /* ********** menu *********** */
-#menuPanel {
+nav {
 	clear: left;
 }
 
