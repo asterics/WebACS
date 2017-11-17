@@ -252,6 +252,8 @@
 				$('#mainContent').attr('src', jsonData.ACS + qstr[1]);
 			} else if (qstr[0] === 'plugins' && jsonData.plugins) {
 				$('#mainContent').attr('src', jsonData.plugins + qstr[1]);
+			} else if (qstr.length === 1){
+				$('#mainContent').attr('src', qstr[0]);
 			} else {
 				$('#mainContent').attr('src', 'startPage.htm');
 			}
@@ -279,7 +281,8 @@
 	$.getJSON(jsonFileName, function(jsonData) {
 		// find the absolute URL to help.css (to inject into help files loaded into iFrame)
 		if (jsonData.stylesheet) {
-			URLToStyle = window.location.href.substring(0, window.location.href.lastIndexOf('/') + 1) + jsonData.stylesheet + 'help.css';
+			var href = window.location.href.split('?');
+			URLToStyle = href[0].substring(0, href[0].lastIndexOf('/') + 1) + jsonData.stylesheet + 'help.css';
 		} else {
 			console.log('Error loading URL to stylesheet - please make sure the relative URL to help.css is specified in helpPaths.json');
 		}

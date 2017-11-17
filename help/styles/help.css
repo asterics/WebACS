@@ -91,7 +91,7 @@ body {
 	width: 53em;
 }
 
-.imageContainer {
+figure {
 	font-size: 0.9em;
 	text-align: center;
 	font-style: italic;
@@ -115,9 +115,6 @@ body {
 
 .bullet_imageContainer {
 	padding: 0.5em;
-	font-size: 0.9em;
-	text-align: center;
-	font-style: italic;
 }
 
 table, th, td {
