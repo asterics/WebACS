@@ -33,7 +33,7 @@
 <hr />
 <div id="quickselectGroup">
 	<label for="quickselect" id="quickselectLabel">Plugin-Quickselect</label>
-	<input id="quickselect" list="componentsDataList">
+	<input id="quickselect" list="componentsDataList"/>
 	<datalist id="componentsDataList">
 	</datalist>
 	<input id="showButton" type="button" value="Show"></input>			
