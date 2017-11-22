@@ -459,9 +459,9 @@ ACS.view = function(modelList, // ACS.modelList
 					}
 					var file = actModel.selectedItemsList[0].getComponentTypeId() + '.htm';
 					if (file.indexOf('Oska') === -1) file = file.slice(9); // the slice eliminates the "asterics."
-					window.open(pathToHelp + 'index.htm?plugins&' + directory + '/' + file);
+					window.open(pathToHelp + 'index.html?plugins&' + directory + '/' + file);
 				} else {			
-					window.open(pathToHelp + 'index.htm?acs&' + ACS.vConst.VIEW_PATHTOACSHELPSTARTPAGE);
+					window.open(pathToHelp + 'index.html?acs&' + ACS.vConst.VIEW_PATHTOACSHELPSTARTPAGE);
 				}
 			}
 		}
