@@ -29,7 +29,7 @@
 // ACS View Constants
 ACS.vConst = {
 	// view
-	VIEW_PATHTOACSHELPSTARTPAGE: 'acs/ACS_Basic_Functions.htm',
+	VIEW_PATHTOACSHELPSTARTPAGE: 'ACS_Basic_Functions.htm',
 	// canvasView
 	CANVASVIEW_MOTHERPANEL: 'canvasMotherPanel',
 	CANVASVIEW_TABLIST: 'canvasPanelTabList',
