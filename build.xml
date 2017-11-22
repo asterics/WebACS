@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="WebACS" default="copyHelpFiles">
+	<property name="help.files.dir" value="help_files/"/>
+	<property name="help.system.dir" value="help/"/>
+	
+	<target name="copyHelpFiles" description="Copy the help files of the WebACS to the help system.">
+		<copy todir="${help.system.dir}/${help.files.dir}" failonerror="true">
+		    <fileset dir="${help.files.dir}"/>
+		</copy>
+	</target>
+	<target name="clean" description="Cleans all temporary files.">
+		<delete dir="${help.system.dir}/${help.files.dir}"/>
+	</target>
+</project>
