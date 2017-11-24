@@ -454,21 +454,23 @@
 	}	
 	
 	returnObj.destroy = function() {
-		// remove all event handlers registered anywhere
-		gui.events.removeHandler('guiPositionChangedEvent', guiPositionChangedEventHandler());
-		gui.events.removeHandler('guiSizeChangedEvent', guiSizeChangedEventHandler());
-		// destroy children and self
-		for (var i = 0; i < children.length; i++) {
-			children[i].destroy();
+		if (group !== null) { // if null we can assume that the element has already been destroyed
+			// remove all event handlers registered anywhere
+			gui.events.removeHandler('guiPositionChangedEvent', guiPositionChangedEventHandler);
+			gui.events.removeHandler('guiSizeChangedEvent', guiSizeChangedEventHandler);
+			// destroy children and self
+			for (var i = 0; i < children.length; i++) {
+				children[i].destroy();
+			}
+			group.destroyChildren();
+			group.destroy();
+			group = null;
+			mainRect = null;
+			nameText = null;
+			anchor = null;
+			controls = null;
+			decoration = null;
 		}
-		group.destroyChildren();
-		group.destroy();
-		group = null;
-		mainRect = null;
-		nameText = null;
-		anchor = null;
-		controls = null;
-		decoration = null;		
 	}
 	
 // ***********************************************************************************************************************
