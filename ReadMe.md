@@ -3,6 +3,11 @@
 
 The WebACS is a platform-independent re-implementation of the AsTeRICS Configuration Suite using HTML5 and Javascript. For more information on AsTeRICS, please refer to [AsTeRICS on Github] (https://github.com/asterics/AsTeRICS) or the AsTeRICS website [http://www.asterics.eu](http://www.asterics.eu).
 
+## Cloning
+To clone the repo ensure to also clone its submodules by
+
+```git clone --recurse-submodules https://github.com/asterics/WebACS.git```
+
 ## Docs
 
 To start the WebACS simply open WebACS.html in Firefox (35.0.1 or higher).
