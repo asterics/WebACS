@@ -101,7 +101,6 @@
 	var componentCollectionChangedEventHandler = function() {
 		log.info('menuView: The componentCollection has been changed!');
 		returnObj.setComponentMenu();
-		// TODO if time: check if all components in model can still be found in componentCollection and delete if not (notify user)
 	}
 	
 	var actModelChangedEventHandler = function() {
@@ -895,6 +894,11 @@
 	
 	// set initial status of ARE
 	ACS.areStatus.setStatus(ACS.statusType.DISCONNECTED); // to make sure the correct buttons are activated to start with - this will trigger the AREStatusChangedEventHandler and set buttons correctly
+	
+	// if WebACS is hosted by ARE webservice, connect directly to ARE
+	if (window.location.href.includes('localhost:8081')) {
+		handleConnectARE();
+	}
 	
 	return returnObj;
 }

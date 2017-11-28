@@ -39,7 +39,7 @@
 // ***********************************************************************************************************************
 	var loadDefaultComponentCollection = function() {
 		var xmlObj = null;
-		if (window.location.href.includes('localhost:8081')) {
+		if (window.location.href.includes('localhost:8081')) { // if WebACS is hosted by ARE webservice, use componentCollection from the ARE
 			$.ajax({
 				url: ACS.mConst.MODEL_DEFAULTCOMPONENTCOLLECTIONONARE,
 				dataType: 'xml',
