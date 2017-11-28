@@ -38,16 +38,47 @@
 // ************************************************** private methods ****************************************************
 // ***********************************************************************************************************************
 	var loadDefaultComponentCollection = function() {
-		var xmlObj;
-		var httpRequest = new XMLHttpRequest();
-		httpRequest.onreadystatechange = function() {
-			if (httpRequest.readyState === XMLHttpRequest.DONE && httpRequest.status === 200) {
-				xmlObj = $.parseXML(httpRequest.responseText);
-			}
+		var xmlObj = null;
+		if (window.location.href.includes('localhost:8081')) {
+			$.ajax({
+				url: ACS.mConst.MODEL_DEFAULTCOMPONENTCOLLECTIONONARE,
+				dataType: 'xml',
+				success: function(data) {
+							log.debug('success reading component collection from ARE');
+							xmlObj = data;
+						},
+				error: function() {
+							log.debug('failed to read component collection from ARE');
+							$.ajax({
+								url: ACS.mConst.MODEL_DEFAULTCOMPONENTCOLLECTION,
+								dataType: 'xml',
+								success: function(data) {
+											log.debug('success reading default component collection as fallback');
+											xmlObj = data;
+										},
+								error: function() {
+											log.debug('failed to read default component collection as fallback');
+										},
+								async: false
+							});
+						},
+				async: false
+			});
+		} else {
+			$.ajax({
+				url: ACS.mConst.MODEL_DEFAULTCOMPONENTCOLLECTION,
+				dataType: 'xml',
+				success: function(data) {
+							log.debug('success reading default component collection');
+							xmlObj = data;
+						},
+				error: function() {
+							log.debug('failed to read default component collection');
+						},
+				async: false
+			});
 		}
-		httpRequest.open('GET', ACS.mConst.MODEL_DEFAULTCOMPONENTCOLLECTION, false);
-		httpRequest.send();
-		return xmlObj; 
+		return xmlObj;
 	}
 	
 	var findPortByNameInXML = function(portName, portsXML) {
@@ -1154,8 +1185,12 @@
 // ************************************************** constructor code ***************************************************
 // ***********************************************************************************************************************
 	componentCollection = loadDefaultComponentCollection();
-	log.debug('the component-id of the first component in the collection is "'+componentCollection.getElementsByTagName('componentType').item(0).attributes.getNamedItem('id').nodeValue+'"');
-	returnObj.events.fireEvent('componentCollectionChangedEvent');
+	if (componentCollection) {
+		log.debug('the component-id of the first component in the collection is "' + componentCollection.getElementsByTagName('componentType').item(0).attributes.getNamedItem('id').nodeValue + '"');
+		returnObj.events.fireEvent('componentCollectionChangedEvent');
+	} else {	
+		alert('No valid component collection found. Please make sure the file defaultComponentCollection.abd exists in the WebACS folder.');
+	}
 	
 	return returnObj;
 }
