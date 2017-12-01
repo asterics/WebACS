@@ -566,7 +566,7 @@
 			returnObj.hasBeenChanged = false;
 			// actually save the model
 			var blob = new Blob([returnObj.getModelXMLString()], {type: 'text/plain;charset=utf-8'});			
-			saveAs(blob, saveName);
+			saveAs(blob, saveName, true);
 		}
 	}
 	
