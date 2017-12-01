@@ -160,7 +160,7 @@
 			}
 			
 			function DDM_errorCallback(HTTPstatus, AREerrorMessage) {
-				if (AREerrorMessage != '') alert(AREerrorMessage);
+				if (AREerrorMessage != '') log.debug('Unable to determine synchronisation status - ARE says: "' + AREerrorMessage + '"');
 				synchronised = undefined;
 				returnObj.events.fireEvent('ARESynchronisationChangedEvent');
 			}
