@@ -550,7 +550,7 @@
 		modelLayer.draw();
 	}
 	
-	var componentPositionChangedEventHandler  = function() {
+	var componentPositionChangedEventHandler = function() {
 		if (!modelView.isDragging()) {
 			if (component.getIsSelected()) {
 				// this will set the position of the component right in the view
@@ -561,6 +561,11 @@
 			}
 			modelLayer.draw();
 		}
+	}
+	
+	var componentIdChangedEventHandler = function() {
+		view.children[4].text(component.getId());
+		modelLayer.draw();
 	}
 	
 // ***********************************************************************************************************************
@@ -742,6 +747,7 @@
 	component.events.registerHandler('selectedEvent', selectedEventHandler);
 	component.events.registerHandler('deSelectedEvent', deSelectedEventHandler);
 	component.events.registerHandler('componentPositionChangedEvent', componentPositionChangedEventHandler);
+	component.events.registerHandler('componentIdChangedEvent', componentIdChangedEventHandler);
 
 	return returnObj;
 }

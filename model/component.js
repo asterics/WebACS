@@ -65,6 +65,7 @@
 	
 	returnObj.setId = function(newId) {
 		id = newId;
+		returnObj.events.fireEvent('componentIdChangedEvent');
 	}
 
 	returnObj.getComponentTypeId = function() {
