@@ -344,9 +344,19 @@
 			var modelXML = $.parseXML(data);
 			// if active model is not empty, open new model first
 			if (modelList.getActModel().componentList.length > 0) modelList.addNewModel();
-			// load the model
-			modelList.getActModel().loadModel(modelXML);
-			ACS.areStatus.setSynchronised(true);
+			// first download the componentCollection from the ARE to make sure we're using the right one
+			getComponentDescriptorsAsXml(componentDescriptors_successCallback, componentDescriptors_errorCallback);
+
+			function componentDescriptors_successCallback(data, HTTPstatus) {
+				modelList.getActModel().setComponentCollection(data);
+				// actually load the downloaded model
+				modelList.getActModel().loadModel(modelXML);
+				ACS.areStatus.setSynchronised(true);
+			}
+		
+			function componentDescriptors_errorCallback(HTTPstatus, AREerrorMessage) {
+				alert('error: ' + AREerrorMessage);
+			}
 		}
 		
 		function DDM_errorCallback(HTTPstatus, AREerrorMessage) {
@@ -486,12 +496,23 @@
 																	}
 
 																	function DMF_successCallback(data, HTTPstatus) {
+																		var modelXML = $.parseXML(data);
 																		// if active model is not empty, open new model first
 																		if (modelList.getActModel().componentList.length > 0) modelList.addNewModel();
-																		// load the model received from ARE
-																		modelList.getActModel().loadModel($.parseXML(data));
-																		// set the correct filename
-																		modelList.getActModel().setFilename(file);
+																		// first download the componentCollection from the ARE to make sure we're using the right one
+																		getComponentDescriptorsAsXml(componentDescriptors_successCallback, componentDescriptors_errorCallback);
+
+																		function componentDescriptors_successCallback(data, HTTPstatus) {
+																			modelList.getActModel().setComponentCollection(data);
+																			// actually load the model received from ARE
+																			modelList.getActModel().loadModel(modelXML);
+																			// set the correct filename
+																			modelList.getActModel().setFilename(file);
+																		}
+																	
+																		function componentDescriptors_errorCallback(HTTPstatus, AREerrorMessage) {
+																			alert('error: ' + AREerrorMessage);
+																		}																		
 																	}
 																	
 																	function DMF_errorCallback(HTTPstatus, AREerrorMessage) {

@@ -3990,7 +3990,6 @@
 
     </componentType>
 
-
 <componentType canonical_name="eu.asterics.component.processor.averager.AveragerInstance" id="asterics.Averager">
         <type subtype="Basic Math">processor</type>
         <singleton>false</singleton>
@@ -4011,7 +4010,6 @@
             <property combobox="average//averager with integer output//accumulate for n milliseconds//median" description="The averager or accumulator mode" name="mode" type="integer" value="0"/>
         </properties>
     </componentType>
-
 
  <componentType canonical_name="eu.asterics.component.processor.basictralgorithms.BasicTRalgorithmsInstance" id="asterics.BasicTRalgorithms">
         <type subtype="Signal Shaping">processor</type>
