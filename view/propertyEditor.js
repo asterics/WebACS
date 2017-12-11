@@ -243,7 +243,7 @@ ACS.propertyEditor = function (modelList, // ACS.modelList
 				boolInput = document.createElement("INPUT");
 				boolInput.setAttribute("type", "checkbox");
 				boolInput.setAttribute("value", valtemp);
-				if (valtemp === "true") {
+				if ((valtemp === "true") || (valtemp === "True")) {
 					boolInput.setAttribute("checked", true);
 				}
 				boolInput.setAttribute("id", h + "/1/" + valtemp);
