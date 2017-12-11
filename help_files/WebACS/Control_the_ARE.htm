@@ -12,7 +12,7 @@
 			<figcaption>System Tab, ARE and ARE Storage Group</figcaption>
 		</figure>
 		<ul>
-			<li><EM>Connect to ARE </EM>connects the ACS with the ARE. The location of the ARE is assumed to be "localhost:8081". The possibility to edit this value has yet to be implemented.</li>
+			<li><EM>Connect to ARE </EM>connects the ACS with the ARE. The location of the ARE is extracted from the URL of the WebACS (assuming it is hosted on the ARE's webservice) or - if the WebACS is not hosted - the ARE is assumed at "localhost:8081". The possibility to edit this value has yet to be implemented.</li>
 			<li><EM>Disconnect from ARE </EM>closes the connection to the ARE.</li>
 			<li><EM>Upload Model </EM>transmits the currently selected model from the ACS to the ARE. The model on the ARE will be overwritten. Uploading the model to the ARE does not start the model on the ARE.</li> 
 			<li><EM>Download Model </EM>transmits the active model from the ARE to the ACS. A new model tab will be opened for this.</li>
