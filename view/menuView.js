@@ -206,13 +206,9 @@
 	
 	// Menu-Button-Handlers - System-Menu
 	var handleConnectARE = function(e) {
-		log.debug('menuView: connectAREBtn has been clicked');
+		log.debug('menuView: attempting to connect to ARE');
 		ACS.areStatus.setStatus(ACS.statusType.CONNECTING);
-		if (window.location.protocol === 'file:') {
-			setBaseURI(ACS.vConst.MENUVIEW_AREBASEURILOCAL);
-		} else {
-			setBaseURI(window.location.origin + '/rest/');
-		}
+		setBaseURI(ACS.areBaseURI + '/rest/');
 		// check and show current status of ARE (the rest of the connection process takes place in the successcallback, because only when this is a success,
 		// we can be sure that an ARE is actually there)
 		getModelState(MS_successCallback, MS_errorCallback);
@@ -229,6 +225,7 @@
 					ACS.areStatus.setStatus(ACS.statusType.CONNECTED);
 					break;
 			}
+			if (ACS.autoConnect && ACS.autoDownloadModel && !ACS.openFile) handleDownloadModel();
 			ACS.areStatus.checkAndSetSynchronisation();
 			// subscribe to changes of the model state and the model itself
 			subscribe(SUBSCRIBE_STATECHANGE_successCallback, SUBSCRIBE_EVENTS_errorCallback, 'model_state_changed');
@@ -280,7 +277,7 @@
 			
 		function MS_errorCallback(HTTPstatus, AREerrorMessage) {
 			log.debug(AREerrorMessage);
-			alert('Unable to connect to ARE - make sure the baseURL is set correctly and ARE is up and running.')
+			alert('Unable to connect to ARE - make sure the areBaseURI is set correctly and the ARE is up and running.');
 			ACS.areStatus.setStatus(ACS.statusType.DISCONNECTED);
 		}		
 	}
@@ -919,11 +916,6 @@
 	
 	// set initial status of ARE
 	ACS.areStatus.setStatus(ACS.statusType.DISCONNECTED); // to make sure the correct buttons are activated to start with - this will trigger the AREStatusChangedEventHandler and set buttons correctly
-	
-	// if WebACS is hosted by ARE webservice, connect directly to ARE
-	if (window.location.port === '8081') {
-		handleConnectARE();
-	}
 	
 	return returnObj;
 }

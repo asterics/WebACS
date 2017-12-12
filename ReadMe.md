@@ -10,9 +10,9 @@ To clone the repo ensure to also clone its submodules by
 
 ## Docs
 
-To start the WebACS simply open WebACS.html in Firefox (35.0.1 or higher).
+To start the WebACS simply open index.html in Firefox (35.0.1 or higher).
 
-There is no further documentation available at the moment.
+For further documentation please refer to /documentation subfolder.
 
 ## Licence
 

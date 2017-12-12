@@ -31,9 +31,9 @@
 // ***********************************************************************************************************************
 // ************************************************** private variables **************************************************
 // ***********************************************************************************************************************
-	var modelList = ACS.modelList();
-	var clipBoard = ACS.clipBoard();
-	var view = ACS.view(modelList, clipBoard);
+	var modelList;
+	var clipBoard;
+	var view;
 
 // ***********************************************************************************************************************
 // ************************************************** private methods ****************************************************
@@ -43,11 +43,63 @@
 // ************************************************** public stuff *******************************************************
 // ***********************************************************************************************************************
 	var returnObj = {};
+	
+	// global variables
+	ACS.openFile = null; // path to model file that will be opened on startup
+	ACS.autoConnect = false; // autoConnect to ARE using ACS.areBaseURI
+	ACS.autoDownloadModel = false; // automatically download the current model from the auto-connected ARE; will only work if no openFile is specified
+	ACS.areBaseURI = null; // specify URI for the ARE (if not specified, but the WebACS is hosted by ARE-webservice, that ARE will be used, else localhost will be assumed)
+	
 
 // ***********************************************************************************************************************
 // ************************************************** constructor code ***************************************************
 // ***********************************************************************************************************************
 	log.setLevel(log.levels.TRACE); // loglevel usage log.trace(msg), log.debug(msg), log.info(msg), log.warn(msg), log.error(msg) (https://github.com/pimterry/loglevel)
+	// extract values from query string
+	var querystring = window.location.search;
+	if (querystring) {
+		querystring = querystring.substring(1); // eliminate the '?'
+		var inStrings = querystring.split('&');
+		for (var i = 0; i < inStrings.length; i++) {
+			var actTuple = inStrings[i].split('=');
+			switch (actTuple[0]) {
+				case 'openFile':			if (actTuple[1] !== '') {
+												ACS.openFile = actTuple[1];
+											}
+											break;
+				case 'autoConnect':			if (actTuple[1] === 'true') {
+												ACS.autoConnect = true;
+											} else {
+												ACS.autoConnect = false;
+											}
+											break;
+				case 'autoDownloadModel':	if (actTuple[1] === 'true') {
+												ACS.autoDownloadModel = true;
+											} else {
+												ACS.autoDownloadModel = false;
+											}
+											break;
+				case 'areBaseURI':			if (actTuple[1] !== '') {
+												ACS.areBaseURI = actTuple[1];
+											}
+											break;
+			}
+		}
+	}
+	// set areBaseURI, if not yet set
+	if (!ACS.areBaseURI) {
+		if (window.location.port === '8081') { // assuming that the WebACS is hosted by ARE-webservice
+			ACS.areBaseURI = window.location.origin;
+		} else {
+			ACS.areBaseURI = 'http://localhost:8081';
+		}
+	}
+	log.debug('openFile: ' + ACS.openFile + '\nautoConnect: ' + ACS.autoConnect + '\nautoDownloadModel: ' + ACS.autoDownloadModel + '\nareBaseURI: ' + ACS.areBaseURI);
+	
+	// setup the WebACS
+	modelList = ACS.modelList();
+	clipBoard = ACS.clipBoard();
+	view = ACS.view(modelList, clipBoard);	
 	ACS.areStatus.setModelList(modelList);
 	
 	return returnObj;

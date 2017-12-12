@@ -547,6 +547,11 @@ ACS.view = function(modelList, // ACS.modelList
 		if (actModelView.getGuiKeyboardMode()) actModelView.setGuiKeyboardMode(false);
 		if (actModelView.getListKeyboardMode()) actModelView.setListKeyboardMode(false);		
 	});
+	
+	// if autoConnect is set true by querystring, connect directly to the ARE
+	if (ACS.autoConnect) {
+		document.getElementById('connectAREBtn').click();
+	}	
 
 	return returnObj;
 }
