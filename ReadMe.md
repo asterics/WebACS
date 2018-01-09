@@ -3,16 +3,37 @@
 
 The WebACS is a platform-independent re-implementation of the AsTeRICS Configuration Suite using HTML5 and Javascript. For more information on AsTeRICS, please refer to [AsTeRICS on Github] (https://github.com/asterics/AsTeRICS) or the AsTeRICS website [http://www.asterics.eu](http://www.asterics.eu).
 
-## Cloning
+## Clone
 To clone the repo ensure to also clone its submodules by
 
 ```git clone --recurse-submodules https://github.com/asterics/WebACS.git```
 
+## Run
+As the WebACS is based an Javascript totally, ```index.html``` can be opened as local file in Firefox (35.0.1 or higher).
+
+It is recommended that the WebACS is hosted on a webserver and started via an http-URL, e.g.
+
+```http://localhost:8081/webapps/WebACS/index.html```
+
+In this case also Chrome and other browsers are supported.
+
+### WebACS query string options
+When starting the WebACS certain parameters can be specified in the query string of the URL:
+* **openFile**: string containing the relative path to the model (must be the same webserver as the one which provides the WebACS) file that shall be opened directly on startup
+* **autoConnect**: boolean – if true: automatically connects to the ARE upon startup: default is false
+* **autoDownloadModel**: boolean – if true: automatically downloads the current model from the ARE; will only work if autoConnect is true and no openFile is specified; default is false
+* **areBaseURI**: string that specifies the URI for the ARE; if not specified, but the WebACS is hosted by an ARE-webservice, the hosting ARE will be used, else localhost will be assumed
+
+#### Examples
+* Automatically connect to the specified ARE and download the model from there:
+http://localhost:8081/webapps/WebACS/?autoConnect=true&autoDownloadModel=true&areBaseURI=http://localhost:8081
+* Automatically open a specified model file and automatically connect to the hosting ARE:
+http://localhost:8081/webapps/WebACS/?autoConnect=true&openFile=testmodels/test1.acs
+
+
 ## Docs
 
-To start the WebACS simply open index.html in Firefox (35.0.1 or higher).
-
-For further documentation please refer to /documentation subfolder.
+For further documentation please refer to [documentation](documentation) subfolder.
 
 ## Licence
 
