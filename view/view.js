@@ -443,7 +443,7 @@ ACS.view = function(modelList, // ACS.modelList
         if(ACS.areStatus.isConnected()) {
             openHelp(ACS.areBaseURI + '/webapps/WebACS/help/');
         } else {
-            openHelp('http://asterics.github.io/AsTeRICS/webapps/WebACS/help/');
+            openHelp(ACS.vConst.VIEW_ONLINE_HELP_PATH);
 		}
 
         function openHelp(pathToHelp) {
