@@ -291,7 +291,7 @@ ACS.propertyEditor = function (modelList, // ACS.modelList
 				textInput = document.createElement("INPUT");
 				textInput.setAttribute("type", "text");
 				textInput.setAttribute("name", propName);
-				textInput.setAttribute("value", valtemp);
+				textInput.setAttribute("value", ACS.utils.decodeForXml(valtemp));
 				textInput.setAttribute("id", h + "/1/" + valtemp);
 				textInput.addEventListener("blur", writeProperty);
 				textInput.addEventListener("input", writePropertyChangLocal); //workaround when blur is not fired
