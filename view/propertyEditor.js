@@ -211,23 +211,30 @@ ACS.propertyEditor = function (modelList, // ACS.modelList
 		//var tempString=actModel.componentList[selectedElement].getId();
 		//Properties
 		for (var h = 0; h < actModel.componentList[selectedElement].propertyList.length; h++) {
-			var propName = actModel.componentList[selectedElement].propertyList[h].getKey();
+            var property = actModel.componentList[selectedElement].propertyList[h];
+			var propName = property.getKey();
 			row[h + 1] = bodyT.insertRow(-1);
 			cell = row[h + 1].insertCell(0);
 
-			var tempStringa = actModel.componentList[selectedElement].propertyList[h].combobox;
-			var valtemp = actModel.componentList[selectedElement].propertyList[h].value;
-			var typetemp = actModel.componentList[selectedElement].propertyList[h].getType();
+			var comboValues = property.combobox;
+			var valtemp = property.value;
+			var typetemp = property.getType();
 			cell.innerHTML = propName;
 
 			//generat dropdown list in case that combox includes values
-			if (tempStringa !== '') {
-				var entries = tempStringa.split('//');
+			if (comboValues !== '') {
+				var entries = comboValues.split('//');
 
 				dropdownList = null;
 				dropdownList = document.createElement('select');
-				for (l = 0; l < entries.length; l++) {
-					dropdownList.appendChild(new Option(entries[l], l));
+				for (var l = 0; l < entries.length; l++) {
+					var option = null;
+					if(typetemp === ACS.dataType.STRING) {
+                        option = new Option(entries[l], entries[l]);
+					} else {
+						option = new Option(entries[l], l);
+					}
+					dropdownList.appendChild(option);
 					dropdownList.selectedIndex = valtemp;
 				}
 				dropdownList.setAttribute("id", h + "/1/" + valtemp);
@@ -237,7 +244,7 @@ ACS.propertyEditor = function (modelList, // ACS.modelList
 			}
 
 			//generate checkbox field for boolean
-			if (tempStringa === '' && typetemp === 1) {
+			if (comboValues === '' && typetemp === ACS.dataType.BOOLEAN) {
 				cell = row[h + 1].insertCell(1);
 				boolInput = null;
 				boolInput = document.createElement("INPUT");
@@ -251,7 +258,7 @@ ACS.propertyEditor = function (modelList, // ACS.modelList
 				cell.appendChild(boolInput);
 			}
 			//generate intage field
-			if (tempStringa === '' && typetemp === 4) {
+			if (comboValues === '' && typetemp === ACS.dataType.INTEGER) {
 				cell = row[h + 1].insertCell(1);
 				numberInput = null;
 				numberInput = document.createElement("INPUT");
@@ -264,7 +271,7 @@ ACS.propertyEditor = function (modelList, // ACS.modelList
 				cell.appendChild(numberInput);
 			}
 
-			if (tempStringa === '' && typetemp === 5) {
+			if (comboValues === '' && typetemp === ACS.dataType.DOUBLE) {
 				cell = row[h + 1].insertCell(1);
 				numberInput = null;
 				numberInput = document.createElement("INPUT");
@@ -278,7 +285,7 @@ ACS.propertyEditor = function (modelList, // ACS.modelList
 				cell.appendChild(numberInput);
 			}
 
-			if (tempStringa === '' && typetemp === 6) {
+			if (comboValues === '' && typetemp === ACS.dataType.STRING) {
 				cell = row[h + 1].insertCell(1);
 				textInput = null;
 				textInput = document.createElement("INPUT");
