@@ -234,8 +234,10 @@ ACS.propertyEditor = function (modelList, // ACS.modelList
 					} else {
 						option = new Option(entries[l], l);
 					}
+					if(valtemp == l || valtemp == entries[l]) {
+						option.selected = true;
+					}
 					dropdownList.appendChild(option);
-					dropdownList.selectedIndex = valtemp;
 				}
 				dropdownList.setAttribute("id", h + "/1/" + valtemp);
 				dropdownList.addEventListener("change", writeProperty);
