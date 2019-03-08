@@ -96,16 +96,10 @@
 		return list.length;
 	}
 	
-// ***********************************************************************************************************************
-// ************************************************** constructor code ***************************************************
-// ***********************************************************************************************************************
-	returnObj.addNewModel();
-	
-	// check if an openFile was provided in the querystring and if yes, try to load a model from that file
-	if (ACS.openFile) {
+	returnObj.loadQueryStringModel = function () {
 		var xmlObj;
 		var httpRequest = new XMLHttpRequest();
-		httpRequest.onreadystatechange = function() {
+		httpRequest.onreadystatechange = function () {
 			if (httpRequest.readyState === XMLHttpRequest.DONE && httpRequest.status === 200) {
 				list[0].setFilename(ACS.openFile.substring(ACS.openFile.lastIndexOf('/') + 1));
 				xmlObj = $.parseXML(httpRequest.responseText);
@@ -121,5 +115,10 @@
 			// has been installed in order not to confuse the enduser, who often will have no knowledge of URLs and querystrings.
 		}
 	}
+// ***********************************************************************************************************************
+// ************************************************** constructor code ***************************************************
+// ***********************************************************************************************************************
+	returnObj.addNewModel();
+
 	return returnObj;
 }
