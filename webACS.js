@@ -105,6 +105,7 @@
 	clipBoard = ACS.clipBoard();
 	view = ACS.view(modelList, clipBoard);	
 	ACS.areStatus.setModelList(modelList);
+	if (ACS.openFile) modelList.loadQueryStringModel();
 	
 	return returnObj;
 }
