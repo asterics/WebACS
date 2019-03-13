@@ -25,31 +25,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- 
- ACS.webACS = function() {
+<<<<<<< Updated upstream
+import log from "loglevel";
 
-// ***********************************************************************************************************************
-// ************************************************** private variables **************************************************
-// ***********************************************************************************************************************
+=======
+>>>>>>> Stashed changes
+export default function() {
+
 	var modelList;
 	var clipBoard;
 	var view;
-
-// ***********************************************************************************************************************
-// ************************************************** private methods ****************************************************
-// ***********************************************************************************************************************
-	
-// ***********************************************************************************************************************
-// ************************************************** public stuff *******************************************************
-// ***********************************************************************************************************************
-	var returnObj = {};
-	
-	// global variables
-	ACS.openFile = null; // path to model file that will be opened on startup
-	ACS.autoConnect = false; // autoConnect to ARE using ACS.areBaseURI
-	ACS.autoDownloadModel = false; // automatically download the current model from the auto-connected ARE; will only work if no openFile is specified
-	ACS.areBaseURI = null; // specify URI for the ARE (if not specified, but the WebACS is hosted by ARE-webservice, that ARE will be used, else localhost will be assumed)
-	
+	var openFile = null; // path to model file that will be opened on startup
+	var autoConnect = false; // autoConnect to ARE using ACS.areBaseURI
+	var autoDownloadModel = false; // automatically download the current model from the auto-connected ARE; will only work if no openFile is specified
+	var areBaseURI = null; // specify URI for the ARE (if not specified, but the WebACS is hosted by ARE-webservice, that ARE will be used, else localhost will be assumed)
 
 // ***********************************************************************************************************************
 // ************************************************** constructor code ***************************************************
@@ -64,47 +53,47 @@
 			var actTuple = inStrings[i].split('=');
 			switch (actTuple[0]) {
 				case 'openFile':			if (actTuple[1] !== '') {
-												ACS.openFile = actTuple[1];
+												openFile = actTuple[1];
 											}
 											break;
 				case 'autoConnect':			if (actTuple[1] === 'true') {
-												ACS.autoConnect = true;
+												autoConnect = true;
 											} else {
-												ACS.autoConnect = false;
+												autoConnect = false;
 											}
 											break;
 				case 'autoDownloadModel':	if (actTuple[1] === 'true') {
-												ACS.autoDownloadModel = true;
+												autoDownloadModel = true;
 											} else {
-												ACS.autoDownloadModel = false;
+												autoDownloadModel = false;
 											}
 											break;
 				case 'areBaseURI':			if (actTuple[1] !== '') {
-												ACS.areBaseURI = actTuple[1];
+												areBaseURI = actTuple[1];
 											}
 											break;
                 case 'helpUrlPath':			if (actTuple[1] !== '') {
-                    							ACS.vConst.VIEW_ONLINE_HELP_PATH = actTuple[1];
+                    							vConst.VIEW_ONLINE_HELP_PATH = actTuple[1];
 											}
 											break;
 			}
 		}
 	}
 	// set areBaseURI, if not yet set
-	if (!ACS.areBaseURI) {
+	if (!areBaseURI) {
 		if (window.location.port === '8081') { // assuming that the WebACS is hosted by ARE-webservice
-			ACS.areBaseURI = window.location.origin;
+			areBaseURI = window.location.origin;
 		} else {
-			ACS.areBaseURI = 'http://localhost:8081';
+			areBaseURI = 'http://localhost:8081';
 		}
 	}
-	log.debug('openFile: ' + ACS.openFile + '\nautoConnect: ' + ACS.autoConnect + '\nautoDownloadModel: ' + ACS.autoDownloadModel + '\nareBaseURI: ' + ACS.areBaseURI);
+	log.debug('openFile: ' + openFile + '\nautoConnect: ' + autoConnect + '\nautoDownloadModel: ' + autoDownloadModel + '\nareBaseURI: ' + areBaseURI);
 	
 	// setup the WebACS
-	modelList = ACS.modelList();
-	clipBoard = ACS.clipBoard();
-	view = ACS.view(modelList, clipBoard);	
-	ACS.areStatus.setModelList(modelList);
-	
-	return returnObj;
+	// modelList = modelList();
+	// clipBoard = clipBoard();
+	// view = view(modelList, clipBoard);	
+	// areStatus.setModelList(modelList);
 }
+
+// export { webACS };
