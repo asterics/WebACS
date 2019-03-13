@@ -31,6 +31,10 @@
     "webpack-dev-server": "^3.2.1"
   },
   "dependencies": {
+    "Blob": "^0.10.0",
+    "FileSaver": "^0.10.0",
+    "jquery": "1.11.1",
+    "kinetic": "^5.1.9",
     "loglevel": "1.1.0"
   }
 }
