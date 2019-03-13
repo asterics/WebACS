@@ -25,11 +25,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-<<<<<<< Updated upstream
 import log from "loglevel";
 
-=======
->>>>>>> Stashed changes
 export default function() {
 
 	var modelList;
