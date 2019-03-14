@@ -247,44 +247,54 @@ ACS.propertyEditor = function (modelList, // ACS.modelList
 			if (isDynProp) {
 
 				log.debug('downloading (dynamic) properties list');
-				setBaseURI(ACS.areBaseURI + '/rest/');
-
 				cell = row[h + 1].insertCell(1);
-				var id = propertyEdPanelCaptions.innerHTML;
-				var key = propName;
-				var currentValue = valtemp || "";
-				var elementId = h + "/1/" + valtemp;
 
-				fetchDynProperties(cell, elementId, currentValue, id, key);
-				function fetchDynProperties(cellToAdd, elementId, currentValue, id, key) {
-					getRuntimeComponentPropertyList(function(data, httpStatus) {
-						var entries = data ? JSON.parse(data) : null;
-						entries.unshift("");
-						if(entries && entries.length === 0) {
-							console.warn('empty dynamic property list');
+				if (ACS.areStatus.getSynchronised() === true) {
+
+					var id = propertyEdPanelCaptions.innerHTML;
+					var key = propName;
+					var currentValue = valtemp || "";
+					var elementId = h + "/1/" + valtemp;
+	
+					fetchDynProperties(cell, elementId, currentValue, id, key);
+					function fetchDynProperties(cellToAdd, elementId, currentValue, id, key) {
+						getRuntimeComponentPropertyList(function(data, httpStatus) {
+							var entries = data ? JSON.parse(data) : null;
+							entries.unshift("");
+							if(entries && entries.length === 0) {
+								console.warn('empty dynamic property list');
+								var inputElement = document.createElement('input');
+								inputElement.value = currentValue;
+								inputElement.setAttribute("id", elementId);
+								cellToAdd.appendChild(inputElement);
+							} else {
+								var dropdownList = document.createElement('select');
+								for (var l = 0; l < entries.length; l++) {
+									var option = new Option(entries[l], entries[l]);
+									option.selected = (entries[l] == currentValue);
+									dropdownList.appendChild(option);
+								}
+								dropdownList.setAttribute("id", elementId);
+								dropdownList.addEventListener("change", writeProperty);
+								cellToAdd.appendChild(dropdownList);
+							}
+						}, function(HTTPstatus, AREerrorMessage) {
+							console.error('check if ARE is running');
+							console.error('error: ' + AREerrorMessage);
 							var inputElement = document.createElement('input');
 							inputElement.setAttribute("id", elementId);
+							inputElement.value = currentValue;
 							cellToAdd.appendChild(inputElement);
-						} else {
-							var dropdownList = document.createElement('select');
-							for (var l = 0; l < entries.length; l++) {
-								var option = new Option(entries[l], entries[l]);
-								option.selected = (entries[l] == currentValue);
-								dropdownList.appendChild(option);
-							}
-							dropdownList.setAttribute("id", elementId);
-							dropdownList.addEventListener("change", writeProperty);
-							cellToAdd.appendChild(dropdownList);
-						}
-					}, function(HTTPstatus, AREerrorMessage) {
-						console.error('check if ARE is running');
-						console.error('error: ' + AREerrorMessage);
-						var inputElement = document.createElement('input');
-						inputElement.setAttribute("id", elementId);
-						cellToAdd.appendChild(inputElement);
-					}, id, key);
-				};
+						}, id, key);
+					};
 
+				} else {
+					var inputElement = document.createElement('input');
+					inputElement.setAttribute("id", elementId);
+					inputElement.value = valtemp;
+					cell.appendChild(inputElement);
+				}
+				
 			} else {
 				//generate checkbox field for boolean
 				if (comboValues === '' && typetemp === ACS.dataType.BOOLEAN) {
