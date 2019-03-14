@@ -260,7 +260,7 @@ ACS.propertyEditor = function (modelList, // ACS.modelList
 					function fetchDynProperties(cellToAdd, elementId, currentValue, id, key) {
 						getRuntimeComponentPropertyList(function(data, httpStatus) {
 							var entries = data ? JSON.parse(data) : null;
-							if (entries === null || entries.length === 0) {
+							if (entries === null || !(entries instanceof Array) || entries.length === 0) {
 								if (entries === null) console.warn('cannot process received data');
 								else console.warn('empty dynamic property list');
 								var inputElement = document.createElement('input');
