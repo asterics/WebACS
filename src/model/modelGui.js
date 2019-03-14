@@ -25,16 +25,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- 
- ACS.gui = function(x, // int
-				    y, // int
-				    width, // int
-				    height, // int
-				    isExternal) { // bool
+ import EventManager from "../eventManager.js";
+ import Gui from "./gui.js";
+ import mConst from "./mConst.js";
+
+ export default function() { 
+
 
 // ***********************************************************************************************************************
 // ************************************************** private variables **************************************************
 // ***********************************************************************************************************************
+	var decoration = mConst.MODELGUI_DECORATION;
+	var fullScreen = mConst.MODELGUI_FULLSCREEN;
+	var alwaysOnTop = mConst.MODELGUI_ALWAYSONTOP;
+	var toSystemTray = mConst.MODELGUI_TOSYSTEMTRAY;
+	var showControlPanel = mConst.MODELGUI_SHOWCONTROLPANEL;
 
 // ***********************************************************************************************************************
 // ************************************************** private methods ****************************************************
@@ -45,40 +50,52 @@
 // ***********************************************************************************************************************
 	var returnObj = {};
 	
-	returnObj.events = ACS.eventManager();
+	returnObj.events = EventManager();
 	
-	returnObj.setNewPosition = function(pos) { // Object {x: int, y: int}
-		x = pos.x;
-		y = pos.y;
-		returnObj.events.fireEvent('guiPositionChangedEvent');
+	returnObj.areGuiWindow = Gui(mConst.MODELGUI_AREGUIWINDOW_X, mConst.MODELGUI_AREGUIWINDOW_Y, mConst.MODELGUI_AREGUIWINDOW_WIDTH, mConst.MODELGUI_AREGUIWINDOW_HEIGHT, false);
+	
+	returnObj.setDecoration = function(dec) {
+		decoration = dec;
+		returnObj.events.fireEvent('decorationChangedEvent');
 	}
 	
-	returnObj.setNewSize = function(newSize) { // Object {width: int, height: int}
-		width = newSize.width;
-		height = newSize.height;
-		returnObj.events.fireEvent('guiSizeChangedEvent');
+	returnObj.getDecoration = function() {
+		return decoration;
+	}
+
+	returnObj.setFullScreen = function(fs) {
+		fullScreen = fs;
 	}
 	
-	returnObj.getIsExternal = function() {
-		return isExternal;
+	returnObj.getFullScreen = function() {
+		return fullScreen;
+	}
+
+	returnObj.setAlwaysOnTop = function(aot) {
+		alwaysOnTop = aot;
+	}
+	
+	returnObj.getAlwaysOnTop = function() {
+		return alwaysOnTop;
+	}
+
+	returnObj.setToSystemTray = function(tst) {
+		toSystemTray = tst;
+	}
+	
+	returnObj.getToSystemTray = function() {
+		return toSystemTray;
+	}
+
+	returnObj.setShowControlPanel = function(scp) {
+		showControlPanel = scp;
+		returnObj.events.fireEvent('showControlPanelChangedEvent');
+	}
+	
+	returnObj.getShowControlPanel = function() {
+		return showControlPanel;
 	}	
 	
-	returnObj.getX = function() {
-		return Number(x);
-	}
-	
-	returnObj.getY = function() {
-		return Number(y);
-	}
-	
-	returnObj.getWidth = function() {
-		return Number(width);
-	}	
-
-	returnObj.getHeight = function() {
-		return Number(height);
-	}		
-
 // ***********************************************************************************************************************
 // ************************************************** constructor code ***************************************************
 // ***********************************************************************************************************************

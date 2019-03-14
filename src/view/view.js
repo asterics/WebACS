@@ -25,14 +25,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- 
-ACS.view = function(modelList, // ACS.modelList
+import MenuView from "./menuView.js";
+
+export default function(modelList, // ACS.modelList
 					clipBoard) { // ACS.clipBoard
 
 // ***********************************************************************************************************************
 // ************************************************** private variables **************************************************
 // ***********************************************************************************************************************
-	var menu = ACS.menuView(modelList);
+	var menu = MenuView(modelList);
 	var canvas = ACS.canvasView(modelList, clipBoard);
 	var propertyEditor = ACS.propertyEditor(modelList,canvas.getCanvasModelViewList(),canvas.getEditorProperties());
 	var actModelView;

@@ -1,10 +1,13 @@
 const path = require("path");
+
 // require("babel-regster");
 require("@babel/register");
 
 // plugins
 const htmlWebpackPlugin = require("html-webpack-plugin");
+const copyWebpackPlugin = require("copy-webpack-plugin");
 let faviconsWebpackPlugin = require("favicons-webpack-plugin");
+
 
 module.exports = {
   entry: path.join(__dirname, "index.js"),
@@ -52,6 +55,12 @@ module.exports = {
       inject: "head",
       hash: true
     }),
+    new copyWebpackPlugin([
+      { 
+        from: 'assets/resources', 
+        to: '.'
+      }
+    ]),
     new faviconsWebpackPlugin({
       logo: "./assets/favicon/asterics-logo.png",
       prefix: 'assets/favicon/',
@@ -64,7 +73,7 @@ module.exports = {
       icons: {
         android: true,
         appleIcon: true,
-        appleStartup: true,
+        appleStartup: false,
         coast: true,
         favicons: true,
         firefox: true,

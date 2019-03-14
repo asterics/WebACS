@@ -25,13 +25,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- 
- ACS.menuView = function(modelList) { // ACS.modelList
+ import TabPanel from "./tabPanel.js";
+ import vConst from "./vConst.js";
+
+ export default function(modelList) { // ACS.modelList
 
 // ***********************************************************************************************************************
 // ************************************************** private variables **************************************************
 // ***********************************************************************************************************************
-	var menuPanel = ACS.tabPanel(ACS.vConst.MENUVIEW_MENUMOTHERPANEL, ACS.vConst.MENUVIEW_CLASSOFTAB, ACS.vConst.MENUVIEW_CLASSOFPANEL);
+	var menuPanel = TabPanel(vConst.MENUVIEW_MENUMOTHERPANEL, vConst.MENUVIEW_CLASSOFTAB, vConst.MENUVIEW_CLASSOFPANEL);
 	
 // ***********************************************************************************************************************
 // ************************************************** private methods ****************************************************
@@ -313,7 +315,7 @@
 			}
 		}
 		if(problemPorts.length > 0) {
-			var alertString = ACS.vConst.MENUVIEW_ALERTSTRINGPORTSMUSTBECONNECTED;
+			var alertString = vConst.MENUVIEW_ALERTSTRINGPORTSMUSTBECONNECTED;
 			for (var i = 0; i < problemPorts.length; i++) {
 				alertString += problemPorts[i].getId() + ' at ' + problemPorts[i].getParentComponent().getComponentTypeId() + '\n';
 			}
@@ -371,14 +373,14 @@
 			var modifyList = actMod.getModifyListForNewComponentCollection(data);
 			var confirmString = '';
 			if (deleteList.length > 0) {
-				confirmString += ACS.vConst.MENUVIEW_CONFIRMNEWCOMPONENTCOLLECTIONDELETE;
+				confirmString += vConst.MENUVIEW_CONFIRMNEWCOMPONENTCOLLECTIONDELETE;
 				for (var i = 0; i < deleteList.length; i++) {
 					confirmString += deleteList[i].getId() + '\n';
 				}
 				confirmString += '\n';
 			}
 			if (modifyList.length > 0) {
-				confirmString += ACS.vConst.MENUVIEW_CONFIRMNEWCOMPONENTCOLLECTIONMODIFY;
+				confirmString += vConst.MENUVIEW_CONFIRMNEWCOMPONENTCOLLECTIONMODIFY;
 				for (var i = 0; i < modifyList.length; i++) {
 					confirmString += modifyList[i].getId() + '\n';
 				}
@@ -392,11 +394,11 @@
 						remAct.execute();
 					}
 					if (modifyList.length > 0) actMod.modifyComponentsAccordingToComponentCollection(modifyList);
-					alert(ACS.vConst.MENUVIEW_ALERTNEWCOMPONENTCOLLECTIONSET);
+					alert(vConst.MENUVIEW_ALERTNEWCOMPONENTCOLLECTIONSET);
 				}
 			} else {
 				actMod.setComponentCollection(data);
-				alert(ACS.vConst.MENUVIEW_ALERTNEWCOMPONENTCOLLECTIONSET);
+				alert(vConst.MENUVIEW_ALERTNEWCOMPONENTCOLLECTIONSET);
 			}
 		}
 		
@@ -910,7 +912,7 @@
 		}*/
 		// ... so we're using the second best option:
 		for (var i = 0; i < modelList.getLength(); i++) {
-			if (modelList.getModelAtIndex(i).hasBeenChanged) return ACS.vConst.MENUVIEW_BEFOREUNLOADMESSAGE;
+			if (modelList.getModelAtIndex(i).hasBeenChanged) return vConst.MENUVIEW_BEFOREUNLOADMESSAGE;
 		}
 	}
 	

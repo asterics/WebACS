@@ -25,54 +25,104 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+ import EventManager from "../eventManager.js";
+ import Model from "./model.js";
  
- ACS.eventManager = function() {
+ export default function(openFile) {
 
 // ***********************************************************************************************************************
 // ************************************************** private variables **************************************************
 // ***********************************************************************************************************************
-	var events = [];
+	var list = []; // ACS.model
+	var filenameCounter = 1;
 	
 // ***********************************************************************************************************************
 // ************************************************** private methods ****************************************************
 // ***********************************************************************************************************************
+	var removeSubstituteFilename = function() { // is called when actModel is removed or loaded from a file
+		var actNumber = list[returnObj.actIndex].getFilename().slice(7); // removing the 7-letter-word "newfile" leaves the number
+		if ((filenameCounter - 1) + '' === actNumber) filenameCounter--;
+	}
+	
+	var filenameBeingChangedEventHandler = function() {
+		removeSubstituteFilename();
+	}
 	
 // ***********************************************************************************************************************
 // ************************************************** public stuff *******************************************************
 // ***********************************************************************************************************************
 	var returnObj = {};
 	
-	returnObj.registerHandler = function(eventName, handler) {
-		if (events[eventName]) {
-			if (events[eventName].indexOf(handler) === -1) events[eventName].push(handler);
-		} else {
-			events[eventName] = [handler];
+	returnObj.actIndex = 0;
+	returnObj.events = EventManager();
+	
+	returnObj.addNewModel = function() {
+		this.actIndex = (list.push(Model('newFile' + filenameCounter))) - 1;
+		filenameCounter++;
+		
+		this.events.fireEvent('newModelAddedEvent');		
+		this.events.fireEvent('actModelChangedEvent');
+		list[this.actIndex].events.registerHandler('filenameBeingChangedEvent', filenameBeingChangedEventHandler);
+	}
+	
+	returnObj.getActModel = function() {
+		return list[this.actIndex];
+	}
+	
+	returnObj.setActModel = function(actIndex) {
+		if ((actIndex > -1) && (actIndex < list.length)) {
+			this.actIndex = actIndex;
+			this.events.fireEvent('actModelChangedEvent');
+			return true;
+		}  else {
+			return false;
 		}
 	}
 	
-	returnObj.removeHandler = function(eventName, handler) {
-		if ((events[eventName]) && (events[eventName].indexOf(handler) > -1)) {
-			events[eventName].splice(events[eventName].indexOf(handler), 1);
-			return true;
-		} else {
-			return false;
-		}
+	returnObj.getModelAtIndex = function(index) {
+		return list[index];
 	}
-
-	returnObj.fireEvent = function(eventName, args) {
-		log.info('the event ' + eventName + ' has been fired and the handlers (if any) are now being called...');
-		if (!events[eventName]) {
-			return false;
-		} else {
-			for (var i = 0; i < events[eventName].length; i++) {
-				events[eventName][i](args);
-			}
+	
+	returnObj.removeModel = function() { // removes the actModel
+		this.events.fireEvent('removingModelEvent');
+		removeSubstituteFilename();
+		list.splice(this.actIndex, 1);
+		if (this.actIndex > (list.length - 1)) this.actIndex--; // if no more models to the right, go to the left
+		if (this.actIndex === -1) { // if list is empty, add a new empty model again
+			returnObj.addNewModel();
 		}
+		this.events.fireEvent('actModelChangedEvent');
+	}
+	
+	returnObj.getLength = function() {
+		return list.length;
 	}
 	
 // ***********************************************************************************************************************
 // ************************************************** constructor code ***************************************************
-// ***********************************************************************************************************************	
+// ***********************************************************************************************************************
+	returnObj.addNewModel();
 	
+	// check if an openFile was provided in the querystring and if yes, try to load a model from that file
+	if (openFile) {
+		var xmlObj;
+		var httpRequest = new XMLHttpRequest();
+		httpRequest.onreadystatechange = function() {
+			if (httpRequest.readyState === XMLHttpRequest.DONE && httpRequest.status === 200) {
+				list[0].setFilename(openFile.substring(openFile.lastIndexOf('/') + 1));
+				xmlObj = $.parseXML(httpRequest.responseText);
+				list[0].loadModel(xmlObj);
+			}
+		}
+		try {
+			httpRequest.open('GET', openFile, false);
+			httpRequest.send();
+		} catch (e) {
+			// Note: If an invalid URL is passed to the WebACS, it will start normally, showing an empty model.
+			// Since URLs will usually be passed by some software and not by the enduser directly, no error-popup 
+			// has been installed in order not to confuse the enduser, who often will have no knowledge of URLs and querystrings.
+		}
+	}
 	return returnObj;
 }

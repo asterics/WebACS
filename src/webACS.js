@@ -27,6 +27,10 @@
  */
 import log from "loglevel";
 
+import ModelList from "./model/modelList.js"
+import ClipBoard from "./model/clipBoard.js";
+import View from "./view/view.js";
+
 export default function() {
 
 	var modelList;
@@ -87,9 +91,9 @@ export default function() {
 	log.debug('openFile: ' + openFile + '\nautoConnect: ' + autoConnect + '\nautoDownloadModel: ' + autoDownloadModel + '\nareBaseURI: ' + areBaseURI);
 	
 	// setup the WebACS
-	// modelList = modelList();
-	// clipBoard = clipBoard();
-	// view = view(modelList, clipBoard);	
+	modelList = ModelList(openFile);
+	clipBoard = ClipBoard();
+	view = View(modelList, clipBoard);	
 	// areStatus.setModelList(modelList);
 }
 

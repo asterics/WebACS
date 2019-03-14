@@ -25,9 +25,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import { gridStepType, screenResType } from "../acsNamespace.js";
  
 // ACS View Constants
-ACS.vConst = {
+export default {
 	// view
 	VIEW_PATHTOACSHELPSTARTPAGE: 'ACS_Basic_Functions.htm',
 	VIEW_ONLINE_HELP_PATH: 'http://asterics.github.io/AsTeRICS/webapps/WebACS/help/',
@@ -129,8 +130,8 @@ ACS.vConst = {
 	// editorProperties
 	EDITORPROPERTIES_ENABLEGRID: true,
 	EDITORPROPERTIES_SHOWGRID: true,
-	EDITORPROPERTIES_GRIDSTEPS: ACS.gridStepType.MEDIUM,
-	EDITORPROPERTIES_SCREENRES: ACS.screenResType.SIXTEENNINE,
+	EDITORPROPERTIES_GRIDSTEPS: gridStepType.MEDIUM,
+	EDITORPROPERTIES_SCREENRES: screenResType.SIXTEENNINE,
 	EDITORPROPERTIES_SCREENRESFIVEFOUR_X: 960,
 	EDITORPROPERTIES_SCREENRESFIVEFOUR_Y: 640,
 	EDITORPROPERTIES_SCREENRESSIXTEENNINE_X: 960,

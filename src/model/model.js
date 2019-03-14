@@ -26,8 +26,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+ import $ from "jquery";
+ import log from "loglevel";
+
+ import EventManager from "../eventManager.js";
+ import ModelGui from "./modelGui.js";
+ import mConst from "./mConst.js";
  
- ACS.model = function(filename) { // String
+ export default function(filename) { // String
 
 // ***********************************************************************************************************************
 // ************************************************** private variables **************************************************
@@ -41,7 +47,7 @@
 		var xmlObj = null;
 		if (window.location.port === '8081') { // if WebACS is hosted by ARE webservice, use componentCollection from the ARE
 			$.ajax({
-				url: ACS.mConst.MODEL_DEFAULTCOMPONENTCOLLECTIONONARE,
+				url: mConst.MODEL_DEFAULTCOMPONENTCOLLECTIONONARE,
 				dataType: 'xml',
 				success: function(data) {
 							log.debug('success reading component collection from ARE');
@@ -50,7 +56,7 @@
 				error: function() {
 							log.debug('failed to read component collection from ARE');
 							$.ajax({
-								url: ACS.mConst.MODEL_DEFAULTCOMPONENTCOLLECTION,
+								url: mConst.MODEL_DEFAULTCOMPONENTCOLLECTION,
 								dataType: 'xml',
 								success: function(data) {
 											log.debug('success reading default component collection as fallback');
@@ -66,7 +72,7 @@
 			});
 		} else {
 			$.ajax({
-				url: ACS.mConst.MODEL_DEFAULTCOMPONENTCOLLECTION,
+				url: mConst.MODEL_DEFAULTCOMPONENTCOLLECTION,
 				dataType: 'xml',
 				success: function(data) {
 							log.debug('success reading default component collection');
@@ -472,16 +478,16 @@
 	returnObj.componentList = []; // Array<ACS.component>
 	returnObj.dataChannelList = []; // Array<ACS.dataChannel>
 	returnObj.eventChannelList = []; // Array<ACS.eventChannel>
-	returnObj.modelGui = ACS.modelGui();
+	returnObj.modelGui = ModelGui();
 	returnObj.visualAreaMarkerList = []; // Array<ACS.visualAreaMarker>
 	returnObj.undoStack = []; // Array<ACS.action>
 	returnObj.redoStack = []; // Array<ACS.action>
 	returnObj.guiUndoStack = []; // Array<ACS.action>
 	returnObj.guiRedoStack = []; // Array<ACS.action>
 	returnObj.metaDataList = []; // Array<ACS.metaData>
-	returnObj.events = ACS.eventManager();
+	returnObj.events = EventManager();
 	returnObj.modelName = generateModelName();
-	returnObj.acsVersion = ACS.mConst.MODELGUI_ACSVERSION;
+	returnObj.acsVersion = mConst.MODELGUI_ACSVERSION;
 	returnObj.selectedItemsList = []; // Array<Object>
 	returnObj.hasBeenChanged = false;
 	returnObj.recentlyRemovedChannel = null; // ACS.channel
@@ -517,8 +523,8 @@
 	
 	returnObj.getFreePosition = function(pos) {
 		while (positionTaken(pos)) {
-			pos[0] += ACS.mConst.MODEL_COMPONENTPOSITIONOFFSETX;
-			pos[1] += ACS.mConst.MODEL_COMPONENTPOSITIONOFFSETY;
+			pos[0] += mConst.MODEL_COMPONENTPOSITIONOFFSETX;
+			pos[1] += mConst.MODEL_COMPONENTPOSITIONOFFSETY;
 		}
 		return pos;
 	}	
@@ -749,7 +755,7 @@
 									break;					
 			}
 			// find a free position for the new component
-			var pos = returnObj.getFreePosition([ACS.mConst.MODEL_NEWCOMPONENTPOSITIONX, ACS.mConst.MODEL_NEWCOMPONENTPOSITIONX]);
+			var pos = returnObj.getFreePosition([mConst.MODEL_NEWCOMPONENTPOSITIONX, mConst.MODEL_NEWCOMPONENTPOSITIONX]);
 			// build the component-object:
 			var newComp = ACS.component(compName + '.' + nextCompNameNumber(compName),
 										compTypeId,

@@ -26,66 +26,29 @@
  * limitations under the License.
  */
  
-var ACS = {};
-
-ACS.portType = {
-	INPUT: 1,
-	OUTPUT: 2
-};
-
-ACS.dataType = {
-	BOOLEAN: 1,
-	BYTE: 2,
-	CHAR: 3,
-	INTEGER: 4,
-	DOUBLE: 5,
-	STRING: 6
-};
-
-ACS.componentType = {
-	SENSOR: 1,
-	PROCESSOR: 2,
-	ACTUATOR: 3
-};
-
-ACS.statusType = {
-	DISCONNECTED: 1,
-	CONNECTING: 2,
-	CONNECTED: 3,
-	STARTING: 4,
-	STARTED: 5,
-	PAUSING: 6,
-	PAUSED: 7,
-	RESUMING: 8,
-	STOPPING: 9,
-	STOPPED: 10,
-	CONNECTIONLOST: 11
-};
-
-ACS.gridStepType = {
-	SMALL: 1,
-	MEDIUM: 2,
-	LARGE: 3,
-	HUGE: 4
-};
-
-ACS.screenResType = {
-	FIVEFOUR: 1,
-	SIXTEENNINE: 2,
-	FOURTHREE: 3
-};
-
- ACS.tabPanelKeyCodes = {
-  TAB: 9,
-  ENTER: 13,
-  ESC: 27,
-  SPACE: 32,
-  PGUP: 33,
-  PGDOWN: 34,
-  END: 35,
-  POS1: 36,
-  LEFT: 37,
-  UP: 38,
-  RIGHT: 39,
-  DOWN: 40
-};
+// ACS Datamodel Constants
+export default {
+	// model
+	MODEL_DEFAULTCOMPONENTCOLLECTION: 'defaultComponentCollection.abd',
+	MODEL_DEFAULTCOMPONENTCOLLECTIONONARE: '/componentCollections/defaultComponentCollection.abd',
+	MODEL_COMPONENTPOSITIONOFFSETX: 10, // if the position of a component is already taken, the new one is inserted this much off to the right
+	MODEL_COMPONENTPOSITIONOFFSETY: 10, // if the position of a component is already taken, the new one is inserted this much off to the bottom
+	MODEL_NEWCOMPONENTPOSITIONX: 15,
+	MODEL_NEWCOMPONENTPOSITIONY: 15,
+	// visualAreaMarker
+	VISUALAREAMARKER_BGCOLOR: 'rgba(0, 0, 255, 0.9)',
+	VISUALAREAMARKER_BORDERCOLOR: 'rgba(0, 0, 255, 0)',
+	// modelGUI
+	MODELGUI_DECORATION: true,
+	MODELGUI_FULLSCREEN: false,
+	MODELGUI_ALWAYSONTOP: false,
+	MODELGUI_TOSYSTEMTRAY: false,
+	MODELGUI_SHOWCONTROLPANEL: true,
+	MODELGUI_AREGUIWINDOW_X: 0,
+	MODELGUI_AREGUIWINDOW_Y: 0,
+	MODELGUI_AREGUIWINDOW_WIDTH: 10000,
+	MODELGUI_AREGUIWINDOW_HEIGHT: 6000,
+	MODELGUI_ACSVERSION: 'webACS_v0.1_to_be_replaced_by_proper_version_number',
+	// clipBoard
+	CLIPBOARD_IDEXTENSION: '_c'
+}

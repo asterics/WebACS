@@ -26,7 +26,7 @@
  * limitations under the License.
  */
 
-ACS.tabPanel = function (id, // String; the id of the div-container holding the tabPanel
+export default function (id, // String; the id of the div-container holding the tabPanel
 	tab, // String; class of the elements that are supposed to become tabs
 	panel) { // String; class of the elements that are supposed to become panels
 

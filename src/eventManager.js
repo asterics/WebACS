@@ -25,19 +25,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- 
- ACS.modelGui = function() { 
+ import log from "loglevel";
 
+ export default function() {
 
 // ***********************************************************************************************************************
 // ************************************************** private variables **************************************************
 // ***********************************************************************************************************************
-	var decoration = ACS.mConst.MODELGUI_DECORATION;
-	var fullScreen = ACS.mConst.MODELGUI_FULLSCREEN;
-	var alwaysOnTop = ACS.mConst.MODELGUI_ALWAYSONTOP;
-	var toSystemTray = ACS.mConst.MODELGUI_TOSYSTEMTRAY;
-	var showControlPanel = ACS.mConst.MODELGUI_SHOWCONTROLPANEL;
-
+	var events = [];
+	
 // ***********************************************************************************************************************
 // ************************************************** private methods ****************************************************
 // ***********************************************************************************************************************
@@ -47,55 +43,37 @@
 // ***********************************************************************************************************************
 	var returnObj = {};
 	
-	returnObj.events = ACS.eventManager();
-	
-	returnObj.areGuiWindow = ACS.gui(ACS.mConst.MODELGUI_AREGUIWINDOW_X, ACS.mConst.MODELGUI_AREGUIWINDOW_Y, ACS.mConst.MODELGUI_AREGUIWINDOW_WIDTH, ACS.mConst.MODELGUI_AREGUIWINDOW_HEIGHT, false);
-	
-	returnObj.setDecoration = function(dec) {
-		decoration = dec;
-		returnObj.events.fireEvent('decorationChangedEvent');
+	returnObj.registerHandler = function(eventName, handler) {
+		if (events[eventName]) {
+			if (events[eventName].indexOf(handler) === -1) events[eventName].push(handler);
+		} else {
+			events[eventName] = [handler];
+		}
 	}
 	
-	returnObj.getDecoration = function() {
-		return decoration;
+	returnObj.removeHandler = function(eventName, handler) {
+		if ((events[eventName]) && (events[eventName].indexOf(handler) > -1)) {
+			events[eventName].splice(events[eventName].indexOf(handler), 1);
+			return true;
+		} else {
+			return false;
+		}
 	}
 
-	returnObj.setFullScreen = function(fs) {
-		fullScreen = fs;
+	returnObj.fireEvent = function(eventName, args) {
+		log.info('the event ' + eventName + ' has been fired and the handlers (if any) are now being called...');
+		if (!events[eventName]) {
+			return false;
+		} else {
+			for (var i = 0; i < events[eventName].length; i++) {
+				events[eventName][i](args);
+			}
+		}
 	}
-	
-	returnObj.getFullScreen = function() {
-		return fullScreen;
-	}
-
-	returnObj.setAlwaysOnTop = function(aot) {
-		alwaysOnTop = aot;
-	}
-	
-	returnObj.getAlwaysOnTop = function() {
-		return alwaysOnTop;
-	}
-
-	returnObj.setToSystemTray = function(tst) {
-		toSystemTray = tst;
-	}
-	
-	returnObj.getToSystemTray = function() {
-		return toSystemTray;
-	}
-
-	returnObj.setShowControlPanel = function(scp) {
-		showControlPanel = scp;
-		returnObj.events.fireEvent('showControlPanelChangedEvent');
-	}
-	
-	returnObj.getShowControlPanel = function() {
-		return showControlPanel;
-	}	
 	
 // ***********************************************************************************************************************
 // ************************************************** constructor code ***************************************************
-// ***********************************************************************************************************************
+// ***********************************************************************************************************************	
 	
 	return returnObj;
 }
