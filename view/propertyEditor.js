@@ -260,13 +260,13 @@ ACS.propertyEditor = function (modelList, // ACS.modelList
 					function fetchDynProperties(cellToAdd, elementId, currentValue, id, key) {
 						getRuntimeComponentPropertyList(function(data, httpStatus) {
 							var entries = data ? JSON.parse(data) : null;
-							if (entries === null || (entries && entries.length === 0)) {
-								console.warn('empty dynamic property list');
+							if (entries === null || entries.length === 0) {
+								if (entries === null) console.warn('cannot process received data');
+								else console.warn('empty dynamic property list');
 								var inputElement = document.createElement('input');
 								inputElement.value = currentValue;
 								inputElement.setAttribute("id", elementId);
 								cellToAdd.appendChild(inputElement);
-								if (entries === null) console.warn('cannot process received data');
 							} else {
 								entries.unshift("");
 								var dropdownList = document.createElement('select');
