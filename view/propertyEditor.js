@@ -296,7 +296,7 @@ ACS.propertyEditor = function (modelList, // ACS.modelList
 					function parseEntries(jsonString) {
 						try {
 							let parsed = JSON.parse(jsonString);
-							return prased instanceof Array ? parsed : [];
+							return parsed instanceof Array ? parsed : [];
 						} catch (error) {}
 						return [];
 					}
