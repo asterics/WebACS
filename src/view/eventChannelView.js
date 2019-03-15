@@ -28,9 +28,9 @@
  import ChannelView from "./channelView.js";
  import vConst from "./vConst.js";
  
- export default function(ec, // ACS.eventChannel (must have at least the startComponent already set)
-								model, // ACS.model
-								modelView, // ACS.modelView
+ export default function(ec, // EventChannel (must have at least the startComponent already set)
+								model, // Model
+								modelView, // ModelView
 								modelLayer) { // Kinetic.Layer
 								
 // ***********************************************************************************************************************

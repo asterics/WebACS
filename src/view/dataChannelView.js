@@ -28,9 +28,9 @@
  import ChannelView from "./channelView.js";
  import vConst from "./vConst.js";
  
- export default function(dc, // ACS.dataChannel (must have at least the outputPort already set)
-								model, // ACS.model
-								modelView, // ACS.modelView
+ export default function(dc, // DataChannel (must have at least the outputPort already set)
+								model, // Model
+								modelView, // ModelView
 								modelLayer) { // Kinetic.Layer
 								
 // ***********************************************************************************************************************

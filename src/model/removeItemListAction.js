@@ -28,7 +28,7 @@
  import Action from "./action.js";
  import AreStatus from "./areStatus.js";
 
- export default function(parentModel, inList) { // ACS.model
+ export default function(parentModel, inList) { // Model
 
 // ***********************************************************************************************************************
 // ************************************************** private variables **************************************************

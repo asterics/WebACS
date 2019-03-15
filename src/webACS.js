@@ -38,7 +38,7 @@ export default function() {
 	var clipBoard;
 	var view;
 	var openFile = null; // path to model file that will be opened on startup
-	var autoConnect = false; // autoConnect to ARE using ACS.areBaseURI
+	var autoConnect = false; // autoConnect to ARE using areBaseURI
 	var autoDownloadModel = false; // automatically download the current model from the auto-connected ARE; will only work if no openFile is specified
 	var areBaseURI = null; // specify URI for the ARE (if not specified, but the WebACS is hosted by ARE-webservice, that ARE will be used, else localhost will be assumed)
 	var areStatus = AreStatus();

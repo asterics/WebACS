@@ -495,18 +495,18 @@
 	returnObj.dataChannelList = []; // Array<DataChannel>
 	returnObj.eventChannelList = []; // Array<EventChannel>
 	returnObj.modelGui = ModelGui();
-	returnObj.visualAreaMarkerList = []; // Array<ACS.visualAreaMarker>
-	returnObj.undoStack = []; // Array<ACS.action>
-	returnObj.redoStack = []; // Array<ACS.action>
-	returnObj.guiUndoStack = []; // Array<ACS.action>
-	returnObj.guiRedoStack = []; // Array<ACS.action>
+	returnObj.visualAreaMarkerList = []; // Array<VisualAreaMarker>
+	returnObj.undoStack = []; // Array<Action>
+	returnObj.redoStack = []; // Array<Action>
+	returnObj.guiUndoStack = []; // Array<Action>
+	returnObj.guiRedoStack = []; // Array<Action>
 	returnObj.metaDataList = []; // Array<MetaData>
 	returnObj.events = EventManager();
 	returnObj.modelName = generateModelName();
 	returnObj.acsVersion = mConst.MODELGUI_ACSVERSION;
 	returnObj.selectedItemsList = []; // Array<Object>
 	returnObj.hasBeenChanged = false;
-	returnObj.recentlyRemovedChannel = null; // ACS.channel
+	returnObj.recentlyRemovedChannel = null; // Channel
 	
 	returnObj.getFilename = function() {
 		return filename;

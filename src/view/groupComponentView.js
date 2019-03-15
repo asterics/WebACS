@@ -25,8 +25,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+ import ComponentView from "./componentView.js";
  
- ACS.groupComponentView = function(	gc, // ACS.groupComponent
+ export default function(	gc, // ACS.groupComponent
 									model, // ACS.model
 									modelView, // ACS.modelView
 									modelLayer) { // Kinetic.Layer
@@ -42,7 +43,7 @@
 // ***********************************************************************************************************************
 // ************************************************** public stuff *******************************************************
 // ***********************************************************************************************************************
-	var returnObj = ACS.componentView(gc, model, modelView, modelLayer);
+	var returnObj = ComponentView(gc, model, modelView, modelLayer);
 
 	returnObj.destroy = function() {
 		// TODO

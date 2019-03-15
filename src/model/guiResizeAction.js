@@ -28,8 +28,8 @@
 import Action from "./action.js";
 import AreStatus from "./areStatus.js";
 
-export default function(parentModel, 	// ACS.model
-							   gui) {	// ACS.gui
+export default function(parentModel, 	// Model
+							   gui) {	// Gui
 
 // ***********************************************************************************************************************
 // ************************************************** private variables **************************************************

@@ -28,8 +28,8 @@
 import Action from "./action.js";
 import AreStatus from "./areStatus.js";
  
-export default function(parentModel, // ACS.model
-								  c) { // ACS.component
+export default function(parentModel, // model
+								  c) { // component
 
 // ***********************************************************************************************************************
 // ************************************************** private variables **************************************************

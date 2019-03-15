@@ -31,9 +31,9 @@
 
  import Kinetic from "kinetic";
  
- export default function(model, // ACS.model
+ export default function(model, // Model
 						modelContainerId, // String
-						editorProperties) { // ACS.editorProperties
+						editorProperties) { // EditorProperties
 						
 // ***********************************************************************************************************************
 // ************************************************** private variables **************************************************

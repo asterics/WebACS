@@ -26,24 +26,24 @@
  * limitations under the License.
  */
  
- ACS.groupComponent = function(id, // String; TODO: decide if this is really necessary
+ export default function(id, // String; TODO: decide if this is really necessary
 							  componentTypeId, // String
 							  name, // String
 							  description, // String
 							  singleton, // bool
 							  x, // int
 							  y, // int
-							  type, // ACS.componentType
-							  inputPortList, // Array<ACS.dataPort>
-							  outputPortList, // Array<ACS.dataPort>
-							  eventListenerPort, // ACS.eventPort
-							  eventTriggerPort, // ACS.eventPort
-							  propertyList, // Array<ACS.property>
+							  type, // componentType
+							  inputPortList, // Array<dataPort>
+							  outputPortList, // Array<dataPort>
+							  eventListenerPort, // eventPort
+							  eventTriggerPort, // eventPort
+							  propertyList, // Array<property>
 							  gui, // acsGui
 							  isSelected, // bool
-							  groupedComponents, // Array<ACS.component>
-							  groupedEventChannels, // Array<ACS.eventChannel>
-							  groupedDataChannels) { // Array<ACS.dataChannel>
+							  groupedComponents, // Array<component>
+							  groupedEventChannels, // Array<eventChannel>
+							  groupedDataChannels) { // Array<dataChannel>
 
 // ***********************************************************************************************************************
 // ************************************************** private variables **************************************************

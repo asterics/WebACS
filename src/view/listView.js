@@ -30,10 +30,10 @@
  import ListComponentView from "./listComponentView.js";
  
  export default function(	containerId, // String
-							model, // ACS.model
-							clipBoard, // ACS.clipBoard
+							model, // Model
+							clipBoard, // ClipBoard
 							tabId, // String
-							modelTabPanel) { // ACS.tabPanel
+							modelTabPanel) { // TabPanel
 							
 // ***********************************************************************************************************************
 // ************************************************** static methods *****************************************************

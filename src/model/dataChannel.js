@@ -28,8 +28,8 @@
  import Channel from "./channel.js";
  
  export default function(id, // String
-							outputPort, // ACS.port
-							inputPort) { // ACS.port
+							outputPort, // Port
+							inputPort) { // Port
 
 // ***********************************************************************************************************************
 // ************************************************** private variables **************************************************

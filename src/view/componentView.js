@@ -26,15 +26,19 @@
  * limitations under the License.
  */
  import vConst from "./vConst.js";
- import DataChannel from "../model/dataChannel";
- import AddDataChannelAction from "../model/addDataChannelAction";
+ 
+ import DataChannel from "../model/dataChannel.js";
+ import EventChannel from "../model/eventChannel.js" 
+
+ import AddDataChannelAction from "../model/addDataChannelAction.js";
+ import AddEventChannelAction from "../model/addEventChannelAction.js";
 
  import log from "loglevel";
  import Kinetic from "kinetic";
  
- export default function(	component, // ACS.component
-								model, // ACS.model
-								modelView, // ACS.modelView
+ export default function(	component, // Component
+								model, // Model
+								modelView, // ModelView
 								modelLayer) { // Kinetic.Layer
 								
 // ***********************************************************************************************************************
@@ -510,9 +514,9 @@
 	var startEventChannelIfPossible = function() {
 		if (!((model.eventChannelList.length > 0) && (!model.eventChannelList[model.eventChannelList.length - 1].endComponent)) && // if no eventChannel started already
 			!((model.dataChannelList.length > 0) && (!model.dataChannelList[model.dataChannelList.length - 1].getInputPort()))) { // and no dataChannel started already
-			var ch = ACS.eventChannel(component.getId() + '_TO_'); // second half of ID is added, when channel is completed
+			var ch = EventChannel(component.getId() + '_TO_'); // second half of ID is added, when channel is completed
 			ch.startComponent = component;
-			var addAct = ACS.addEventChannelAction(model, ch);
+			var addAct = AddEventChannelAction(model, ch);
 			addAct.execute();
 			return true;
 		}

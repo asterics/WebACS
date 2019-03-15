@@ -28,8 +28,8 @@
 import AreStatus from "./areStatus.js";
 import Action from "./action.js";
 
-export default function(parentModel, // ACS.model
-									dc) { // ACS.dataChannel
+export default function(parentModel, // Model
+									dc) { // DataChannel
 
 // ***********************************************************************************************************************
 // ************************************************** private variables **************************************************

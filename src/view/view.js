@@ -29,14 +29,14 @@ import MenuView from "./menuView.js";
 import CanvasView from "./canvasView.js";
 import PropertyEditor from "./propertyEditor.js";
 import vConst from "./vConst.js";
-import { statusType } from "../acsNamespace.js";
+import { statusType, componentType } from "../acsNamespace.js";
 
 import RemoveItemListAction from "../model/removeItemListAction.js";
 
 import log from "loglevel";
 
-export default function(modelList, // ACS.modelList
-					clipBoard, areStatus, { autoConnect, areBaseURI, autoDownloadModel, openFile }) { // ACS.clipBoard
+export default function(modelList, // ModelList
+					clipBoard, areStatus, { autoConnect, areBaseURI, autoDownloadModel, openFile }) { // ClipBoard
 
 // ***********************************************************************************************************************
 // ************************************************** private variables **************************************************
@@ -450,7 +450,7 @@ export default function(modelList, // ACS.modelList
 	
 	var helpHandler = function() {
         if(areStatus.isConnected()) {
-            openHelp(ACS.areBaseURI + '/webapps/WebACS/help/');
+            openHelp(areBaseURI + '/webapps/WebACS/help/');
         } else {
             openHelp(vConst.VIEW_ONLINE_HELP_PATH);
 		}
@@ -461,9 +461,9 @@ export default function(modelList, // ACS.modelList
             if (actModel.selectedItemsList.length === 1 && typeof actModel.selectedItemsList[0].getComponentTypeId() !== 'undefined') { // thus there is one single item selected and this item is a component
                 var directory;
                 switch (actModel.selectedItemsList[0].getType()) {
-                    case ACS.componentType.SENSOR: directory = 'sensors'; break;
-                    case ACS.componentType.PROCESSOR: directory = 'processors'; break;
-                    case ACS.componentType.ACTUATOR: directory = 'actuators'; break;
+                    case componentType.SENSOR: directory = 'sensors'; break;
+                    case componentType.PROCESSOR: directory = 'processors'; break;
+                    case componentType.ACTUATOR: directory = 'actuators'; break;
                 }
                 var file = actModel.selectedItemsList[0].getComponentTypeId() + '.htm';
                 if (file.indexOf('Oska') === -1) file = file.slice(9); // the slice eliminates the "asterics."

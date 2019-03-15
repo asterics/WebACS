@@ -32,8 +32,8 @@
 
  import log from "loglevel";
  
- export default function(	modelList, // ACS.modelList
-							clipBoard) { // ACS.clipBoard
+ export default function(	modelList, // ModelList
+							clipBoard) { // ClipBoard
 
 // ***********************************************************************************************************************
 // ************************************************** private variables **************************************************

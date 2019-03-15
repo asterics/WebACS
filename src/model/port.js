@@ -27,9 +27,9 @@
  */
  
  export default function(id, // String; unique, defined in component collection
-					parentComponent, // ACS.component
-					type, // ACS.portType
-					dataType, // ACS.dataType
+					parentComponent, // Component
+					type, // portType
+					dataType, // dataType
 					position, // int
 					mustBeConnected) { // bool
 

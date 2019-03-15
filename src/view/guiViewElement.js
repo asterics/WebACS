@@ -33,14 +33,14 @@
 
  import Kinetic from "kinetic";
  
- export default function(	model, // ACS.model
-								gui, // ACS.gui
+ export default function(	model, // Model
+								gui, // Gui
 								guiLayer, // Kinetic.Layer
 								sizeBoundsMaxIn, // Object {width, height}
 								dragBoundsIn, // Object {left, right, upper, lower}
 								name, // String
 								backgroundColor, // String
-								editorProperties) { // ACS.editorProperties
+								editorProperties) { // EditorProperties
 						
 // ***********************************************************************************************************************
 // ************************************************** private variables **************************************************

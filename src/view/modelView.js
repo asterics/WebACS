@@ -41,9 +41,9 @@
  import Kinetic from "kinetic";
 
  export default function(	modelContainerId, // String
-							model, // ACS.model
-							clipBoard, // ACS.clipBoard
-							editorProperties) { // ACS.editorProperties
+							model, // Model
+							clipBoard, // ClipBoard
+							editorProperties) { // EditorProperties
 							
 // ***********************************************************************************************************************
 // ************************************************** private variables **************************************************
@@ -52,13 +52,13 @@
 	var componentViewList = []; // Array<ComponentView>
 	var dataChannelViewList = []; // Array<DataChannelView>
 	var eventChannelViewList = []; // Array<EventChannelView>
-	var visualAreaMarkerViewList = []; // Array<ACS.visualMarkerView>
-	var guiView; // ACS.guiView
-	var listView; // ACS.listView
+	var visualAreaMarkerViewList = []; // Array<VisualMarkerView>
+	var guiView; // GuiView
+	var listView; // ListView
 	var modelStage; // Kinetic.Stage
 	var modelLayer; // Kinetic.Layer
 	var focusRect = null; // Kinetic.Rect
-	var dragAct = null; // ACS.dragDropAction
+	var dragAct = null; // DragDropAction
 	var dragging = false; // boolean
 	var keyboardMode = false; // boolean
 	var portMode = false; // boolean
@@ -67,8 +67,8 @@
 	var listKeyboardMode = false; // boolean
 	var listPortMode = false; // boolean
 	var listChannelMode = false; // boolean
-	var channelModePort = null; // ACS.port or Object {component: ACS.component, direction: <in, out>}
-	var channelModeChannelList = []; // Array<ACS.channel>
+	var channelModePort = null; // Port or Object {component: Component, direction: <in, out>}
+	var channelModeChannelList = []; // Array<Channel>
 	var channelModeActChannelPointer = -1; // int
 	
 // ***********************************************************************************************************************
@@ -459,7 +459,7 @@
 			channelModePort = findCompView(model.selectedItemsList[0]).getFocussedPort();
 			if (channelModePort) {
 				// generate a list of all channels connected to this port
-				if (typeof channelModePort.direction === 'undefined') { // must be ACS.port, i.e. we are looking for dataChannels
+				if (typeof channelModePort.direction === 'undefined') { // must be Port, i.e. we are looking for dataChannels
 					for (var i = 0; i < model.dataChannelList.length; i++) {
 						if (((channelModePort.getType() === portType.INPUT) && (model.dataChannelList[i].getInputPort() === channelModePort)) || 
 							((channelModePort.getType() === portType.OUTPUT) && (model.dataChannelList[i].getOutputPort() === channelModePort))) {

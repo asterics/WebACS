@@ -1,24 +1,34 @@
+import ModelList from "../../model/modelList.js";
+import Component from "../../model/component.js";
+import Port from "../../model/port.js";
+import ClipBoard from "../../model/clipBoard.js";
+
+import View from "../../view/view.js";
+import vConst from "../../view/vConst.js";
+
+import QUnit from "qunit";
+
 QUnit.module( 'view' );
 
 // handleKeyDown and handleKeyPress require user inputs
 
 QUnit.test( 'view cutBtnPressedHandler_pasteBtnPressedHandler', function( assert ) {
 	resetDocument();
-	var modelList = ACS.modelList();
-	var comp = ACS.component("comp1","asterics.FS20Receiver","desc",true,1,2,"actuator",false,true);
-	var port = ACS.port('outP', comp, 1, 0, 0, false);
+	var modelList = ModelList();
+	var comp = Component("comp1","asterics.FS20Receiver","desc",true,1,2,"actuator",false,true);
+	var port = Port('outP', comp, 1, 0, 0, false);
 	comp.outputPortList.push(port);
 	modelList.getActModel().addComponent(comp);
 	modelList.getActModel().addItemToSelection(comp);
-	var clipBoard = ACS.clipBoard();
-	var v = ACS.view(modelList, clipBoard);
+	var clipBoard = ClipBoard();
+	var v = View(modelList, clipBoard);
 	$('#cutBtn').trigger('click');
 	assert.strictEqual(modelList.getActModel().componentList.length, 0);
 	modelList.addNewModel();
 	var alertStub = sinon.stub(window, 'alert');
 	$('#pasteBtn').trigger('click');
 	assert.strictEqual(alertStub.callCount, 1);
-	assert.strictEqual(alertStub.getCall(0).args[0], ACS.vConst.MODELVIEW_ALERTSTRINGCHANGEDCOMPONENTS + 'comp1_c (FS20Receiver)\n');
+	assert.strictEqual(alertStub.getCall(0).args[0], vConst.MODELVIEW_ALERTSTRINGCHANGEDCOMPONENTS + 'comp1_c (FS20Receiver)\n');
 	assert.strictEqual(modelList.getActModel().componentList.length, 1);
 	assert.strictEqual(modelList.getActModel().componentList[0].getId(), 'comp1_c');
 	// to prevent browser from presenting a popup on unload of the page:
@@ -29,18 +39,18 @@ QUnit.test( 'view cutBtnPressedHandler_pasteBtnPressedHandler', function( assert
 
 QUnit.test( 'view copyBtnPressedHandler_pasteBtnPressedHandler', function( assert ) {
 	resetDocument();
-	var modelList = ACS.modelList();
-	var comp = ACS.component("comp1","asterics.FS20Receiver","desc",true,1,2,"actuator",false,true);
+	var modelList = ModelList();
+	var comp = Component("comp1","asterics.FS20Receiver","desc",true,1,2,"actuator",false,true);
 	modelList.getActModel().addComponent(comp);
 	modelList.getActModel().addItemToSelection(comp);
-	var clipBoard = ACS.clipBoard();
-	var v = ACS.view(modelList, clipBoard);
+	var clipBoard = ClipBoard();
+	var v = View(modelList, clipBoard);
 	$('#copyBtn').trigger('click');
 	modelList.addNewModel();
 	var alertStub = sinon.stub(window, 'alert');
 	$('#pasteBtn').trigger('click');
 	assert.strictEqual(alertStub.callCount, 1);
-	assert.strictEqual(alertStub.getCall(0).args[0], ACS.vConst.MODELVIEW_ALERTSTRINGCHANGEDCOMPONENTS + 'comp1_c (FS20Receiver)\n');	
+	assert.strictEqual(alertStub.getCall(0).args[0], vConst.MODELVIEW_ALERTSTRINGCHANGEDCOMPONENTS + 'comp1_c (FS20Receiver)\n');	
 	assert.strictEqual(modelList.getActModel().componentList.length, 1);
 	assert.strictEqual(modelList.getActModel().componentList[0].getId(), 'comp1_c');
 	// to prevent browser from presenting a popup on unload of the page:
@@ -51,12 +61,12 @@ QUnit.test( 'view copyBtnPressedHandler_pasteBtnPressedHandler', function( asser
 
 QUnit.test( 'view deleteBtnPressedHandler', function( assert ) {
 	resetDocument();
-	var modelList = ACS.modelList();
-	var comp = ACS.component("comp1","asterics.FS20Receiver","desc",true,1,2,"actuator",false,true);
+	var modelList = ModelList();
+	var comp = Component("comp1","asterics.FS20Receiver","desc",true,1,2,"actuator",false,true);
 	modelList.getActModel().addComponent(comp);
 	modelList.getActModel().addItemToSelection(comp);
-	var clipBoard = ACS.clipBoard();
-	var v = ACS.view(modelList, clipBoard);
+	var clipBoard = ClipBoard();
+	var v = View(modelList, clipBoard);
 	assert.strictEqual(modelList.getActModel().componentList.length, 1);
 	$('#deleteSelectionBtn').trigger('click');
 	assert.strictEqual(modelList.getActModel().componentList.length, 0);
@@ -66,12 +76,12 @@ QUnit.test( 'view deleteBtnPressedHandler', function( assert ) {
 
 QUnit.test( 'view undoBtnPressedHandler', function( assert ) {
 	resetDocument();
-	var modelList = ACS.modelList();
-	var comp = ACS.component("comp1","asterics.FS20Receiver","desc",true,1,2,"actuator",false,true);
+	var modelList = ModelList();
+	var comp = Component("comp1","asterics.FS20Receiver","desc",true,1,2,"actuator",false,true);
 	modelList.getActModel().addComponent(comp);
 	modelList.getActModel().addItemToSelection(comp);
-	var clipBoard = ACS.clipBoard();
-	var v = ACS.view(modelList, clipBoard);
+	var clipBoard = ClipBoard();
+	var v = View(modelList, clipBoard);
 	$('#deleteSelectionBtn').trigger('click');
 	assert.strictEqual(modelList.getActModel().componentList.length, 0);
 	$('#undoBtn').trigger('click');
@@ -82,12 +92,12 @@ QUnit.test( 'view undoBtnPressedHandler', function( assert ) {
 
 QUnit.test( 'view redoBtnPressedHandler', function( assert ) {
 	resetDocument();
-	var modelList = ACS.modelList();
-	var comp = ACS.component("comp1","asterics.FS20Receiver","desc",true,1,2,"actuator",false,true);
+	var modelList = ModelList();
+	var comp = Component("comp1","asterics.FS20Receiver","desc",true,1,2,"actuator",false,true);
 	modelList.getActModel().addComponent(comp);
 	modelList.getActModel().addItemToSelection(comp);
-	var clipBoard = ACS.clipBoard();
-	var v = ACS.view(modelList, clipBoard);
+	var clipBoard = ClipBoard();
+	var v = View(modelList, clipBoard);
 	$('#deleteSelectionBtn').trigger('click');
 	assert.strictEqual(modelList.getActModel().componentList.length, 0);
 	$('#undoBtn').trigger('click');

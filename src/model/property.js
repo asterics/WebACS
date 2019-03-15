@@ -28,7 +28,7 @@
  import { encodeForXml } from "./utils.js";
  
  export default function(key, // String; must be unique
-						type, // ACS.dataType
+						type, // dataType
 						value) { // String
 
 // ***********************************************************************************************************************

@@ -30,7 +30,8 @@
  import vConst from "./vConst.js";
  import { statusType } from "../acsNamespace.js";
 
- import AddComponentAction from "../model/addComponentAction";
+ import AddComponentAction from "../model/addComponentAction.js";
+ import RemoveItemListAction from "../model/removeItemListAction.js";
 
  import { setBaseURI, getModelState, downloadDeployedModel, 
 					uploadModel, pauseModel, startModel, stopModel, 
@@ -41,7 +42,7 @@
 
  import log from "loglevel";
 
- export default function(modelList, areStatus, { areBaseURI, autoConnect, autoDownloadModel, openFile }) { // ACS.modelList
+ export default function(modelList, areStatus, { areBaseURI, autoConnect, autoDownloadModel, openFile }) { // ModelList
 
 // ***********************************************************************************************************************
 // ************************************************** private variables **************************************************
@@ -403,7 +404,7 @@
 				if (confirm(confirmString)) {
 					actMod.setComponentCollection(data);
 					if (deleteList.length > 0) {
-						var remAct = ACS.removeItemListAction(actMod, deleteList);
+						var remAct = RemoveItemListAction(actMod, deleteList);
 						remAct.execute();
 					}
 					if (modifyList.length > 0) actMod.modifyComponentsAccordingToComponentCollection(modifyList);

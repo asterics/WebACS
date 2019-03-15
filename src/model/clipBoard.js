@@ -26,11 +26,13 @@
  * limitations under the License.
  */
 import Gui from "./gui.js";
+import mConst from "./mConst.js";
+
 import Component from "./component.js";
 import Property from "./property.js";
-import Port from "./port.js";
 import Event from "./event.js";
-import mConst from "./mConst.js";
+import Port from "./port.js";
+import DataChannel from "./dataChannel.js"
 
 import AddItemsAction from "./addItemsAction.js";
 import RemoveItemListAction from "./removeItemListAction";
@@ -41,7 +43,7 @@ export default function() {
 // ************************************************** private variables **************************************************
 // ***********************************************************************************************************************
 	var components = []; // Array<Component>
-	var dataChannels = []; // Array<ACS.dataChannel>
+	var dataChannels = []; // Array<DataChannel>
 	var eventChannels = []; // Array<EventChannel>
 	var removedComponentsList = []; // list of all components that were not found in the componentCollection
 	var changedComponentsList = []; // list of all components that did not match the componentCollection
@@ -208,7 +210,7 @@ export default function() {
 			ext = mConst.CLIPBOARD_IDEXTENSION;
 		}		
 		for (var i = 0; i < oldList.length; i++) {
-			var channel = ACS.dataChannel(oldList[i].getId().valueOf() + ext, findPort(oldList[i].getOutputPort(), extendId),findPort(oldList[i].getInputPort(), extendId));
+			var channel = DataChannel(oldList[i].getId().valueOf() + ext, findPort(oldList[i].getOutputPort(), extendId),findPort(oldList[i].getInputPort(), extendId));
 			channel.setIsSelected(true); // elements shall be selected, when pasted
 			channel.description = oldList[i].description.valueOf();
 			if ((channel.getInputPort() !== null) && (channel.getOutputPort() !== null)) { // only keep the channel, if it has a source and a target within the copied components

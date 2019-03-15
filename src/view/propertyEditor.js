@@ -25,16 +25,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import AreStatus from "../model/areStatus.js";
+
 import TabPanel from "./tabPanel.js";
 import vConst from "./vConst.js";
 
-import { dataType } from "../acsNamespace.js";
+import Event from "../model/event.js";
+
+import { dataType, statusType} from "../acsNamespace.js";
 import { setRuntimeComponentProperty } from "../are/rest/areCommunicator.js";
 import { decodeForXml } from "../model/utils.js";
 
-export default function (modelList, // ACS.modelList
-	modelViewListtemp, // Array<ACS.modelView>
-	editorPropsTemp) { // ACS.editorProperties
+export default function (modelList, // ModelList
+	modelViewListtemp, // Array<ModelView>
+	editorPropsTemp) { // EditorProperties
 
 	// ***********************************************************************************************************************
 	// ************************************************** private variables **************************************************
@@ -1020,10 +1024,10 @@ export default function (modelList, // ACS.modelList
 			});
 		}
 		// if ARE is connected and synchronised, write value directly to ARE via REST
-		if ((ACS.areStatus.getStatus != ACS.statusType.DISCONNECTED) &&
-			(ACS.areStatus.getStatus != ACS.statusType.CONNECTING) &&
-			(ACS.areStatus.getStatus != ACS.statusType.CONNECTIONLOST) &&
-			ACS.areStatus.getSynchronised()) {
+		if ((AreStatus().getStatus != statusType.DISCONNECTED) &&
+			(AreStatus().getStatus != statusType.CONNECTING) &&
+			(AreStatus().getStatus != statusType.CONNECTIONLOST) &&
+			AreStatus().getSynchronised()) {
 			setRuntimeComponentProperty(SRCP_successCallback, SRCP_errorCallback, actModel.componentList[selectedElement].getId(), actModel.componentList[selectedElement].propertyList[splitId].getKey(), t);
 
 			function SRCP_successCallback(data, HTTPstatus) {
@@ -1056,8 +1060,8 @@ export default function (modelList, // ACS.modelList
 
 		if (t !== '---' && previousDropDownEntry === '---') {
 			//generate and insert eventconnection into selectedChannel
-			var listener = ACS.event(r_value, '', listenerComponent.getId());
-			var trigger = ACS.event(t, '', triggerComponent.getId());
+			var listener = Event(r_value, '', listenerComponent.getId());
+			var trigger = Event(t, '', triggerComponent.getId());
 			var description = eventConnectionDescription;
 			var eventConnection = {
 				listener,
@@ -1101,8 +1105,8 @@ export default function (modelList, // ACS.modelList
 			cell.appendChild(textInput);
 		} else if (t !== '---' && previousDropDownEntry !== '---') {
 			selectedChan.eventConnections.splice(insertPosition, 1);
-			var listener = ACS.event(r_value, '', listenerComponent.getId());
-			var trigger = ACS.event(t, '', triggerComponent.getId());
+			var listener = Event(r_value, '', listenerComponent.getId());
+			var trigger = Event(t, '', triggerComponent.getId());
 			var description = eventConnectionDescription;
 			var eventConnection = {
 				listener,
@@ -1115,7 +1119,7 @@ export default function (modelList, // ACS.modelList
 			selectedChan.eventConnections.splice(insertPosition, 1);
 		}
 		previousDropDownEntry = splitIdTriggerName;
-		ACS.areStatus.checkAndSetSynchronisation();
+		AreStatus().checkAndSetSynchronisation();
 	}
 
 	var writeChannelDescription = function (evt) {
@@ -1136,8 +1140,8 @@ export default function (modelList, // ACS.modelList
 
 			if (t !== "---") {
 				selectedChan.eventConnections.splice(insertPosition, 1);
-				var listener = ACS.event(r_value, '', listenerComponent.getId());
-				var trigger = ACS.event(t, '', triggerComponent.getId());
+				var listener = Event(r_value, '', listenerComponent.getId());
+				var trigger = Event(t, '', triggerComponent.getId());
 				var description = eventConnectionDescription;
 				var eventConnection = {
 					listener,
@@ -1164,7 +1168,7 @@ export default function (modelList, // ACS.modelList
 			document.getElementById(evt.target.id).value = 'false';
 		}
 		actModel.componentList[selectedElement].inputPortList[splitId].sync = t;
-		ACS.areStatus.setSynchronised(false);
+		AreStatus().setSynchronised(false);
 	}
 
 	var writeGuiEditorProperties = function (evt) {
@@ -1195,27 +1199,27 @@ export default function (modelList, // ACS.modelList
 			if (idStringSplit === '0') {
 				var tempbool = actModel.modelGui.getDecoration();
 				actModel.modelGui.setDecoration(!tempbool);
-				ACS.areStatus.checkAndSetSynchronisation();
+				AreStatus().checkAndSetSynchronisation();
 			}
 			if (idStringSplit === '1') {
 				var tempbool = actModel.modelGui.getFullScreen();
 				actModel.modelGui.setFullScreen(!tempbool);
-				ACS.areStatus.checkAndSetSynchronisation();
+				AreStatus().checkAndSetSynchronisation();
 			}
 			if (idStringSplit === '2') {
 				var tempbool = actModel.modelGui.getAlwaysOnTop();
 				actModel.modelGui.setAlwaysOnTop(!tempbool);
-				ACS.areStatus.checkAndSetSynchronisation();
+				AreStatus().checkAndSetSynchronisation();
 			}
 			if (idStringSplit === '3') {
 				var tempbool = actModel.modelGui.getToSystemTray();
 				actModel.modelGui.setToSystemTray(!tempbool);
-				ACS.areStatus.checkAndSetSynchronisation();
+				AreStatus().checkAndSetSynchronisation();
 			}
 			if (idStringSplit === '4') {
 				var tempbool = actModel.modelGui.getShowControlPanel();
 				actModel.modelGui.setShowControlPanel(!tempbool);
-				ACS.areStatus.checkAndSetSynchronisation();
+				AreStatus().checkAndSetSynchronisation();
 			}
 		}
 	}

@@ -26,7 +26,7 @@
  * limitations under the License.
  */
  
- ACS.visualAreaMarkerView = function(vaMarker, // ACS.visualAreaMarker
+ export default function(vaMarker, // ACS.visualAreaMarker
 									 modelLayer) { // Kinetic.Layer
 									
 // ***********************************************************************************************************************

@@ -37,8 +37,8 @@
  
  export default function(	containerId, // String
 									mainList, // DOM Element
-									component, // ACS.component
-									model, // ACS.model
+									component, // Component
+									model, // Model
 									listView) { // ListView
 								
 // ***********************************************************************************************************************

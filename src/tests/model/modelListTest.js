@@ -1,12 +1,16 @@
+import ModelList from "../../model/modelList.js";
+
+import QUnit from "qunit";
+
 QUnit.module( 'modelList' );
 
 QUnit.test( 'modelList addNewModel', function( assert ) {
-	var modelList = ACS.modelList();
+	var modelList = ModelList();
 	assert.strictEqual(modelList.getModelAtIndex(0).getFilename(), 'newFile1');
 });
 
 QUnit.test( 'modelList setActModel', function( assert ) {
-	var modelList = ACS.modelList();
+	var modelList = ModelList();
 	modelList.addNewModel();
 	modelList.addNewModel();
 	modelList.setActModel(1);
@@ -15,7 +19,7 @@ QUnit.test( 'modelList setActModel', function( assert ) {
 });
 
 QUnit.test( 'modelList removeModel', function( assert ) {
-	var modelList = ACS.modelList();
+	var modelList = ModelList();
 	modelList.addNewModel();
 	modelList.addNewModel();
 	modelList.setActModel(1);
@@ -25,7 +29,7 @@ QUnit.test( 'modelList removeModel', function( assert ) {
 });
 
 QUnit.test( 'modelList handling of filenameBeingChangedEvent', function( assert ) {
-	var modelList = ACS.modelList();
+	var modelList = ModelList();
 	modelList.getActModel().setFilename('anotherName');
 	assert.strictEqual(modelList.getModelAtIndex(0).getFilename(), 'anotherName');
 });

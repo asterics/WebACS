@@ -28,10 +28,10 @@
 import Action from "./action.js";
 import AreStatus from "./areStatus.js";
 
-export default function(	parentModel, // ACS.model
-								components, // Array<ACS.component>
-								dataChannels, // Array<ACS.dataChannel>
-								eventChannels) { // Array<ACS.eventChannel>
+export default function(	parentModel, // Model
+								components, // Array<Component>
+								dataChannels, // Array<DataChannel>
+								eventChannels) { // Array<EventChannel>
 								
 
 // ***********************************************************************************************************************

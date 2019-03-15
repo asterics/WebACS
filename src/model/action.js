@@ -26,7 +26,7 @@
  * limitations under the License.
  */
  
-export default function(parentModel) { // ACS.model
+export default function(parentModel) { // Model
 
 // ***********************************************************************************************************************
 // ************************************************** private variables **************************************************

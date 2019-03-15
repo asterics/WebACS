@@ -44,8 +44,8 @@
 	
 	returnObj.startComponent = null;
 	returnObj.endComponent = null;
-	returnObj.eventConnections = [];	// 	{trigger: ACS.event,
-										//	listener: ACS.event,
+	returnObj.eventConnections = [];	// 	{trigger: Event,
+										//	listener: Event,
 										//	description: String}
 
 // ***********************************************************************************************************************

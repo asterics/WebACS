@@ -1,22 +1,31 @@
+import Model from "../../model/model.js";
+import Component from "../../model/component.js";
+import DataChannel from "../../model/dataChannel.js";
+import EventChannel from "../../model/eventChannel.js";
+
+import RemoveItemListAction from "../../model/removeItemListAction.js";
+
+import QUnit from "qunit";
+
 QUnit.module( 'removeItemListAction' );
 
 QUnit.test( 'removeItemListAction initialization', function( assert ) {
-	var model = ACS.model("test.acs");
-	var comp = ACS.component("comp1","typeID","desc",true,1,2,"actuator",true,true);
+	var model = Model("test.acs");
+	var comp = Component("comp1","typeID","desc",true,1,2,"actuator",true,true);
 	
 	var itemList = [comp];
-	var action = ACS.removeItemListAction(model, itemList);
+	var action = RemoveItemListAction(model, itemList);
 	assert.strictEqual(action.getModel(), model);
 });
 
 QUnit.test( 'removeItemListAction execute', function( assert ) {
-	var model = ACS.model("test.acs");
-	var comp1 = ACS.component("comp1","typeID","desc",true,1,2,"actuator",true,true);
-	var comp2 = ACS.component("comp2","typeID","desc",true,1,2,"actuator",true,true);
-	var dc1 = ACS.dataChannel('dataChannel1');
-	var dc2 = ACS.dataChannel('dataChannel2');
-	var ec1 = ACS.eventChannel('eventChannel1');
-	var ec2 = ACS.eventChannel('eventChannel2');
+	var model = Model("test.acs");
+	var comp1 = Component("comp1","typeID","desc",true,1,2,"actuator",true,true);
+	var comp2 = Component("comp2","typeID","desc",true,1,2,"actuator",true,true);
+	var dc1 = DataChannel('dataChannel1');
+	var dc2 = DataChannel('dataChannel2');
+	var ec1 = EventChannel('eventChannel1');
+	var ec2 = EventChannel('eventChannel2');
 	model.addComponent(comp1);
 	model.addComponent(comp2);
 	model.addDataChannel(dc1);
@@ -27,7 +36,7 @@ QUnit.test( 'removeItemListAction execute', function( assert ) {
 	itemList.push(comp1);
 	itemList.push(dc1);
 	itemList.push(ec1);
-	var action = ACS.removeItemListAction(model, itemList);
+	var action = RemoveItemListAction(model, itemList);
 	action.execute();
 	assert.strictEqual(model.componentList.length, 1);
 	assert.strictEqual(model.componentList[0], comp2);
@@ -39,13 +48,13 @@ QUnit.test( 'removeItemListAction execute', function( assert ) {
 });
 
 QUnit.test( 'removeItemListAction undo', function( assert ) {
-	var model = ACS.model("test.acs");
-	var comp1 = ACS.component("comp1","typeID","desc",true,1,2,"actuator",true,true);
-	var comp2 = ACS.component("comp2","typeID","desc",true,1,2,"actuator",true,true);
-	var dc1 = ACS.dataChannel('dataChannel1');
-	var dc2 = ACS.dataChannel('dataChannel2');
-	var ec1 = ACS.eventChannel('eventChannel1');
-	var ec2 = ACS.eventChannel('eventChannel2');
+	var model = Model("test.acs");
+	var comp1 = Component("comp1","typeID","desc",true,1,2,"actuator",true,true);
+	var comp2 = Component("comp2","typeID","desc",true,1,2,"actuator",true,true);
+	var dc1 = DataChannel('dataChannel1');
+	var dc2 = DataChannel('dataChannel2');
+	var ec1 = EventChannel('eventChannel1');
+	var ec2 = EventChannel('eventChannel2');
 	model.addComponent(comp1);
 	model.addComponent(comp2);
 	model.addDataChannel(dc1);
@@ -56,7 +65,7 @@ QUnit.test( 'removeItemListAction undo', function( assert ) {
 	itemList.push(comp1);
 	itemList.push(dc1);
 	itemList.push(ec1);
-	var action = ACS.removeItemListAction(model, itemList);
+	var action = RemoveItemListAction(model, itemList);
 	action.execute();
 	action.undo();
 	assert.strictEqual(model.componentList.length, 2);

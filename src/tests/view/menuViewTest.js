@@ -1,8 +1,16 @@
+import Component from "../../model/component.js";
+import Port from "../../model/port.js";
+import ModelList from "../../model/modelList.js";
+
+import MenuView from "../../view/menuView.js";
+
+import QUnit from "qunit";
+
 QUnit.module( 'menuView' );
 
 QUnit.test( 'menuView setComponentMenu', function( assert ) {
-	var modelList = ACS.modelList();
-	var menuView = ACS.menuView(modelList);
+	var modelList = ModelList();
+	var menuView = MenuView(modelList);
 	menuView.setComponentMenu();
 	assert.strictEqual(document.getElementById('sensorsBtnList').getElementsByTagName('li').length, 50);
 	assert.strictEqual(document.getElementById('processorsBtnList').getElementsByTagName('li').length, 73);
@@ -14,10 +22,10 @@ QUnit.test( 'menuView setComponentMenu', function( assert ) {
 // handleConnectARE: TODO
 
 QUnit.test( 'menuView handleNewModel', function( assert ) {
-	var modelList = ACS.modelList();
-	var menuView = ACS.menuView(modelList);
-	var comp = ACS.component("comp1","asterics.FS20Receiver","desc",true,1,2,"actuator",false,true);
-	var port = ACS.port('outP', comp, 1, 0, 0, false);
+	var modelList = ModelList();
+	var menuView = MenuView(modelList);
+	var comp = Component("comp1","asterics.FS20Receiver","desc",true,1,2,"actuator",false,true);
+	var port = Port('outP', comp, 1, 0, 0, false);
 	comp.outputPortList.push(port);
 	modelList.getActModel().addComponent(comp);
 	$('#newModelBtn').trigger('click');
@@ -27,10 +35,10 @@ QUnit.test( 'menuView handleNewModel', function( assert ) {
 // handleSelectedFile and handleOpenModel require user input to file dialog
 
 QUnit.test( 'menuView handleCloseModel', function( assert ) {
-	var modelList = ACS.modelList();
-	var menuView = ACS.menuView(modelList);
-	var comp = ACS.component("comp1","asterics.FS20Receiver","desc",true,1,2,"actuator",false,true);
-	var port = ACS.port('outP', comp, 1, 0, 0, false);
+	var modelList = ModelList();
+	var menuView = MenuView(modelList);
+	var comp = Component("comp1","asterics.FS20Receiver","desc",true,1,2,"actuator",false,true);
+	var port = Port('outP', comp, 1, 0, 0, false);
 	comp.outputPortList.push(port);
 	modelList.getActModel().addComponent(comp);
 	$('#newModelBtn').trigger('click');
@@ -42,8 +50,8 @@ QUnit.test( 'menuView handleCloseModel', function( assert ) {
 // handleSaveModel requires user input to file dialog
 
 QUnit.test( 'menuView handleCompMenu', function( assert ) {
-	var modelList = ACS.modelList();
-	var menuView = ACS.menuView(modelList);
+	var modelList = ModelList();
+	var menuView = MenuView(modelList);
 	menuView.setComponentMenu();
 	var evObjEnter = document.createEvent( 'Events' );
     evObjEnter.initEvent('mouseenter', true, false );

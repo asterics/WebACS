@@ -28,7 +28,7 @@
  
  export default function(id, // String; unique, defined in component collection
 					 description, // String
-					 parentComponent) { // ACS.component
+					 parentComponent) { // Component
 
 // ***********************************************************************************************************************
 // ************************************************** private variables **************************************************

@@ -82,7 +82,7 @@ export default function() {
 		return gridSteps;
 	}
 	
-	returnObj.setGridSteps = function(newSteps) { // ACS.gridStepType
+	returnObj.setGridSteps = function(newSteps) { // GridStepType
 		gridSteps = newSteps;
 		returnObj.events.fireEvent('gridStepsChangedEvent');
 	}	

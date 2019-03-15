@@ -34,7 +34,7 @@
 						 singleton, // bool
 						 x, // int
 						 y, // int
-						 type, // ACS.componentType
+						 type, // componentType
 						 isSelected, // bool
 						 foundInComponentCollection) { // bool (if false, the component will be a skeleton only and removed by the view)
 

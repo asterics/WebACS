@@ -29,8 +29,8 @@
 
  import Kinetic from "kinetic";
  
- export default function(model, // ACS.model
-						    modelView, // ACS.modelView
+ export default function(model, // Model
+						    modelView, // ModelView
 						    modelLayer) { // Kinetic.Layer
 						   
 // ***********************************************************************************************************************

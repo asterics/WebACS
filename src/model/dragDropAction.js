@@ -27,8 +27,8 @@
  */
 import Action from "./action.js";
  
-export default function(parentModel, 	// ACS.model
-							  compList) {	// Array<ACS.component>
+export default function(parentModel, 	// Model
+							  compList) {	// Array<Component>
 
 // ***********************************************************************************************************************
 // ************************************************** private variables **************************************************
