@@ -26,16 +26,24 @@
  * limitations under the License.
  */
 import MenuView from "./menuView.js";
+import CanvasView from "./canvasView.js";
+import PropertyEditor from "./propertyEditor.js";
+import vConst from "./vConst.js";
+import { statusType } from "../acsNamespace.js";
+
+import RemoveItemListAction from "../model/removeItemListAction.js";
+
+import log from "loglevel";
 
 export default function(modelList, // ACS.modelList
-					clipBoard) { // ACS.clipBoard
+					clipBoard, areStatus, { autoConnect, areBaseURI, autoDownloadModel, openFile }) { // ACS.clipBoard
 
 // ***********************************************************************************************************************
 // ************************************************** private variables **************************************************
 // ***********************************************************************************************************************
-	var menu = MenuView(modelList);
-	var canvas = ACS.canvasView(modelList, clipBoard);
-	var propertyEditor = ACS.propertyEditor(modelList,canvas.getCanvasModelViewList(),canvas.getEditorProperties());
+	var menu = MenuView(modelList, areStatus, { autoConnect, areBaseURI, autoDownloadModel, openFile });
+	var canvas = CanvasView(modelList, clipBoard);
+	var propertyEditor = PropertyEditor(modelList,canvas.getCanvasModelViewList(),canvas.getEditorProperties());
 	var actModelView;
 
 // ***********************************************************************************************************************
@@ -113,7 +121,7 @@ export default function(modelList, // ACS.modelList
 	}
 	
 	var handleModelPanelShortcutClick = function() {
-		var tablist = document.getElementById(ACS.vConst.CANVASVIEW_TABLIST).getElementsByClassName('tab');
+		var tablist = document.getElementById(vConst.CANVASVIEW_TABLIST).getElementsByClassName('tab');
 		for (var i = 0; i < tablist.length; i++) {
 			if (tablist.item(i).attributes.getNamedItem('aria-selected').value === 'true') {
 				tablist.item(i).focus();
@@ -122,7 +130,7 @@ export default function(modelList, // ACS.modelList
 	}
 	
 	var handleModelDesignerShortcutClick = function() {
-		var tablist = document.getElementById(ACS.vConst.CANVASVIEW_TABLIST).getElementsByClassName('tab');
+		var tablist = document.getElementById(vConst.CANVASVIEW_TABLIST).getElementsByClassName('tab');
 		for (var i = 0; i < tablist.length; i++) {
 			if (tablist.item(i).attributes.getNamedItem('aria-selected').value === 'true') {
 				var panelId = tablist.item(i).attributes.getNamedItem('id').value;
@@ -134,7 +142,7 @@ export default function(modelList, // ACS.modelList
 	}
 	
 	var handleGuiDesignerShortcutClick = function() {
-		var tablist = document.getElementById(ACS.vConst.CANVASVIEW_TABLIST).getElementsByClassName('tab');
+		var tablist = document.getElementById(vConst.CANVASVIEW_TABLIST).getElementsByClassName('tab');
 		for (var i = 0; i < tablist.length; i++) {
 			if (tablist.item(i).attributes.getNamedItem('aria-selected').value === 'true') {
 				var panelId = tablist.item(i).attributes.getNamedItem('id').value;
@@ -146,7 +154,7 @@ export default function(modelList, // ACS.modelList
 	}
 	
 	var handleListViewShortcutClick = function() {
-		var tablist = document.getElementById(ACS.vConst.CANVASVIEW_TABLIST).getElementsByClassName('tab');
+		var tablist = document.getElementById(vConst.CANVASVIEW_TABLIST).getElementsByClassName('tab');
 		for (var i = 0; i < tablist.length; i++) {
 			if (tablist.item(i).attributes.getNamedItem('aria-selected').value === 'true') {
 				var panelId = tablist.item(i).attributes.getNamedItem('id').value;
@@ -169,7 +177,7 @@ export default function(modelList, // ACS.modelList
 	var handleKeydown = function(e) {
 		// catch Del to delete selected items
 		if (e.keyCode === 46) { // Del can't be caught by keyPress for not all browsers act consistently (see: http://unixpapa.com/js/key.html)
-			if (!$('#' + ACS.vConst.PROPERTYEDITOR_MOTHERPANEL).find('*').is(':focus')) { // if focus is not somewhere inside propertyEditor (otherwise key could not be used in propertyEditor)
+			if (!$('#' + vConst.PROPERTYEDITOR_MOTHERPANEL).find('*').is(':focus')) { // if focus is not somewhere inside propertyEditor (otherwise key could not be used in propertyEditor)
 				deleteSelectionHandler();
 				stopEvent(e);
 				return false;
@@ -229,7 +237,7 @@ export default function(modelList, // ACS.modelList
 				break;
 			case 120: // Ctrl-x for cut
 				if (e.ctrlKey) {
-					if (!$('#' + ACS.vConst.PROPERTYEDITOR_MOTHERPANEL).find('*').is(':focus')) { // if focus is not somewhere inside propertyEditor (otherwise key could not be used in propertyEditor)
+					if (!$('#' + vConst.PROPERTYEDITOR_MOTHERPANEL).find('*').is(':focus')) { // if focus is not somewhere inside propertyEditor (otherwise key could not be used in propertyEditor)
 						cutHandler();
 						stopEvent(e);
 						return false;	
@@ -238,7 +246,7 @@ export default function(modelList, // ACS.modelList
 				break;
 			case 99: // Ctrl-c for copy
 				if (e.ctrlKey) {
-					if (!$('#' + ACS.vConst.PROPERTYEDITOR_MOTHERPANEL).find('*').is(':focus')) { // if focus is not somewhere inside propertyEditor (otherwise key could not be used in propertyEditor)
+					if (!$('#' + vConst.PROPERTYEDITOR_MOTHERPANEL).find('*').is(':focus')) { // if focus is not somewhere inside propertyEditor (otherwise key could not be used in propertyEditor)
 						copyHandler();
 						stopEvent(e);
 						return false;	
@@ -247,7 +255,7 @@ export default function(modelList, // ACS.modelList
 				break;
 			case 118: // Ctrl-v for paste
 				if (e.ctrlKey) {
-					if (!$('#' + ACS.vConst.PROPERTYEDITOR_MOTHERPANEL).find('*').is(':focus')) { // if focus is not somewhere inside propertyEditor (otherwise key could not be used in propertyEditor)
+					if (!$('#' + vConst.PROPERTYEDITOR_MOTHERPANEL).find('*').is(':focus')) { // if focus is not somewhere inside propertyEditor (otherwise key could not be used in propertyEditor)
 						pasteHandler();
 						stopEvent(e);
 						return false;	
@@ -256,7 +264,7 @@ export default function(modelList, // ACS.modelList
 				break;
 			case 122: // Ctrl-z for undo
 				if (e.ctrlKey) {
-					if (!$('#' + ACS.vConst.PROPERTYEDITOR_MOTHERPANEL).find('*').is(':focus')) { // if focus is not somewhere inside propertyEditor (otherwise key could not be used in propertyEditor)
+					if (!$('#' + vConst.PROPERTYEDITOR_MOTHERPANEL).find('*').is(':focus')) { // if focus is not somewhere inside propertyEditor (otherwise key could not be used in propertyEditor)
 						undoHandler();
 						stopEvent(e);
 						return false;		
@@ -265,7 +273,7 @@ export default function(modelList, // ACS.modelList
 				break;
 			case 121: // Ctrl-y for redo
 				if (e.ctrlKey) {
-					if (!$('#' + ACS.vConst.PROPERTYEDITOR_MOTHERPANEL).find('*').is(':focus')) { // if focus is not somewhere inside propertyEditor (otherwise key could not be used in propertyEditor)
+					if (!$('#' + vConst.PROPERTYEDITOR_MOTHERPANEL).find('*').is(':focus')) { // if focus is not somewhere inside propertyEditor (otherwise key could not be used in propertyEditor)
 						redoHandler();
 						stopEvent(e);
 						return false;	
@@ -400,9 +408,9 @@ export default function(modelList, // ACS.modelList
 		if (!$('#guiPanel' + actModelView.getModelContainerId()).is(':focus')) {
 			var remAct;			
 			if (actModelView.getChannelMode() && $('#modelPanel' + actModelView.getModelContainerId()).is(':focus')) {
-				remAct = ACS.removeItemListAction(modelList.getActModel(), modelList.getActModel().selectedItemsList.slice(1)); // omits the first selected item, so that the operation is only performed on the channel
+				remAct = RemoveItemListAction(modelList.getActModel(), modelList.getActModel().selectedItemsList.slice(1)); // omits the first selected item, so that the operation is only performed on the channel
 			} else {
-				remAct = ACS.removeItemListAction(modelList.getActModel(), modelList.getActModel().selectedItemsList);
+				remAct = RemoveItemListAction(modelList.getActModel(), modelList.getActModel().selectedItemsList);
 			}	
 			remAct.execute();
 		}
@@ -441,10 +449,10 @@ export default function(modelList, // ACS.modelList
 	}
 	
 	var helpHandler = function() {
-        if(ACS.areStatus.isConnected()) {
+        if(areStatus.isConnected()) {
             openHelp(ACS.areBaseURI + '/webapps/WebACS/help/');
         } else {
-            openHelp(ACS.vConst.VIEW_ONLINE_HELP_PATH);
+            openHelp(vConst.VIEW_ONLINE_HELP_PATH);
 		}
 
         function openHelp(pathToHelp) {
@@ -461,32 +469,32 @@ export default function(modelList, // ACS.modelList
                 if (file.indexOf('Oska') === -1) file = file.slice(9); // the slice eliminates the "asterics."
                 window.open(pathToHelp + 'index.html?plugins&' + directory + '/' + file);
             } else {
-                window.open(pathToHelp + 'index.html?acs&' + ACS.vConst.VIEW_PATHTOACSHELPSTARTPAGE);
+                window.open(pathToHelp + 'index.html?acs&' + vConst.VIEW_PATHTOACSHELPSTARTPAGE);
             }
 		}
 	}
 	
 	var AREStatusChangedEventHandler = function() {
-		switch (ACS.areStatus.getStatus()) {
-			case ACS.statusType.DISCONNECTED: document.getElementById('AREstatus').textContent = 'Disconnected'; break;
-			case ACS.statusType.CONNECTING:	document.getElementById('AREstatus').textContent = 'Trying to connect'; break;
-			case ACS.statusType.CONNECTED: document.getElementById('AREstatus').textContent = 'Connected'; break;
-			case ACS.statusType.STARTING: document.getElementById('AREstatus').textContent = 'Attempting to start model'; break;
-			case ACS.statusType.STARTED: document.getElementById('AREstatus').textContent = 'Model running'; break;
-			case ACS.statusType.PAUSING: document.getElementById('AREstatus').textContent = 'Attempting to pause model'; break;
-			case ACS.statusType.PAUSED: document.getElementById('AREstatus').textContent = 'Model paused'; break;
-			case ACS.statusType.RESUMING: document.getElementById('AREstatus').textContent = 'Attempting to resume model'; break;
-			case ACS.statusType.STOPPING: document.getElementById('AREstatus').textContent = 'Attempting to stop model'; break;
-			case ACS.statusType.STOPPED: document.getElementById('AREstatus').textContent = 'Model stopped'; break;
-			case ACS.statusType.CONNECTIONLOST: document.getElementById('AREstatus').textContent = 'Connection lost'; break;
+		switch (areStatus.getStatus()) {
+			case statusType.DISCONNECTED: document.getElementById('AREstatus').textContent = 'Disconnected'; break;
+			case statusType.CONNECTING:	document.getElementById('AREstatus').textContent = 'Trying to connect'; break;
+			case statusType.CONNECTED: document.getElementById('AREstatus').textContent = 'Connected'; break;
+			case statusType.STARTING: document.getElementById('AREstatus').textContent = 'Attempting to start model'; break;
+			case statusType.STARTED: document.getElementById('AREstatus').textContent = 'Model running'; break;
+			case statusType.PAUSING: document.getElementById('AREstatus').textContent = 'Attempting to pause model'; break;
+			case statusType.PAUSED: document.getElementById('AREstatus').textContent = 'Model paused'; break;
+			case statusType.RESUMING: document.getElementById('AREstatus').textContent = 'Attempting to resume model'; break;
+			case statusType.STOPPING: document.getElementById('AREstatus').textContent = 'Attempting to stop model'; break;
+			case statusType.STOPPED: document.getElementById('AREstatus').textContent = 'Model stopped'; break;
+			case statusType.CONNECTIONLOST: document.getElementById('AREstatus').textContent = 'Connection lost'; break;
 		}
 	}
 	
 	var ARESynchronisationChangedEventHandler = function() {
-		if ((ACS.areStatus.getStatus() === ACS.statusType.DISCONNECTED) || (ACS.areStatus.getStatus() === ACS.statusType.CONNECTIONLOST) || (ACS.areStatus.getStatus() === ACS.statusType.CONNECTING)) {
+		if ((areStatus.getStatus() === statusType.DISCONNECTED) || (areStatus.getStatus() === statusType.CONNECTIONLOST) || (areStatus.getStatus() === statusType.CONNECTING)) {
 			document.getElementById('synchronisationStatus').textContent = '';
 		} else {
-			switch (ACS.areStatus.getSynchronised()) {
+			switch (areStatus.getSynchronised()) {
 				case true: document.getElementById('synchronisationStatus').textContent = ' / synchronised';
 						   break;
 				case false: document.getElementById('synchronisationStatus').textContent = ' / NOT synchronised';
@@ -523,8 +531,8 @@ export default function(modelList, // ACS.modelList
 	menu.events.registerHandler('redoBtnPressedEvent', redoHandler);
 	menu.events.registerHandler('helpBtnPressedEvent', helpHandler);
 	// register handlers for areStatus events
-	ACS.areStatus.events.registerHandler('AREStatusChangedEvent', AREStatusChangedEventHandler);
-	ACS.areStatus.events.registerHandler('ARESynchronisationChangedEvent', ARESynchronisationChangedEventHandler);
+	areStatus.events.registerHandler('AREStatusChangedEvent', AREStatusChangedEventHandler);
+	areStatus.events.registerHandler('ARESynchronisationChangedEvent', ARESynchronisationChangedEventHandler);
 	// register handlers for shortcuts
 	$('#AKmenu').click(handleMenuShortcutClick).keypress(function(e) {if (e.keyCode === 13) handleMenuShortcutClick();});
 	$('#AKactModelPanel').click(handleModelPanelShortcutClick).keypress(function(e) {if (e.keyCode === 13) handleModelPanelShortcutClick();});
@@ -545,7 +553,7 @@ export default function(modelList, // ACS.modelList
 	});
 	
 	// if autoConnect is set true by querystring, connect directly to the ARE
-	if (ACS.autoConnect) {
+	if (autoConnect) {
 		document.getElementById('connectAREBtn').click();
 	}	
 

@@ -30,6 +30,7 @@ import log from "loglevel";
 import ModelList from "./model/modelList.js"
 import ClipBoard from "./model/clipBoard.js";
 import View from "./view/view.js";
+import AreStatus from "./model/areStatus.js";
 
 export default function() {
 
@@ -40,6 +41,7 @@ export default function() {
 	var autoConnect = false; // autoConnect to ARE using ACS.areBaseURI
 	var autoDownloadModel = false; // automatically download the current model from the auto-connected ARE; will only work if no openFile is specified
 	var areBaseURI = null; // specify URI for the ARE (if not specified, but the WebACS is hosted by ARE-webservice, that ARE will be used, else localhost will be assumed)
+	var areStatus = AreStatus();
 
 // ***********************************************************************************************************************
 // ************************************************** constructor code ***************************************************
@@ -93,7 +95,7 @@ export default function() {
 	// setup the WebACS
 	modelList = ModelList(openFile);
 	clipBoard = ClipBoard();
-	view = View(modelList, clipBoard);	
+	view = View(modelList, clipBoard, areStatus, { autoConnect, areBaseURI, autoDownloadModel, openFile });	
 	// areStatus.setModelList(modelList);
 }
 

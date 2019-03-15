@@ -1,4 +1,5 @@
 const path = require("path");
+const webpack = require("webpack");
 
 // require("babel-regster");
 require("@babel/register");
@@ -31,8 +32,10 @@ module.exports = {
         use: [{
           loader: "url-loader",
           options: {
-            limit: 8000,
-            name: "images/[hash]-[name].[ext]"
+            // limit: 8000,
+            limit: 1,
+            // name: "images/[hash]-[name].[ext]"
+            name: "view/images/[name].[ext]"
           }
         }]
       },
@@ -52,7 +55,7 @@ module.exports = {
     new htmlWebpackPlugin({
       template: path.join(__dirname, "index.html"),
       filename: 'index.html',
-      inject: "head",
+      inject: "body",
       hash: true
     }),
     new copyWebpackPlugin([
@@ -82,6 +85,12 @@ module.exports = {
         yandex: true,
         windows: true
       }
+    }),
+    new webpack.ProvidePlugin({
+      $: "jquery",
+      jQuery: "jquery",
+      "window.jQuery": "jquery",
+      "window.$": "jquery"
     })
   ],
   mode: "production",

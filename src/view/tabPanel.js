@@ -21,10 +21,12 @@
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * WITHOUT WARRAACS.gridStepTypeNTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import EventManager from "../eventManager.js";
+import { tabPanelKeyCodes } from "../acsNamespace.js";
 
 export default function (id, // String; the id of the div-container holding the tabPanel
 	tab, // String; class of the elements that are supposed to become tabs
@@ -120,12 +122,12 @@ export default function (id, // String; the id of the div-container holding the 
 		}
 
 		switch (e.keyCode) {
-		case ACS.tabPanelKeyCodes.ENTER:
-		case ACS.tabPanelKeyCodes.SPACE:
+		case tabPanelKeyCodes.ENTER:
+		case tabPanelKeyCodes.SPACE:
 			return true;
 
-		case ACS.tabPanelKeyCodes.LEFT:
-		case ACS.tabPanelKeyCodes.UP: {
+		case tabPanelKeyCodes.LEFT:
+		case tabPanelKeyCodes.UP: {
 				var $newTab;
 
 				if (e.ctrlKey) {
@@ -150,8 +152,8 @@ export default function (id, // String; the id of the div-container holding the 
 				e.stopPropagation();
 				return false;
 			}
-		case ACS.tabPanelKeyCodes.RIGHT:
-		case ACS.tabPanelKeyCodes.DOWN: {
+		case tabPanelKeyCodes.RIGHT:
+		case tabPanelKeyCodes.DOWN: {
 				var $newTab;
 				var curIdx = $tabs.index($tab);
 				var counter = 0;
@@ -172,13 +174,13 @@ export default function (id, // String; the id of the div-container holding the 
 				e.stopPropagation();
 				return false;
 			}
-		case ACS.tabPanelKeyCodes.POS1: {
+		case tabPanelKeyCodes.POS1: {
 				// switch to the first tab
 				switchTabs($tab, $tabs.first());
 				e.stopPropagation();
 				return false;
 			}
-		case ACS.tabPanelKeyCodes.END: {
+		case tabPanelKeyCodes.END: {
 				// switch to the last tab
 				switchTabs($tab, $tabs.last());
 				e.stopPropagation();
@@ -197,19 +199,19 @@ export default function (id, // String; the id of the div-container holding the 
 		}
 
 		switch (e.keyCode) {
-		case ACS.tabPanelKeyCodes.ENTER:
-		case ACS.tabPanelKeyCodes.SPACE:
-		case ACS.tabPanelKeyCodes.LEFT:
-		case ACS.tabPanelKeyCodes.UP:
-		case ACS.tabPanelKeyCodes.RIGHT:
-		case ACS.tabPanelKeyCodes.DOWN:
-		case ACS.tabPanelKeyCodes.POS1:
-		case ACS.tabPanelKeyCodes.END: {
+		case tabPanelKeyCodes.ENTER:
+		case tabPanelKeyCodes.SPACE:
+		case tabPanelKeyCodes.LEFT:
+		case tabPanelKeyCodes.UP:
+		case tabPanelKeyCodes.RIGHT:
+		case tabPanelKeyCodes.DOWN:
+		case tabPanelKeyCodes.POS1:
+		case tabPanelKeyCodes.END: {
 				e.stopPropagation();
 				return false;
 			}
-		case ACS.tabPanelKeyCodes.PGUP:
-		case ACS.tabPanelKeyCodes.PGDOWN: {
+		case tabPanelKeyCodes.PGUP:
+		case tabPanelKeyCodes.PGDOWN: {
 
 				// The tab keypress handler must consume pageup and pagedown
 				// keypresses to prevent Firefox from switching tabs
@@ -273,12 +275,12 @@ export default function (id, // String; the id of the div-container holding the 
 		}
 
 		switch (e.keyCode) {
-		case ACS.tabPanelKeyCodes.ESC: {
+		case tabPanelKeyCodes.ESC: {
 				e.stopPropagation();
 				return false;
 			}
-		case ACS.tabPanelKeyCodes.LEFT:
-		case ACS.tabPanelKeyCodes.UP: {
+		case tabPanelKeyCodes.LEFT:
+		case tabPanelKeyCodes.UP: {
 				if (!e.ctrlKey) {
 					// do not process
 					return true;
@@ -291,7 +293,7 @@ export default function (id, // String; the id of the div-container holding the 
 				e.stopPropagation();
 				return false;
 			}
-		case ACS.tabPanelKeyCodes.PGUP: {
+		case tabPanelKeyCodes.PGUP: {
 				var $newTab;
 
 				if (!e.ctrlKey) {
@@ -317,7 +319,7 @@ export default function (id, // String; the id of the div-container holding the 
 				e.preventDefault();
 				return false;
 			}
-		case ACS.tabPanelKeyCodes.PGDOWN: {
+		case tabPanelKeyCodes.PGDOWN: {
 				var $newTab;
 
 				if (!e.ctrlKey) {
@@ -355,13 +357,13 @@ export default function (id, // String; the id of the div-container holding the 
 			return true;
 		}
 
-		if (e.ctrlKey && (e.keyCode == ACS.tabPanelKeyCodes.PGUP || e.keyCode == ACS.tabPanelKeyCodes.PGDOWN)) {
+		if (e.ctrlKey && (e.keyCode == tabPanelKeyCodes.PGUP || e.keyCode == tabPanelKeyCodes.PGDOWN)) {
 			e.stopPropagation();
 			e.preventDefault();
 			return false;
 		}
 		switch (e.keyCode) {
-		case ACS.tabPanelKeyCodes.ESC: {
+		case tabPanelKeyCodes.ESC: {
 				e.stopPropagation();
 				e.preventDefault();
 				return false;
@@ -376,7 +378,7 @@ export default function (id, // String; the id of the div-container holding the 
 	// ***********************************************************************************************************************
 	var returnObj = {};
 
-	returnObj.events = ACS.eventManager();
+	returnObj.events = EventManager();
 
 	returnObj.updatePanel = function () {
 		$panel = $('#' + id); // the jQuery object for the panel

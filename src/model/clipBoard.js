@@ -25,15 +25,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- 
+import Gui from "./gui.js";
+import Component from "./component.js";
+import Property from "./property.js";
+import Port from "./port.js";
+import Event from "./event.js";
+import mConst from "./mConst.js";
+
+import AddItemsAction from "./addItemsAction.js";
+import RemoveItemListAction from "./removeItemListAction";
+
 export default function() {
 
 // ***********************************************************************************************************************
 // ************************************************** private variables **************************************************
 // ***********************************************************************************************************************
-	var components = []; // Array<ACS.component>
+	var components = []; // Array<Component>
 	var dataChannels = []; // Array<ACS.dataChannel>
-	var eventChannels = []; // Array<ACS.eventChannel>
+	var eventChannels = []; // Array<EventChannel>
 	var removedComponentsList = []; // list of all components that were not found in the componentCollection
 	var changedComponentsList = []; // list of all components that did not match the componentCollection
 	var removedSingletonComponentsList = []; // list of all singleton-components that were already in the model and have therefore not been pasted
@@ -44,7 +53,7 @@ export default function() {
 // ************************************************** private methods ****************************************************
 // ***********************************************************************************************************************
 	var copyProperty = function(oldProp) {
-		var newProp = ACS.property(	oldProp.getKey().valueOf(),
+		var newProp = Property(	oldProp.getKey().valueOf(),
 									oldProp.getType(),
 									oldProp.value.valueOf());
 		newProp.description = oldProp.description.valueOf();
@@ -55,7 +64,7 @@ export default function() {
 	}
 	
 	var copyPort = function(oldPort, newParentComponent) {
-		var newPort = ACS.port(	oldPort.getId().valueOf(),
+		var newPort = Port(	oldPort.getId().valueOf(),
 								newParentComponent,
 								oldPort.getType(),
 								oldPort.getDataType(),
@@ -70,7 +79,7 @@ export default function() {
 	}
 	
 	var copyEvent = function(oldEvent, newParentComponent) {
-		var newEvent = ACS.event(oldEvent.getId().valueOf(),
+		var newEvent = Event(oldEvent.getId().valueOf(),
 								 oldEvent.getDescription().valueOf(),
 								 newParentComponent)
 	
@@ -79,8 +88,8 @@ export default function() {
 	
 	var countExtensions = function(id) {
 		var count = 0;
-		var extLength = ACS.mConst.CLIPBOARD_IDEXTENSION.length;
-		while (id.substr(-extLength, extLength) === ACS.mConst.CLIPBOARD_IDEXTENSION) {
+		var extLength = mConst.CLIPBOARD_IDEXTENSION.length;
+		while (id.substr(-extLength, extLength) === mConst.CLIPBOARD_IDEXTENSION) {
 			id = id.slice(0, id.length - extLength);
 			count++
 		}
@@ -94,7 +103,7 @@ export default function() {
 		while (!newPort && (i < portList.length)) {
 			var ext = '';
 			if (extendId) {
-				ext = ACS.mConst.CLIPBOARD_IDEXTENSION;
+				ext = mConst.CLIPBOARD_IDEXTENSION;
 			}
 			if ((portList[i].getId() === oldPort.getId()) && (portList[i].getParentComponent().getId() === oldPort.getParentComponent().getId() + ext)) {
 				newPort = portList[i];
@@ -111,7 +120,7 @@ export default function() {
 		while (!newEvent && (i < eventList.length)) {
 			var ext = '';
 			if (extendId) {
-				ext = ACS.mConst.CLIPBOARD_IDEXTENSION;
+				ext = mConst.CLIPBOARD_IDEXTENSION;
 			}
 			if ((eventList[i].getId() === oldEvent.getId()) && (eventList[i].getParentComponent().getId() === oldEvent.getParentComponent().getId() + ext)) {
 				newEvent = eventList[i];
@@ -128,7 +137,7 @@ export default function() {
 		while (!newComp && (i < compList.length)) {
 			var ext = '';
 			if (extendId) {
-				ext = ACS.mConst.CLIPBOARD_IDEXTENSION;
+				ext = mConst.CLIPBOARD_IDEXTENSION;
 			}
 			if (compList[i].getId() === oldComp.getId() + ext) {
 				newComp = compList[i];
@@ -147,11 +156,11 @@ export default function() {
 		// decide on extension for id
 		var ext = '';
 		if (extendId) {
-			ext = ACS.mConst.CLIPBOARD_IDEXTENSION;
+			ext = mConst.CLIPBOARD_IDEXTENSION;
 		}
 		// do the copying
 		for (var i = 0; i < oldList.length; i++) {
-			var comp = ACS.component(oldList[i].getId().valueOf() + ext,
+			var comp = Component(oldList[i].getId().valueOf() + ext,
 									 oldList[i].getComponentTypeId().valueOf(),
 									 oldList[i].getDescription().valueOf(),
 									 oldList[i].getSingleton(),
@@ -180,7 +189,7 @@ export default function() {
 				comp.propertyList[j] = copyProperty(oldList[i].propertyList[j]);
 			}
 			if (oldList[i].gui) {
-				comp.gui = ACS.gui(oldList[i].gui.getX(),
+				comp.gui = Gui(oldList[i].gui.getX(),
 								   oldList[i].gui.getY(),
 								   oldList[i].gui.getWidth(),
 								   oldList[i].gui.getHeight(),
@@ -196,7 +205,7 @@ export default function() {
 		var newList = [];
 		var ext = '';
 		if (extendId) {
-			ext = ACS.mConst.CLIPBOARD_IDEXTENSION;
+			ext = mConst.CLIPBOARD_IDEXTENSION;
 		}		
 		for (var i = 0; i < oldList.length; i++) {
 			var channel = ACS.dataChannel(oldList[i].getId().valueOf() + ext, findPort(oldList[i].getOutputPort(), extendId),findPort(oldList[i].getInputPort(), extendId));
@@ -214,10 +223,10 @@ export default function() {
 		var newList = [];
 		var ext = '';
 		if (extendId) {
-			ext = ACS.mConst.CLIPBOARD_IDEXTENSION;
+			ext = mConst.CLIPBOARD_IDEXTENSION;
 		}	
 		for (var i = 0; i < oldList.length; i++) {
-			var channel = ACS.eventChannel(oldList[i].getId().valueOf() + ext);
+			var channel = EventChannel(oldList[i].getId().valueOf() + ext);
 			channel.setIsSelected(true); // elements shall be selected, when pasted
 			channel.startComponent = findComponent(compList, oldList[i].startComponent,extendId);
 			channel.endComponent = findComponent(compList, oldList[i].endComponent,extendId);
@@ -256,7 +265,7 @@ export default function() {
 
 	returnObj.cut = function(model) {
 		returnObj.copy(model);
-		var remAct = ACS.removeItemListAction(model, model.selectedItemsList);
+		var remAct = RemoveItemListAction(model, model.selectedItemsList);
 		remAct.execute();
 	}
 
@@ -314,7 +323,7 @@ export default function() {
 						var j = 0;
 						while (j < model.componentList.length) {
 							if (model.componentList[j].getId() === pasteComponents[i].getId()) {
-								pasteComponents[i].setId(pasteComponents[i].getId() + ACS.mConst.CLIPBOARD_IDEXTENSION);
+								pasteComponents[i].setId(pasteComponents[i].getId() + mConst.CLIPBOARD_IDEXTENSION);
 								j = 0; // must start checking from the beginning, since the ID has changed and all components have to be checked for the new ID
 							} else {
 								j++;
@@ -325,7 +334,7 @@ export default function() {
 						while (j < pasteComponents.length) {
 							if (j !== i) { // avoid comparing with self
 								if (pasteComponents[j].getId() === pasteComponents[i].getId()) {
-									pasteComponents[i].setId(pasteComponents[i].getId() + ACS.mConst.CLIPBOARD_IDEXTENSION);
+									pasteComponents[i].setId(pasteComponents[i].getId() + mConst.CLIPBOARD_IDEXTENSION);
 									j = 0; // must start checking from the beginning, since the ID has changed and all components have to be checked for the new ID
 								} else {
 									j++;
@@ -342,7 +351,7 @@ export default function() {
 						while (j < pasteComponents.length) {
 							if (j !== i) { // avoid comparing with self
 								if ((pasteComponents[i].getX() === pasteComponents[j].getX()) && (pasteComponents[i].getY() === pasteComponents[j].getY())) {
-									pasteComponents[i].setNewPosition(pasteComponents[i].getX() + ACS.mConst.MODEL_COMPONENTPOSITIONOFFSETX, pasteComponents[i].getY() + ACS.mConst.MODEL_COMPONENTPOSITIONOFFSETY);
+									pasteComponents[i].setNewPosition(pasteComponents[i].getX() + mConst.MODEL_COMPONENTPOSITIONOFFSETX, pasteComponents[i].getY() + mConst.MODEL_COMPONENTPOSITIONOFFSETY);
 									j = 0; // must start checking from the beginning, since the position has changed and all components have to be checked for the new position
 								} else {
 									j++;
@@ -358,9 +367,9 @@ export default function() {
 							pasteComponents[i].matchesComponentCollection = false;
 						} else if (inputPortsFull.length > pasteComponents[i].inputPortList.length) {
 							for (var j = pasteComponents[i].inputPortList.length; j < inputPortsFull.length; j++) {
-								pasteComponents[i].inputPortList.push(ACS.port(	inputPortsFull.item(j).attributes.getNamedItem('id').textContent,
+								pasteComponents[i].inputPortList.push(Port(	inputPortsFull.item(j).attributes.getNamedItem('id').textContent,
 																				pasteComponents[i],
-																				ACS.portType.INPUT,
+																				PortType.INPUT,
 																				model.getDataType(inputPortsFull.item(j).getElementsByTagName('dataType').item(0).textContent),
 																				j,
 																				inputPortsFull.item(j).getElementsByTagName('mustBeConnected').item(0).textContent));
@@ -375,9 +384,9 @@ export default function() {
 							pasteComponents[i].matchesComponentCollection = false;
 						} else if (outputPortsFull.length > pasteComponents[i].outputPortList.length) {
 							for (var j = pasteComponents[i].outputPortList.length; j < outputPortsFull.length; j++) {
-								pasteComponents[i].outputPortList.push(ACS.port(	outputPortsFull.item(j).attributes.getNamedItem('id').textContent,
+								pasteComponents[i].outputPortList.push(Port(	outputPortsFull.item(j).attributes.getNamedItem('id').textContent,
 																					pasteComponents[i],
-																					ACS.portType.OUTPUT,
+																					PortType.OUTPUT,
 																					model.getDataType(outputPortsFull.item(j).getElementsByTagName('dataType').item(0).textContent),
 																					j,
 																					false));
@@ -392,7 +401,7 @@ export default function() {
 							pasteComponents[i].matchesComponentCollection = false;
 						} else if (listenEvents.length > pasteComponents[i].listenEventList.length) {
 							for (var j = pasteComponents[i].listenEventList.length; j < listenEvents.length; j++) {
-								pasteComponents[i].listenEventList.push(ACS.event(	listenEvents.item(j).attributes.getNamedItem('id').textContent,
+								pasteComponents[i].listenEventList.push(Event(	listenEvents.item(j).attributes.getNamedItem('id').textContent,
 																				listenEvents.item(j).getElementsByTagName('description').item(0).textContent,
 																				pasteComponents[i]));
 							}
@@ -405,7 +414,7 @@ export default function() {
 							pasteComponents[i].matchesComponentCollection = false;
 						} else if (triggerEvents.length > pasteComponents[i].triggerEventList.length) {
 							for (var j = pasteComponents[i].triggerEventList.length; j < triggerEvents.length; j++) {
-								pasteComponents[i].triggerEventList.push(ACS.event(	triggerEvents.item(j).attributes.getNamedItem('id').textContent,
+								pasteComponents[i].triggerEventList.push(Event(	triggerEvents.item(j).attributes.getNamedItem('id').textContent,
 																				triggerEvents.item(j).getElementsByTagName('description').item(0).textContent,
 																				pasteComponents[i]));
 							}
@@ -418,7 +427,7 @@ export default function() {
 							pasteComponents[i].matchesComponentCollection = false;
 						} else if (propertiesFull.length > pasteComponents[i].propertyList.length) {
 							for (var j = pasteComponents[i].propertyList.length; j < propertiesFull.length; j++) {
-								pasteComponents[i].propertyList.push(ACS.property(	propertiesFull.item(j).attributes.getNamedItem('name').textContent, 
+								pasteComponents[i].propertyList.push(Property(	propertiesFull.item(j).attributes.getNamedItem('name').textContent, 
 																				model.getDataType(propertiesFull.item(j).attributes.getNamedItem('type').textContent), 
 																				propertiesFull.item(j).attributes.getNamedItem('value').textContent));
 								if (propertiesFull.item(j).attributes.getNamedItem('description'))
@@ -464,7 +473,7 @@ export default function() {
 				}
 			}	
 			
-			var addAct = ACS.addItemsAction(model, pasteComponents, pasteDataChannels, pasteEventChannels);
+			var addAct = AddItemsAction(model, pasteComponents, pasteDataChannels, pasteEventChannels);
 			addAct.execute();
 			model.events.fireEvent('alertUserOfComponentCollectionMismatchEvent'); // needed in case the pasted parts do not match the component collection (alerts the user)
 			if (removedSingletonComponentsList.length > 0) model.events.fireEvent('alertUserOfRemovedSingletonComponentsEvent');
