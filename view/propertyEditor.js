@@ -263,31 +263,45 @@ ACS.propertyEditor = function (modelList, // ACS.modelList
 							if (entries === null || !(entries instanceof Array) || entries.length === 0) {
 								if (entries === null) console.warn('cannot process received data');
 								else console.warn('empty dynamic property list');
-								var inputElement = document.createElement('input');
-								inputElement.value = currentValue;
-								inputElement.setAttribute("id", elementId);
-								cellToAdd.appendChild(inputElement);
+								insertInputElement(cellToAdd, currentValue, elementId);
 							} else {
 								entries.unshift("");
-								var dropdownList = document.createElement('select');
-								for (var l = 0; l < entries.length; l++) {
-									var option = new Option(entries[l], entries[l]);
-									option.selected = (entries[l] == currentValue);
-									dropdownList.appendChild(option);
-								}
-								dropdownList.setAttribute("id", elementId);
-								dropdownList.addEventListener("change", writeProperty);
-								cellToAdd.appendChild(dropdownList);
+								insertSelectionElements(cellToAdd, entries, currentValue, elementId);
+								// var dropdownList = document.createElement('select');
+								// for (var l = 0; l < entries.length; l++) {
+								// 	var option = new Option(entries[l], entries[l]);
+								// 	option.selected = (entries[l] == currentValue);
+								// 	dropdownList.appendChild(option);
+								// }
+								// dropdownList.setAttribute("id", elementId);
+								// dropdownList.addEventListener("change", writeProperty);
+								// cellToAdd.appendChild(dropdownList);
 							}
 						}, function(HTTPstatus, AREerrorMessage) {
 							console.error('check if ARE is running');
 							console.error('error: ' + AREerrorMessage);
-							var inputElement = document.createElement('input');
-							inputElement.setAttribute("id", elementId);
-							inputElement.value = currentValue;
-							cellToAdd.appendChild(inputElement);
+							insertInputElement(cellToAdd, currentValue, elementId);
 						}, id, key);
 					};
+
+					function insertInputElement(cell, currentValue, elementId) {
+						var inputElement = document.createElement('input');
+						inputElement.value = currentValue;
+						inputElement.setAttribute("id", elementId);
+						cell.appendChild(inputElement);
+					}
+
+					function insertSelectionElements(cell, entries, currentValue, elementId) {
+						var dropdownList = document.createElement('select');
+						for (var l = 0; l < entries.length; l++) {
+							var option = new Option(entries[l], entries[l]);
+							option.selected = (entries[l] == currentValue);
+							dropdownList.appendChild(option);
+						}
+						dropdownList.setAttribute("id", elementId);
+						dropdownList.addEventListener("change", writeProperty);
+						cell.appendChild(dropdownList);
+					}
 
 				} else {
 					var inputElement = document.createElement('input');
