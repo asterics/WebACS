@@ -3,7 +3,7 @@ import "webpack-jquery-ui/css";
 
 import "./src/assets.js";
 
-import "./styles/webACS.css";
+import "./assets/css/webACS.css";
 
 import webACS from "./src/webACS.js";
 
