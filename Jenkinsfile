@@ -13,22 +13,22 @@ pipeline {
         }
     }
     stages {
-        stage('Test') {
-            steps {
-                sh '''
-                    mkdir deps
-                    yarn global add http-server --prefix deps/
-                    ./deps/bin/hs assets/resources/ &
-                    yarn test
-                    kill -2 $(ps aux | grep 'bin/hs' | awk '{print $2}')
-                '''
-            }
-        }
         stage('Build') {
             steps {
                 sh '''
                     yarn install
                     yarn build
+                '''
+            }
+        }
+        stage('Test') {
+            steps {
+                sh '''
+                    mkdir deps
+                    yarn global add http-server --prefix deps/
+                    ./deps/bin/hs dist/ &
+                    yarn test
+                    kill -2 $(ps aux | grep 'bin/hs' | awk '{print $2}')
                 '''
             }
         }
