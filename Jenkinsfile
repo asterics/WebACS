@@ -28,7 +28,7 @@ pipeline {
                     yarn global add http-server --prefix deps/
                     ./deps/bin/hs dist/ &
                     yarn test
-                    kill -2 $(ps aux | grep 'bin/hs' | awk '{print $2}')
+                    kill -2 %1
                 '''
             }
         }
