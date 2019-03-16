@@ -34,7 +34,8 @@ pipeline {
         }
         stage('Bundle') {
             steps {
-                zip zipFile: 'WebACS.zip', archive: false, dir: 'dist'
+                // zip zipFile: 'WebACS.zip', archive: false, dir: 'dist'
+                sh 'zip -r WebACS.zip dist'
                 archiveArtifacts artifacts: 'WebACS.zip', fingerprint: true
             }
         }
