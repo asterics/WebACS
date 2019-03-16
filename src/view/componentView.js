@@ -30,8 +30,8 @@
  import DataChannel from "../model/dataChannel.js";
  import EventChannel from "../model/eventChannel.js" 
 
- import AddDataChannelAction from "../model/addDataChannelAction.js";
- import AddEventChannelAction from "../model/addEventChannelAction.js";
+ import addDataChannelAction from "../model/addDataChannelAction.js";
+ import addEventChannelAction from "../model/addEventChannelAction.js";
 
  import log from "loglevel";
  import Kinetic from "kinetic";
@@ -494,7 +494,7 @@
 		if (!((model.dataChannelList.length > 0) && (!model.dataChannelList[model.dataChannelList.length - 1].getInputPort())) && // if no dataChannel started already
 			!((model.eventChannelList.length > 0) && (!model.eventChannelList[model.eventChannelList.length - 1].endComponent))) { // and no eventChannel started already
 			var ch = DataChannel(outPort.getId() + 'AT' + outPort.getParentComponent().getId(), outPort, null);
-			var addAct = AddDataChannelAction(model, ch);
+			var addAct = addDataChannelAction(model, ch);
 			addAct.execute();
 			return true;
 		}
@@ -516,7 +516,7 @@
 			!((model.dataChannelList.length > 0) && (!model.dataChannelList[model.dataChannelList.length - 1].getInputPort()))) { // and no dataChannel started already
 			var ch = EventChannel(component.getId() + '_TO_'); // second half of ID is added, when channel is completed
 			ch.startComponent = component;
-			var addAct = AddEventChannelAction(model, ch);
+			var addAct = addEventChannelAction(model, ch);
 			addAct.execute();
 			return true;
 		}

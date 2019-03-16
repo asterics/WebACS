@@ -231,7 +231,7 @@
 	var alertUserOfRemovedComponents = function(removedComponents, removeFromModel) {
 		if (removedComponents.length > 0) {
 			var alertString = vConst.MODELVIEW_ALERTSTRINGREMOVEDCOMPONENTS;
-			for (j = 0; j < removedComponents.length; j++) {
+			for (var j = 0; j < removedComponents.length; j++) {
 				if (removeFromModel) model.removeComponent(removedComponents[j]);
 				var compTypeId = removedComponents[j].getComponentTypeId();
 				alertString = alertString + removedComponents[j].getId() + ' ('	+ compTypeId.substring(9, compTypeId.length) + ')\n';
@@ -243,7 +243,7 @@
 	var alertUserOfChangedComponents = function(changedComponents) {
 		if (changedComponents.length > 0) {
 			var alertString = vConst.MODELVIEW_ALERTSTRINGCHANGEDCOMPONENTS;
-			for (j = 0; j < changedComponents.length; j++) {
+			for (var j = 0; j < changedComponents.length; j++) {
 				var compTypeId = changedComponents[j].getComponentTypeId();
 				alertString = alertString + changedComponents[j].getId() + ' ('	+ compTypeId.substring(9, compTypeId.length) + ')\n';
 				changedComponents[j].matchesComponentCollection = true;
@@ -384,7 +384,7 @@
 		var removedComponents = clipBoard.getRemovedSingletonComponentsList();
 		if (removedComponents.length > 0) {
 			var alertString = vConst.MODELVIEW_ALERTSTRINGSINGLETONCOMPONENTS;
-			for (j = 0; j < removedComponents.length; j++) {
+			for (var j = 0; j < removedComponents.length; j++) {
 				var compTypeId = removedComponents[j].getComponentTypeId();
 				alertString = alertString + compTypeId.substring(9, compTypeId.length) + '\n';
 			}

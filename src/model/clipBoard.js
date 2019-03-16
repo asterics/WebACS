@@ -32,10 +32,13 @@ import Component from "./component.js";
 import Property from "./property.js";
 import Event from "./event.js";
 import Port from "./port.js";
-import DataChannel from "./dataChannel.js"
+import DataChannel from "./dataChannel.js";
+import EventChannel from "./eventChannel.js";
 
-import AddItemsAction from "./addItemsAction.js";
-import RemoveItemListAction from "./removeItemListAction";
+import addItemsAction from "./addItemsAction.js";
+import removeItemListAction from "./removeItemListAction";
+
+import { portType } from "../acsNamespace";
 
 export default function() {
 
@@ -267,7 +270,7 @@ export default function() {
 
 	returnObj.cut = function(model) {
 		returnObj.copy(model);
-		var remAct = RemoveItemListAction(model, model.selectedItemsList);
+		var remAct = removeItemListAction(model, model.selectedItemsList);
 		remAct.execute();
 	}
 
@@ -371,7 +374,7 @@ export default function() {
 							for (var j = pasteComponents[i].inputPortList.length; j < inputPortsFull.length; j++) {
 								pasteComponents[i].inputPortList.push(Port(	inputPortsFull.item(j).attributes.getNamedItem('id').textContent,
 																				pasteComponents[i],
-																				PortType.INPUT,
+																				portType.INPUT,
 																				model.getDataType(inputPortsFull.item(j).getElementsByTagName('dataType').item(0).textContent),
 																				j,
 																				inputPortsFull.item(j).getElementsByTagName('mustBeConnected').item(0).textContent));
@@ -388,7 +391,7 @@ export default function() {
 							for (var j = pasteComponents[i].outputPortList.length; j < outputPortsFull.length; j++) {
 								pasteComponents[i].outputPortList.push(Port(	outputPortsFull.item(j).attributes.getNamedItem('id').textContent,
 																					pasteComponents[i],
-																					PortType.OUTPUT,
+																					portType.OUTPUT,
 																					model.getDataType(outputPortsFull.item(j).getElementsByTagName('dataType').item(0).textContent),
 																					j,
 																					false));
@@ -475,7 +478,7 @@ export default function() {
 				}
 			}	
 			
-			var addAct = AddItemsAction(model, pasteComponents, pasteDataChannels, pasteEventChannels);
+			var addAct = addItemsAction(model, pasteComponents, pasteDataChannels, pasteEventChannels);
 			addAct.execute();
 			model.events.fireEvent('alertUserOfComponentCollectionMismatchEvent'); // needed in case the pasted parts do not match the component collection (alerts the user)
 			if (removedSingletonComponentsList.length > 0) model.events.fireEvent('alertUserOfRemovedSingletonComponentsEvent');

@@ -32,8 +32,8 @@
  import EventChannel from "../model/eventChannel.js";
  import ListView from "./listView.js";
  
- import AddEventChannelAction from "../model/addEventChannelAction.js";
- import AddDataChannelAction from "../model/addDataChannelAction";
+ import addEventChannelAction from "../model/addEventChannelAction.js";
+ import addDataChannelAction from "../model/addDataChannelAction";
  
  export default function(	containerId, // String
 									mainList, // DOM Element
@@ -194,7 +194,7 @@
 				$btn.click(function(port) {
 					return function() {
 						var ch = DataChannel(port.getId() + 'AT' + port.getParentComponent().getId(), port, null);
-						var addAct = AddDataChannelAction(model, ch);
+						var addAct = addDataChannelAction(model, ch);
 						addAct.execute();
 					}
 				}(portList[i]));
@@ -533,7 +533,7 @@
 		$btn.click(function() {
 			var ch = EventChannel(component.getId() + '_TO_'); // second half of ID is added, when channel is completed
 			ch.startComponent = component;
-			var addAct = AddEventChannelAction(model, ch);
+			var addAct = addEventChannelAction(model, ch);
 			addAct.execute();			
 		});
 		$('#' + containerId + '_eventOutput_AT_' + component.getId().replace(/\s+/g, '').replace(/\.+/g, '')).append($div);

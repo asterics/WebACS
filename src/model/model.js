@@ -518,6 +518,7 @@
 	}
 	
 	returnObj.findComponentInCollection = function(compTypeId, actCompColl) {
+		if (!actCompColl) { actCompColl = loadDefaultComponentCollection(); }
 		var allComponents = actCompColl.getElementsByTagName('componentType');
 		for (var j = 0; j < allComponents.length; j++) {
 			if (allComponents.item(j).attributes.getNamedItem('id').textContent === compTypeId) return allComponents.item(j);

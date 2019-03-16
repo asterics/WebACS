@@ -31,7 +31,7 @@ import PropertyEditor from "./propertyEditor.js";
 import vConst from "./vConst.js";
 import { statusType, componentType } from "../acsNamespace.js";
 
-import RemoveItemListAction from "../model/removeItemListAction.js";
+import removeItemListAction from "../model/removeItemListAction.js";
 
 import log from "loglevel";
 
@@ -408,9 +408,9 @@ export default function(modelList, // ModelList
 		if (!$('#guiPanel' + actModelView.getModelContainerId()).is(':focus')) {
 			var remAct;			
 			if (actModelView.getChannelMode() && $('#modelPanel' + actModelView.getModelContainerId()).is(':focus')) {
-				remAct = RemoveItemListAction(modelList.getActModel(), modelList.getActModel().selectedItemsList.slice(1)); // omits the first selected item, so that the operation is only performed on the channel
+				remAct = removeItemListAction(modelList.getActModel(), modelList.getActModel().selectedItemsList.slice(1)); // omits the first selected item, so that the operation is only performed on the channel
 			} else {
-				remAct = RemoveItemListAction(modelList.getActModel(), modelList.getActModel().selectedItemsList);
+				remAct = removeItemListAction(modelList.getActModel(), modelList.getActModel().selectedItemsList);
 			}	
 			remAct.execute();
 		}

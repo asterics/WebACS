@@ -93,7 +93,7 @@ module.exports = {
       "window.$": "jquery"
     })
   ],
-  mode: "production",
+  // mode: "production",
   // watch: true,
   devtool: "source-map",
 };

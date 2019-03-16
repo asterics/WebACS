@@ -1,0 +1,229 @@
+<?xml version="1.0"?>
+<model xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" modelName="29.07.2014_1130" version="20130320">
+	<modelDescription>
+		<shortDescription>das ist die short description</shortDescription>
+		<requirements>das sind die model requirements</requirements>
+		<description>das ist eine detaillierte description</description>
+	</modelDescription>
+	<components>
+		<component id="ButtonGrid.1" type_id="asterics.ButtonGrid">
+			<description>Keyboard which sends event after button press</description>
+			<properties>
+				<property name="caption" value="Keyboard" />
+				<property name="horizontalOrientation" value="false" />
+				<property name="buttonCaption1" value="Button 1" />
+				<property name="buttonCaption2" value="Button 2" />
+				<property name="buttonCaption3" value="Button 3" />
+				<property name="buttonCaption4" value="Button 4" />
+				<property name="buttonCaption5" value="Button 5" />
+				<property name="buttonCaption6" value="" />
+				<property name="buttonCaption7" value="" />
+				<property name="buttonCaption8" value="" />
+				<property name="buttonCaption9" value="" />
+				<property name="buttonCaption10" value="" />
+				<property name="buttonCaption11" value="" />
+				<property name="buttonCaption12" value="" />
+				<property name="buttonCaption13" value="" />
+				<property name="buttonCaption14" value="" />
+				<property name="buttonCaption15" value="" />
+				<property name="buttonCaption16" value="" />
+				<property name="buttonCaption17" value="" />
+				<property name="buttonCaption18" value="" />
+				<property name="buttonCaption19" value="" />
+				<property name="buttonCaption20" value="" />
+			</properties>
+			<layout>
+				<posX>226</posX>
+				<posY>293</posY>
+			</layout>
+			<gui>
+				<posX>0</posX>
+				<posY>444</posY>
+				<width>500</width>
+				<height>2000</height>
+			</gui>
+		</component>
+		<component id="Arduino.1" type_id="asterics.Arduino">
+			<description>Arduino Microcontroller CIM</description>
+			<ports>
+				<inputPort portTypeID="pwm3" sync="false">
+				</inputPort>
+				<inputPort portTypeID="pwm5" sync="false">
+				</inputPort>
+				<inputPort portTypeID="pwm6" sync="false">
+				</inputPort>
+				<outputPort portTypeID="A0">
+				</outputPort>
+				<outputPort portTypeID="A1">
+				</outputPort>
+				<outputPort portTypeID="A2">
+				</outputPort>
+				<outputPort portTypeID="A3">
+				</outputPort>
+				<outputPort portTypeID="A4">
+				</outputPort>
+				<outputPort portTypeID="A5">
+				</outputPort>
+			</ports>
+			<properties>
+				<property name="periodicADCUpdate" value="0" />
+				<property name="pin2Mode" value="0" />
+				<property name="pin3Mode" value="0" />
+				<property name="pin4Mode" value="0" />
+				<property name="pin5Mode" value="0" />
+				<property name="pin6Mode" value="0" />
+				<property name="pin7Mode" value="0" />
+				<property name="pin8Mode" value="0" />
+				<property name="pin9Mode" value="0" />
+				<property name="pin10Mode" value="0" />
+				<property name="pin11Mode" value="0" />
+				<property name="pin12Mode" value="0" />
+				<property name="pin13Mode" value="0" />
+			</properties>
+			<layout>
+				<posX>80</posX>
+				<posY>80</posY>
+			</layout>
+		</component>
+		<component id="PlatformDigitalOut.1" type_id="asterics.PlatformDigitalOut">
+			<description>Control for the digital outputs of the Personal Platform</description>
+			<ports>
+				<inputPort portTypeID="command" sync="false">
+				</inputPort>
+			</ports>
+			<properties>
+				<property name="pullupOutput1" value="false" />
+				<property name="pullupOutput2" value="false" />
+			</properties>
+			<layout>
+				<posX>353</posX>
+				<posY>109</posY>
+			</layout>
+		</component>
+		<component id="DoubleToString.1" type_id="asterics.DoubleToString">
+			<description>Converts double to string</description>
+			<ports>
+				<inputPort portTypeID="input" sync="false">
+				</inputPort>
+				<outputPort portTypeID="output">
+				</outputPort>
+			</ports>
+			<layout>
+				<posX>228</posX>
+				<posY>27</posY>
+			</layout>
+		</component>
+		<component id="FacetrackerLK.1" type_id="asterics.FacetrackerLK">
+			<description>Webcamera-based face tracking sensor</description>
+			<ports>
+				<outputPort portTypeID="noseX">
+				</outputPort>
+				<outputPort portTypeID="noseY">
+				</outputPort>
+				<outputPort portTypeID="chinX">
+				</outputPort>
+				<outputPort portTypeID="chinY">
+				</outputPort>
+			</ports>
+			<properties>
+				<property name="cameraSelection" value="0" />
+				<property name="cameraResolution" value="1" />
+				<property name="cameraDisplayUpdate" value="100" />
+				<property name="cameraProfile" value="" />
+			</properties>
+			<layout>
+				<posX>558</posX>
+				<posY>187</posY>
+			</layout>
+			<gui>
+				<posX>0</posX>
+				<posY>0</posY>
+				<width>2000</width>
+				<height>1500</height>
+			</gui>
+		</component>
+	</components>
+	<channels>
+		<channel id="binding.0">
+			<source>
+				<component id="Arduino.1" />
+				<port id="A0" />
+			</source>
+			<target>
+				<component id="DoubleToString.1" />
+				<port id="input" />
+			</target>
+		</channel>
+	</channels>
+	<eventChannels>
+		<eventChannel id="pin2ChangedLowToHigh_setOut1">
+			<sources>
+				<source>
+					<component id="Arduino.1" />
+					<eventPort id="pin2ChangedLowToHigh" />
+				</source>
+			</sources>
+			<targets>
+				<target>
+					<component id="PlatformDigitalOut.1" />
+					<eventPort id="setOut1" />
+				</target>
+			</targets>
+		</eventChannel>
+		<eventChannel id="pin4ChangedHighToLow_setOut2">
+			<sources>
+				<source>
+					<component id="Arduino.1" />
+					<eventPort id="pin4ChangedHighToLow" />
+				</source>
+			</sources>
+			<targets>
+				<target>
+					<component id="PlatformDigitalOut.1" />
+					<eventPort id="setOut2" />
+				</target>
+			</targets>
+		</eventChannel>
+		<eventChannel id="pin8ChangedHighToLow_clearOut1">
+			<sources>
+				<source>
+					<component id="Arduino.1" />
+					<eventPort id="pin8ChangedHighToLow" />
+				</source>
+			</sources>
+			<targets>
+				<target>
+					<component id="PlatformDigitalOut.1" />
+					<eventPort id="clearOut1" />
+				</target>
+			</targets>
+		</eventChannel>
+		<eventChannel id="pin11ChangedHighToLow_clearOut2">
+			<sources>
+				<source>
+					<component id="Arduino.1" />
+					<eventPort id="pin11ChangedHighToLow" />
+				</source>
+			</sources>
+			<targets>
+				<target>
+					<component id="PlatformDigitalOut.1" />
+					<eventPort id="clearOut2" />
+				</target>
+			</targets>
+		</eventChannel>
+	</eventChannels>
+	<modelGUI>
+		<Decoration>true</Decoration>
+		<Fullscreen>false</Fullscreen>
+		<AlwaysOnTop>false</AlwaysOnTop>
+		<ToSystemTray>false</ToSystemTray>
+		<ShopControlPanel>true</ShopControlPanel>
+		<AREGUIWindow>
+			<posX>0</posX>
+			<posY>0</posY>
+			<width>9000</width>
+			<height>5000</height>
+		</AREGUIWindow>
+	</modelGUI>
+</model>

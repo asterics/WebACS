@@ -59,7 +59,15 @@
 		if (!inputPort) {
 			inputPort = newInPort;
 			// set second half of channel-id
-			returnObj.setId(returnObj.getId() + '_TO_' + inputPort.getId() + 'AT' + inputPort.getParentComponent().getId());
+			// returnObj.setId(returnObj.getId() + '_TO_' + inputPort.getId() + 'AT' + inputPort.getParentComponent().getId());
+			returnObj.events.fireEvent('dataChannelCompletedEvent');
+		}
+	}
+
+	returnObj.setOutputPort = function(newOutPort) {
+		if (!outputPort) {
+			outputPort = newOutPort;
+			// returnObj.setId(returnObj.getId() + '_TO_' + outputPort.getId() + 'AT' + outputPort.getParentComponent().getId());
 			returnObj.events.fireEvent('dataChannelCompletedEvent');
 		}
 	}

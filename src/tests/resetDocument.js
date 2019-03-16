@@ -1,4 +1,4 @@
-var resetDocument = function() {
+export default function() {
 	document.getElementById('menuPanel').innerHTML = ''+
 			'<h1 class="menu_header">AsTeRICS Configuration Suite</h1>'+
 			'<div id="mainMenuPanel" class="tabpanel" role="menu">'+
@@ -53,7 +53,7 @@ var resetDocument = function() {
 			  '<div id="panel2" class="panel menuPanel" aria-labelledby="tab2" role="tabpanel">'+
 				'<section class="buttonGroup">'+
 					'<h2>Components</h2>'+
-					'<ul class="buttonList">'+
+					'<ul class="buttonList componentsMenu">'+
 						'<li><button type="button" class="menuButton" id="sensorsBtn"><div class="buttonContents"><img src="view/images/sensor.png" alt="Sensors" />Sensors</div></button><ul id="sensorsBtnList" class="compMenuL1 compMenu hiddenMenu"></ul></li>'+
 						'<li><button type="button" class="menuButton" id="processorsBtn"><div class="buttonContents"><img src="view/images/processor.png" alt="Open model" />Processors</div></button><ul id="processorsBtnList" class="compMenuL1 compMenu hiddenMenu"></ul></li>'+
 						'<li><button type="button" class="menuButton" id="actuatorsBtn"><div class="buttonContents"><img src="view/images/actuator.png" alt="Save model" />Actuators</div></button><ul id="actuatorsBtnList" class="compMenuL1 compMenu hiddenMenu"></ul></li>'+
@@ -111,6 +111,7 @@ var resetDocument = function() {
 						'<li><button type="button" class="menuButton" id="componentCollMgrBtn"><div class="buttonContents"><img src="view/images/ConfigureBundle.png" alt="Component Collection Manager" />Component<br />Collection Manager</div></button></li>'+
 						'<li><button type="button" class="menuButton" id="optionsBtn"><div class="buttonContents"><img src="view/images/Options.png" alt="Options" />Options</div></button></li>'+
 						'<li><button type="button" class="menuButton" id="printBtn"><div class="buttonContents"><img src="view/images/Printer.png" alt="Print" />Print</div></button></li>'+
+						'<li><button type="button" class="menuButton" id="helpBtn"><div class="buttonContents"><img src="view/images/Question.png" alt="Help (F1)" />Help</div></button></li>'+
 						'<li><button type="button" class="menuButton" id="aboutBtn"><div class="buttonContents"><img src="view/images/about.png" alt="About" />About</div></button></li>'+
 					'</ul>'+
 				'</section>'+

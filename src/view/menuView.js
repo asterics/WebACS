@@ -30,8 +30,8 @@
  import vConst from "./vConst.js";
  import { statusType } from "../acsNamespace.js";
 
- import AddComponentAction from "../model/addComponentAction.js";
- import RemoveItemListAction from "../model/removeItemListAction.js";
+ import addComponentAction from "../model/addComponentAction.js";
+ import removeItemListAction from "../model/removeItemListAction.js";
 
  import { setBaseURI, getModelState, downloadDeployedModel, 
 					uploadModel, pauseModel, startModel, stopModel, 
@@ -108,7 +108,7 @@
 		if (compObject === 'singleton') {
 			alert('Sorry, you cannot insert another ' + actCompName + ' - there can be only one per model.');
 		} else {
-			var remAct = AddComponentAction(modelList.getActModel(), compObject);
+			var remAct = addComponentAction(modelList.getActModel(), compObject);
 			remAct.execute();
 		}		
 	}
@@ -404,7 +404,7 @@
 				if (confirm(confirmString)) {
 					actMod.setComponentCollection(data);
 					if (deleteList.length > 0) {
-						var remAct = RemoveItemListAction(actMod, deleteList);
+						var remAct = removeItemListAction(actMod, deleteList);
 						remAct.execute();
 					}
 					if (modifyList.length > 0) actMod.modifyComponentsAccordingToComponentCollection(modifyList);
