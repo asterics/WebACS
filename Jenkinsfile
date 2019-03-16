@@ -24,8 +24,8 @@ pipeline {
         stage('Test') {
             steps {
                 sh '''
-                    yarn global add http-server
-                    hs dist/ &
+                    yarn global add http-server --prefix /usr/local
+                    /usr/local/hs dist/ &
                     yarn test
                     kill $(ps aux | grep 'bin/hs' | awk '{print $2}')
                 '''
