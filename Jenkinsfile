@@ -24,7 +24,6 @@ pipeline {
         stage('Test') {
             steps {
                 sh '''
-                    mkdir deps
                     yarn global add http-server --prefix deps/
                     ./deps/bin/hs dist/ &
                     yarn test
