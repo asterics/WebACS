@@ -38,7 +38,7 @@ pipeline {
                 //     apt-get install zip
                 //     zip -r WebACS.zip dist
                 // '''
-                archiveArtifacts artifacts: 'WebACS.zip', fingerprint: true
+                archiveArtifacts artifacts: 'dist', fingerprint: true
             }
         }
     }
