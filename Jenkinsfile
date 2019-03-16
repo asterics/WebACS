@@ -35,7 +35,11 @@ pipeline {
         stage('Bundle') {
             steps {
                 // zip zipFile: 'WebACS.zip', archive: false, dir: 'dist'
-                sh 'zip -r WebACS.zip dist'
+                sh '''
+                    apt-get update
+                    apt-get install zip
+                    zip -r WebACS.zip dist
+                '''
                 archiveArtifacts artifacts: 'WebACS.zip', fingerprint: true
             }
         }
