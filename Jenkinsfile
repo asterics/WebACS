@@ -21,6 +21,12 @@ pipeline {
                 '''
             }
         }
+        stage('Bundle') {
+            steps {
+                zip zipFile: 'WebACS.zip', archive: false, dir: 'dist'
+                archiveArtifacts artifacts: 'WebACS.zip', fingerprint: true
+            }
+        }
         stage('Test') {
             steps {
                 sh '''
@@ -28,7 +34,7 @@ pipeline {
                     yarn global add http-server --prefix deps/
                     ./deps/bin/hs dist/ &
                     yarn test
-                    kill $(ps aux | grep 'bin/hs' | awk '{print $2}')
+                    kill -2 $(ps aux | grep 'bin/hs' | awk '{print $2}')
                 '''
             }
         }
