@@ -43,7 +43,7 @@ pipeline {
             }
             steps {
                 sh 'zip -r WebACS.zip dist/*'
-                archiveArtifacts artifacts: 'dist', fingerprint: true
+                archiveArtifacts artifacts: 'WebACS.zip', fingerprint: true
             }
         }
     }
