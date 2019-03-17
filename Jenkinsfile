@@ -8,6 +8,14 @@ pipeline {
     }
     agent none
     stages {
+        stage('Cleanup') {
+            agent {
+                label params.agent
+            }
+            steps {
+                deleteDir()
+            }
+        }
         stage('Build') {
             agent {
                 docker {
@@ -42,7 +50,7 @@ pipeline {
                 label params.agent
             }
             steps {
-                sh 'zip -r WebACS.zip dist/*'
+                sh 'cd dist && zip -r ../WebACS.zip *'
                 archiveArtifacts artifacts: 'WebACS.zip', fingerprint: true
             }
         }
