@@ -6,14 +6,15 @@ pipeline {
         choice(name: 'image', description: 'Docker Image', choices: ['node:10', 'node:11'])
         gitParameter(branchFilter: 'origin.*/(.*)', defaultValue: env.BRANCH_NAME, name: 'BRANCH', type: 'PT_BRANCH_TAG', useRepository: "${webacs}")
     }
-    agent {
-        docker {
-            image params.image
-            label params.agent
-        }
-    }
+    agent none
     stages {
         stage('Build') {
+            agent {
+                docker {
+                    image params.image
+                    label params.agent
+                }
+            }
             steps {
                 sh '''
                     yarn install
@@ -22,6 +23,12 @@ pipeline {
             }
         }
         stage('Test') {
+            agent {
+                docker {
+                    image params.image
+                    label params.agent
+                }
+            }
             steps {
                 sh '''
                     yarn global add http-server --prefix deps/
@@ -30,14 +37,12 @@ pipeline {
                 '''
             }
         }
-        stage('Bundle') {
+        stage('Deploy') {
+            agent {
+                label params.agent
+            }
             steps {
-                // zip zipFile: 'WebACS.zip', archive: false, dir: 'dist'
-                // sh '''
-                //     apt-get update
-                //     apt-get install zip
-                //     zip -r WebACS.zip dist
-                // '''
+                sh 'zip -r WebACS.zip dist/*'
                 archiveArtifacts artifacts: 'dist', fingerprint: true
             }
         }
