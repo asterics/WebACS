@@ -55,9 +55,4 @@ pipeline {
             }
         }
     }
-    post {
-        always {
-            cleanWs cleanWhenAborted: false, cleanWhenFailure: false, cleanWhenNotBuilt: false
-        }
-    }
 }
