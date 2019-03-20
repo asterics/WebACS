@@ -26,7 +26,7 @@ pipeline {
       steps {
         sh '''
           yarn install
-          yarn setup
+          yarn build
         '''
       }
     }
