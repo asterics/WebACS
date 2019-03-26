@@ -12,7 +12,7 @@ module.exports = {
     [
       "@semantic-release/github",
       {
-        assets: [{ path: "WebACS-v*.zip", label: "AsTeRICS Docs" }, { path: "dist/build.json", label: "build.json" }]
+        assets: [{ path: "WebACS-v*.zip", label: "AsTeRICS WebACS" }, { path: "dist/build.json", label: "build.json" }]
       }
     ],
     [
