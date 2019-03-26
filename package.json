@@ -1,6 +1,6 @@
 {
   "name": "WebACS",
-  "version": "3.0.1",
+  "version": "3.0.0",
   "description": "Assistive Technology Rapid Integration and Construction Set",
   "main": "index.js",
   "repository": "https://github.com/asterics/WebACS.git",
@@ -10,8 +10,11 @@
   "scripts": {
     "dev": "cross-env NODE_ENV=development webpack-dev-server --open --hot",
     "build": "cross-env NODE_ENV=production webpack --progress --hide-modules",
+    "postbuild": "node src/scripts/logBuild.js",
     "test:watch": "cross-env NODE_ENV=test jest --watch",
-    "test": "cross-env NODE_ENV=test jest"
+    "test": "cross-env NODE_ENV=test jest",
+    "release": "semantic-release",
+    "release:prepare": "yarn add -D semantic-release@15 @semantic-release/commit-analyzer @semantic-release/changelog @semantic-release/exec"
   },
   "devDependencies": {
     "@babel/cli": "^7.2.3",
