@@ -82,7 +82,7 @@ pipeline {
           steps {
             sh '''
               mkdir build
-              mv dist build/WebACS
+              ln -s ../dist build/WebACS
             '''
             script {
               def remote = [ name: 'studyathome', host: 'studyathome.technikum-wien.at', user: env.SERVER_USR, password: env.SERVER_PSW, allowAnyHosts: true ]
@@ -121,7 +121,6 @@ pipeline {
             sh '''
               git checkout $BRANCH
               git pull
-              ls -la . ./dist
               yarn release:prepare
               yarn release --branch $BRANCH
             '''
