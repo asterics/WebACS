@@ -121,6 +121,7 @@ pipeline {
             sh '''
               git checkout $BRANCH
               git pull
+              ls -la . ./dist
               yarn release:prepare
               yarn release --branch $BRANCH
             '''
