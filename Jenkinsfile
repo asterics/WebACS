@@ -100,6 +100,7 @@ pipeline {
           }
           steps {
             archiveArtifacts artifacts: 'WebACS.zip', fingerprint: true
+            archiveArtifacts artifacts: 'dist/build.json', fingerprint: true
           }
         }
         stage('Release') {
