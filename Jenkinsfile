@@ -55,21 +55,21 @@ pipeline {
         sh 'cd dist && zip -r ../WebACS.zip *'
       }
     }
-    // stage('Test') {
-    //   agent {
-    //     docker {
-    //       image params.image
-    //       label params.agent
-    //     }
-    //   }
-    //   steps {
-    //     sh '''
-    //       yarn global add http-server --prefix deps/
-    //       ./deps/bin/hs dist/ &
-    //       yarn test
-    //     '''
-    //   }
-    // }
+    stage('Test') {
+      agent {
+        docker {
+          image params.image
+          label params.agent
+        }
+      }
+      steps {
+        sh '''
+          yarn global add http-server --prefix deps/
+          ./deps/bin/hs dist/ &
+          yarn test
+        '''
+      }
+    }
     stage('Output') {
       parallel {
         stage('Deploy') {
@@ -157,6 +157,7 @@ pipeline {
             sh '''
               git checkout $BRANCH
               git pull
+              printenv
               yarn release:prepare
               yarn release --branch $BRANCH
             '''

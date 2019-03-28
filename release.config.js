@@ -3,7 +3,7 @@ const successComment = release_comment
   ? ":tada: This issue has been resolved in version ${nextRelease.version} :tada:\n\nThe release is available on [GitHub release](<github_release_url>)"
   : false;
 
-module.exports = {
+const config = {
   repositoryUrl: "https://github.com/asterics/WebACS",
   tagFormat: "v${version}",
   plugins: [
@@ -59,3 +59,8 @@ module.exports = {
   dryRun: false,
   ci: false
 };
+
+console.log(successComment);
+console.log(config);
+
+module.exports = config;
