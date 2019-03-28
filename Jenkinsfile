@@ -119,7 +119,8 @@ pipeline {
               rm -rf gh-pages/*
               cp -r dist/* gh-pages/
               cd gh-pages
-              git add *
+              git add .
+              git add -u .
               git -c user.name='Mr. Jenkins' -c user.email='studyathome@technikum-wien.at' commit -m 'docs: release WebACS'
               git push -f https://$GH_TOKEN@github.com/asterics/WebACS.git
             '''
