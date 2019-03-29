@@ -157,7 +157,6 @@ pipeline {
             sh '''
               git checkout $BRANCH
               git pull
-              printenv
               yarn release:prepare
               yarn release --branch $BRANCH
             '''
