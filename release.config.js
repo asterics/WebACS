@@ -1,5 +1,5 @@
 const { release_comment } = process.env;
-const successComment = release_comment
+const successComment = release_comment === "true"
   ? ":tada: This issue has been resolved in version ${nextRelease.version} :tada:\n\nThe release is available on [GitHub release](<github_release_url>)"
   : false;
 
