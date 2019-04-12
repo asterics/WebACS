@@ -132,6 +132,7 @@ ACS.propertyEditor = function (modelList, // ACS.modelList
 					}
 				}
 			}
+			
 
 			//Part for component
 			if (selectedElementType === "component") {
@@ -258,7 +259,7 @@ ACS.propertyEditor = function (modelList, // ACS.modelList
 	
 					fetchDynProperties(cell, elementId, currentValue, id, key);
 					function fetchDynProperties(cellToAdd, elementId, currentValue, id, key) {
-						getRuntimeComponentPropertyList(function(data, httpStatus) {
+						getRuntimeComponentPropertyDynamic(function(data, httpStatus) {
 							var entries = parseEntries(data);
 							if (entries.length === 0) {
 								insertInputElement(cellToAdd, currentValue, elementId);
