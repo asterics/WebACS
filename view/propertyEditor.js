@@ -133,7 +133,6 @@ ACS.propertyEditor = function (modelList, // ACS.modelList
 				}
 			}
 			
-				
 
 			//Part for component
 			if (selectedElementType === "component") {
@@ -211,7 +210,7 @@ ACS.propertyEditor = function (modelList, // ACS.modelList
 		//var tempString=actModel.componentList[selectedElement].getId();
 		//Properties
 		for (var h = 0; h < actModel.componentList[selectedElement].propertyList.length; h++) {
-            var property = actModel.componentList[selectedElement].propertyList[h];
+			var property = actModel.componentList[selectedElement].propertyList[h];
 			var propName = property.getKey();
 			row[h + 1] = bodyT.insertRow(-1);
 			cell = row[h + 1].insertCell(0);
@@ -219,6 +218,7 @@ ACS.propertyEditor = function (modelList, // ACS.modelList
 			var comboValues = property.combobox;
 			var valtemp = property.value;
 			var typetemp = property.getType();
+			var isDynProp = property.getStringList;
 			cell.innerHTML = propName;
 
 			//generat dropdown list in case that combox includes values
@@ -245,77 +245,141 @@ ACS.propertyEditor = function (modelList, // ACS.modelList
 				cell.appendChild(dropdownList);
 			}
 
-			//generate checkbox field for boolean
-			if (comboValues === '' && typetemp === ACS.dataType.BOOLEAN) {
+			if (isDynProp) {
+
+				log.debug('downloading (dynamic) properties list');
 				cell = row[h + 1].insertCell(1);
-				boolInput = null;
-				boolInput = document.createElement("INPUT");
-				boolInput.setAttribute("type", "checkbox");
-				boolInput.setAttribute("value", valtemp);
-				if ((valtemp === "true") || (valtemp === "True")) {
-					boolInput.setAttribute("checked", true);
+
+				if (ACS.areStatus.getSynchronised() === true) {
+
+					var id = propertyEdPanelCaptions.innerHTML;
+					var key = propName;
+					var currentValue = valtemp || "";
+					var elementId = h + "/1/" + valtemp;
+	
+					fetchDynProperties(cell, elementId, currentValue, id, key);
+					function fetchDynProperties(cellToAdd, elementId, currentValue, id, key) {
+						getRuntimeComponentPropertyDynamic(function(data, httpStatus) {
+							var entries = parseEntries(data);
+							if (entries.length === 0) {
+								insertInputElement(cellToAdd, currentValue, elementId);
+							} else {
+								entries.unshift("");
+								insertSelectionElements(cellToAdd, entries, currentValue, elementId);
+							}
+						}, function(HTTPstatus, AREerrorMessage) {
+							console.error('check if ARE is running and connected with WebACS');
+							console.error('error: ' + AREerrorMessage);
+							insertInputElement(cellToAdd, currentValue, elementId);
+						}, id, key);
+					};
+
+					function insertInputElement(cell, currentValue, elementId) {
+						console.warn('no dynamic properties from ARE - using textfield instead of combobox');
+						var inputElement = document.createElement('input');
+						inputElement.value = currentValue;
+						inputElement.setAttribute("id", elementId);
+						cell.appendChild(inputElement);
+					}
+
+					function insertSelectionElements(cell, entries, currentValue, elementId) {
+						var dropdownList = document.createElement('select');
+						for (var l = 0; l < entries.length; l++) {
+							var option = new Option(entries[l], entries[l]);
+							option.selected = (entries[l] == currentValue);
+							dropdownList.appendChild(option);
+						}
+						dropdownList.setAttribute("id", elementId);
+						dropdownList.addEventListener("change", writeProperty);
+						cell.appendChild(dropdownList);
+					}
+
+					function parseEntries(jsonString) {
+						try {
+							let parsed = JSON.parse(jsonString);
+							return parsed instanceof Array ? parsed : [];
+						} catch (error) {}
+						return [];
+					}
+
+				} else {
+					var inputElement = document.createElement('input');
+					inputElement.setAttribute("id", elementId);
+					inputElement.value = valtemp;
+					cell.appendChild(inputElement);
 				}
-				boolInput.setAttribute("id", h + "/1/" + valtemp);
-				boolInput.addEventListener("change", writeProperty);
-				cell.appendChild(boolInput);
-			}
-			//generate intage field
-			if (comboValues === '' && typetemp === ACS.dataType.INTEGER) {
-				cell = row[h + 1].insertCell(1);
-				numberInput = null;
-				numberInput = document.createElement("INPUT");
-				numberInput.setAttribute("type", "number");
-				numberInput.setAttribute("value", valtemp);
-				numberInput.setAttribute("id", h + "/1/" + valtemp);
-				numberInput.addEventListener("focus", setPreviousNumber);
-				numberInput.addEventListener("change", writeProperty);
-				numberInput.addEventListener("input", writePropertyChangLocal); //workaround when blur is not fired
-				cell.appendChild(numberInput);
+				
+			} else {
+				//generate checkbox field for boolean
+				if (comboValues === '' && typetemp === ACS.dataType.BOOLEAN) {
+					cell = row[h + 1].insertCell(1);
+					boolInput = null;
+					boolInput = document.createElement("INPUT");
+					boolInput.setAttribute("type", "checkbox");
+					boolInput.setAttribute("value", valtemp);
+					if ((valtemp === "true") || (valtemp === "True")) {
+						boolInput.setAttribute("checked", true);
+					}
+					boolInput.setAttribute("id", h + "/1/" + valtemp);
+					boolInput.addEventListener("change", writeProperty);
+					cell.appendChild(boolInput);
+				}
+				//generate intage field
+				if (comboValues === '' && typetemp === ACS.dataType.INTEGER) {
+					cell = row[h + 1].insertCell(1);
+					numberInput = null;
+					numberInput = document.createElement("INPUT");
+					numberInput.setAttribute("type", "number");
+					numberInput.setAttribute("value", valtemp);
+					numberInput.setAttribute("id", h + "/1/" + valtemp);
+					numberInput.addEventListener("focus", setPreviousNumber);
+					numberInput.addEventListener("change", writeProperty);
+					numberInput.addEventListener("input", writePropertyChangLocal); //workaround when blur is not fired
+					cell.appendChild(numberInput);
+				}
+
+				if (comboValues === '' && typetemp === ACS.dataType.DOUBLE) {
+					cell = row[h + 1].insertCell(1);
+					numberInput = null;
+					numberInput = document.createElement("INPUT");
+					numberInput.setAttribute("type", "text");
+					//numberInput.setAttribute("step","0.0000000001");
+					numberInput.setAttribute("value", valtemp);
+					numberInput.setAttribute("pattern", "^[-]?(0|[1-9][0-9]*)(\.[0-9]+)?([eE][+-]?[0-9]+)?");
+					numberInput.setAttribute("id", h + "/1/" + valtemp);
+					numberInput.addEventListener("change", writeProperty);
+					numberInput.addEventListener("input", writePropertyChangLocal); //workaround when blur is not fired
+					cell.appendChild(numberInput);
+				}
+
+				if (comboValues === '' && typetemp === ACS.dataType.STRING) {
+					cell = row[h + 1].insertCell(1);
+					textInput = null;
+					textInput = document.createElement("INPUT");
+					textInput.setAttribute("type", "text");
+					textInput.setAttribute("name", propName);
+					textInput.setAttribute("value", ACS.utils.decodeForXml(valtemp));
+					textInput.setAttribute("id", h + "/1/" + valtemp);
+					textInput.addEventListener("blur", writeProperty);
+					textInput.addEventListener("input", writePropertyChangLocal); //workaround when blur is not fired
+					cell.appendChild(textInput);
+				}
 			}
 
-			if (comboValues === '' && typetemp === ACS.dataType.DOUBLE) {
-				cell = row[h + 1].insertCell(1);
-				numberInput = null;
-				numberInput = document.createElement("INPUT");
-				numberInput.setAttribute("type", "text");
-				//numberInput.setAttribute("step","0.0000000001");
-				numberInput.setAttribute("value", valtemp);
-				numberInput.setAttribute("pattern", "^[-]?(0|[1-9][0-9]*)(\.[0-9]+)?([eE][+-]?[0-9]+)?");
-				numberInput.setAttribute("id", h + "/1/" + valtemp);
-				numberInput.addEventListener("change", writeProperty);
-				numberInput.addEventListener("input", writePropertyChangLocal); //workaround when blur is not fired
-				cell.appendChild(numberInput);
-			}
-
-			if (comboValues === '' && typetemp === ACS.dataType.STRING) {
-				cell = row[h + 1].insertCell(1);
-				textInput = null;
-				textInput = document.createElement("INPUT");
-				textInput.setAttribute("type", "text");
-				textInput.setAttribute("name", propName);
-				textInput.setAttribute("value", ACS.utils.decodeForXml(valtemp));
-				textInput.setAttribute("id", h + "/1/" + valtemp);
-				textInput.addEventListener("blur", writeProperty);
-				textInput.addEventListener("input", writePropertyChangLocal); //workaround when blur is not fired
-				cell.appendChild(textInput);
-			}
-
-			//element.setAttribute("type", "button");
-			//element.setAttribute("value", tempString);
 		}
 
 		//internal Properties
 		internalPropertyTable.setAttribute("class", "propertyEditorT");
 
-		var headerInternalProoperty = internalPropertyTable.createTHead();
-		headerInternalProoperty.setAttribute("class", "propertyEditorTh");
-		row[0] = headerInternalProoperty.insertRow(0);
-		var headerInternalProopertyCell1 = document.createElement("TH");
-		headerInternalProopertyCell1.innerHTML = "Internal Property";
-		row[0].appendChild(headerInternalProopertyCell1);
-		var headerInternalProopertyCell2 = document.createElement("TH");
-		headerInternalProopertyCell2.innerHTML = "Value";
-		row[0].appendChild(headerInternalProopertyCell2);
+		var headerInternalProperty = internalPropertyTable.createTHead();
+		headerInternalProperty.setAttribute("class", "propertyEditorTh");
+		row[0] = headerInternalProperty.insertRow(0);
+		var headerInternalPropertyCell1 = document.createElement("TH");
+		headerInternalPropertyCell1.innerHTML = "Internal Property";
+		row[0].appendChild(headerInternalPropertyCell1);
+		var headerInternalPropertyCell2 = document.createElement("TH");
+		headerInternalPropertyCell2.innerHTML = "Value";
+		row[0].appendChild(headerInternalPropertyCell2);
 
 		var bodyT2 = internalPropertyTable.createTBody();
 		bodyT2.setAttribute("class", "propertyEditorTb");
@@ -1645,3 +1709,4 @@ ACS.propertyEditor = function (modelList, // ACS.modelList
 
 	return returnObj;
 }
+
