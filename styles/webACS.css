@@ -1,19 +1,87 @@
+/*
+ * AsTeRICS - Assistive Technology Rapid Integration and Construction Set (http://www.asterics.org)
+ * 
+ * 
+ * Y88b                     d88P      888               d8888  .d8888b.   .d8888b. 
+ *  Y88b                   d88P       888              d88888 d88P  Y88b d88P  Y88b
+ *   Y88b                 d88P        888             d88P888 888    888 Y88b.
+ *    Y88b     d888b     d88P .d88b.  8888888b.      d88P 888 888         "Y888b.  
+ *     Y88b   d88888b   d88P d8P  Y8b 888   Y88b    d88P  888 888            "Y88b.
+ *      Y88b d88P Y88b d88P  88888888 888    888   d88P   888 888    888       "888
+ *       Y88888P   Y88888P   Y8b.     888   d88P  d8888888888 Y88b  d88P Y88b  d88P
+ *        Y888P     Y888P     "Y8888  8888888P"  d88P     888  "Y8888P"   "Y8888P"
+ * 
+ * Copyright 2015 Kompetenznetzwerk KI-I (http://ki-i.at)
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+ 
 body {
 	font-family: Arial, Verdana, Helvetica, sans-serif;
 	font-size: 100%;
 	background-color: #dfe9f5;
+	margin: 0;
+	padding: 0;
+}
+
+#pageAreas {
+	font-size: 0.7em;
+	overflow: hidden;
+	padding: 0 0 0 1.5em;
+	border-bottom: 1px solid black;
+	margin-bottom: 1em;
+	background-color: #ECE9D8;
+}
+
+#pageAreasHeader {
+	float: left;
+	padding: 0.2em 0.5em 0.2em 0.5em;
+	border-left: 1px solid black;
+	border-right: 1px solid black;
+	font-weight: bold;
+}
+
+#pageAreas ul {
+	position: relative;
+	margin: 0;
+}
+
+#pageAreas li {
+	list-style: none;
+	float: left;
+	border-right: 1px solid black;
+	padding: 0.2em 0.5em 0.2em 0.5em;
+	font-weight: bold;
+}
+
+#pageAreas li:hover, #pageAreas li:focus  {
+	background-color: #0bf8ea;
+	cursor: pointer;
+}
+
+#menuPanel {
+	padding: 0 0 0.5em 1em;
 }
 
 .menu_header {
   text-align: left;
   background-color: #dfe9f5;
   color: black;
-  padding-left: 0.3em;
   margin: 0;
 }
 
 .tabpanel {
-  padding: 0.5em;
+  padding-top: 0.5em;
   background-color: #dfe9f5;
   height: 1%; /* IE fix for float bug */
 }
@@ -22,6 +90,10 @@ body {
   margin: 0;
   padding: 0;
   list-style: none;
+}
+
+#canvasPanelTabList {
+	max-width: 70em;
 }
 
 .tab {
@@ -41,6 +113,22 @@ body {
   border-top-right-radius: 5px;
 }
 
+.menuTab:focus {
+	border: 1px dotted black;
+}
+
+.canvasTab:focus {
+	border: 1px dotted black;
+}
+
+.modelTab:focus {
+	border: 1px dotted black;
+}
+
+.propEdTab:focus {
+	border: 1px dotted black;
+}
+
 .canvasTab {
   background-color: #dfe9f5;
   margin: .2em 1px -1px 0;
@@ -50,6 +138,7 @@ body {
   font-size: 0.8em;
   border-top-left-radius: 3px;
   border-top-right-radius: 3px;
+  overflow: hidden;
 }
 
 .modelTab {
@@ -88,10 +177,10 @@ body {
 }
 
 .canvasPanel {
-  height: 37em;
-  width: 70em;
-  padding: 3px 4px 1px 2px;
-  background-color: #d1e5fd;
+	height: 37em;
+	width: 70em;
+	padding: 3px 4px 1px 2px;
+	background-color: #d1e5fd;
 }
 
 .modelPanel {
@@ -99,6 +188,14 @@ body {
   width: 69em;
   padding: 0.3em 0.5em;  
   overflow: scroll;
+}
+
+.listPanelFocusableElement:focus {
+	background-color: #d1e511;
+}
+
+.listPanelFocusableElementKeyboardMode:focus {
+	background-color: #fdae33;
 }
 
 .propEdPanel {
@@ -120,6 +217,23 @@ li[aria-selected='true'] {
 	overflow: visible;
 	padding: 0 0.5em 0 0.5em;
 	height: 6em;
+	margin: 0 1px 0 1px;
+	font-size: 80%;	
+	border-width: 3px;
+	background-color: lightgrey;
+	opacity: 1;
+}
+
+.menuButton:disabled {
+	opacity: 0.5;
+}
+
+.menuButton:hover {
+	border-color: blue;
+}
+
+.menuButton:active {
+	background-color: blue;
 }
 
 .menuButton img {
@@ -152,10 +266,6 @@ li[aria-selected='true'] {
 	padding: 0;
 }
 
-.buttonList button {
-	margin: 0 1px 0 1px;
-}
-
 .buttonGroup input {
 	top: -5em;
 }
@@ -182,11 +292,40 @@ li[aria-selected='true'] {
 	border-right: 0;
 }
 
+.componentsMenu {
+	border: none !important;
+	top: -8.5em;
+	font-size: 0.8em !important;
+}
+
+.componentsMenu img {
+	display: block;
+	margin: auto;
+}
+
+.componentsMenu-item {
+	margin-right: 0.5em !important;
+	padding-top: 1em !important;
+	padding-bottom: 0.5em !important;
+	border: 1px solid #999;
+	border-radius: 3px;
+}
+
+.ui-menu-item {
+	border-bottom: 1px solid #999;
+}
+
+.ui-state-focus {
+	margin-bottom: 0 !important;
+}
+
+.ui-state-active {
+	margin-bottom: 0 !important;
+}
+
 .compMenu {
-	position: absolute;
-	padding: 0;
 	width: 12em;
-	z-index: 1000;
+	border: none !important;
 }
 
 .compMenu li {
@@ -197,38 +336,18 @@ li[aria-selected='true'] {
 
 .compMenu div {
 	padding: 2px;
-	border-top: 1px solid white;
-	border-bottom: 1px solid white;
-}
-
-.compMenuL2 {
-	left: 12.5em;
 }
 
 .compMenuL2 li {
-	position: relative;
-	clear: left;
-	top: -1.6em;
-	padding: 2px 0 2px 0;
-	border-top: 1px solid white;
-	border-bottom: 1px solid white;
+	top: -0.7em;
 }
 
 .compMenu li:hover, .compMenu li:focus {
 	background-color: #afdef8;
 }
 
-.hiddenMenu {
-	left: -3000em;
-}
-
-div[aria-hidden='true'] {
-   display: none;
-}
-
 #canvasMotherPanel {
-  padding: 0 0.5em 0.5em 0.5em;
-  padding-bottom: 1em;
+  padding: 0 0.5em 0.5em 1em;
   background-color: #dfe9f5;
   float: left;
 }
@@ -246,8 +365,79 @@ div[aria-hidden='true'] {
 	border: 1px solid black;
 }
 
+#statusAndZoomBar {
+	clear: left;
+	font-size: 0.8em;
+	padding-left: 1.5em;
+}
+
+#statusBar {
+	float: left;
+}
+
+#zoomBar {
+	margin-left: 71em;
+}
+
+#zoomSlider {
+	height: 0.7em;
+}
+
 .hidden {
   position: absolute;
-  left: -300em;
-  top: -300em;
+  left: -3000em;
+}
+
+.displayNone {
+	display: none;
+}
+
+.bold {
+	font-weight: bold;
+}
+
+/* ******************** styles for jquery-ui dialog ******************** */
+.ui-dialog {
+	width: auto !important;
+	font-size: 0.8em !important;
+}
+
+.ui-dialog-content {
+	min-height: 0 !important;
+}
+
+.loadModelFromStorageDialogButtonPane {
+	margin-top: 1em;
+}
+
+/* ******************** styles for Property Editor *************** */
+.propertyEditorTh{
+	background-color: #e9ecfa;
+}
+
+.propertyEditorT{
+	width: 100%;
+	border-spacing: 4px;
+	border: 3px solid #dddddd;
+	padding: 0px 0px 0px 0px;
+	margin: 0px 0px 10px 0px;
+}
+.propertyEditorTb{
+	background-color: #eeeeee;
+}
+.propertyeditorCaptions{
+	padding: 0px 0px 0px 0px;
+	margin: 0px 0px 4px 0px;
+	background-color: #d1e5fd;
+}
+.propertyEditorWrapper{
+	min-width: 100%;
+	padding: 0px 0px 0px 0px;
+	margin: 0px 0px 4px 0px;
+	display: inline-block;
+}
+.alertDialog{
+	font-family: Arial, Verdana, Helvetica, sans-serif;
+	font-size: 0.9em;
+	display: none;
 }
