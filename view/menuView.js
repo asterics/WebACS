@@ -208,6 +208,7 @@
 	var handleConnectARE = function(e) {
 		log.debug('menuView: attempting to connect to ARE');
 		ACS.areStatus.setStatus(ACS.statusType.CONNECTING);
+                Object.keys(astericsREST).forEach(e => { window[e] = astericsREST[e] });
 		setBaseURI(ACS.areBaseURI + '/rest/');
 		// check and show current status of ARE (the rest of the connection process takes place in the successcallback, because only when this is a success,
 		// we can be sure that an ARE is actually there)
