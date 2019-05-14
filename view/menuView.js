@@ -322,8 +322,13 @@
 		 }
 	 }
 
+	 var inTestMode = false;
 	function handleTestModel(e) {
+		if (inTestMode) {
+			return;
+		}
 		log.debug('test model');
+		inTestMode = true;
 		var testStart = new Date().getTime();
 		var testDurationSeconds = ACS.utils.getLocalStorageItem(ACS.vConst.WEBACS_OPTIONS_TESTMODE_TIMEOUT) || 30;
 		var testDurationMillis = testDurationSeconds * 1000;
@@ -383,6 +388,7 @@
 
 		function uploadAndStart(model) {
 			log.info('reverting to previous model...');
+			inTestMode = false;
 			uploadModel(function () {
 				startModel();
 			}, function error () {
