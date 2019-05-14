@@ -183,6 +183,13 @@
 		 log.debug('disabled synchronization!');
 		 returnObj.events.fireEvent('ARESynchronisationChangedEvent');
 	 }
+
+     returnObj.enableSynchronization = function() {
+         syncDisabled = false;
+         returnObj.checkAndSetSynchronisation();
+         log.debug('enabled synchronization!');
+         returnObj.events.fireEvent('ARESynchronisationChangedEvent');
+     }
 	
 	returnObj.getSynchronised = function() {
 		return synchronised && !syncDisabled;
