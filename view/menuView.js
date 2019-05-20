@@ -331,12 +331,13 @@
 		inTestMode = true;
 		var testStart = new Date().getTime();
 		var testDurationSeconds = ACS.utils.getLocalStorageItem(ACS.vConst.WEBACS_OPTIONS_TESTMODE_TIMEOUT) || 30;
+		var fontSize = ACS.utils.getLocalStorageItem(ACS.vConst.WEBACS_OPTIONS_TESTMODE_FONTSIZE_PX) || 13;
 		var testDurationMillis = testDurationSeconds * 1000;
 		var currentModelXml = null;
 		downloadModelInternal(function (model) {
 			currentModelXml = model;
 			uploadModel(function successUpload () {
-				startModel(function sucessStart () {
+				startModel(function successStart () {
 					checkTimeout(currentModelXml, testDurationMillis);
 				}, function errorStart () {
 					uploadAndStart(currentModelXml);
@@ -347,19 +348,22 @@
 
 			function checkTimeout(xmlModel, duration) {
 				var timeoutHandler = null;
-				$('#btnTestStatusAdd').show();
-				$('#btnTestStatusCancel').show();
-				$('#btnTestStatusAdd').off();
-				$('#btnTestStatusCancel').off();
-				$('#btnTestStatusAdd').on('click', function () {
+				$('#btnTestStatusAdd').show().off().css('font-size', fontSize + 'px').on('click', function () {
 					duration += 30000;
 					updateStatus();
 				});
-				$('#btnTestStatusCancel').on('click', function () {
+				$('#btnTestStatusCancel').show().off().css('font-size', fontSize + 'px').on('click', function () {
 					if (timeoutHandler) {
 						clearTimeout(timeoutHandler);
 					}
 					end();
+				});
+				$('#btnTestStatusApprove').show().off().css('font-size', fontSize + 'px').on('click', function () {
+					if (timeoutHandler) {
+						clearTimeout(timeoutHandler);
+					}
+					hideButtons();
+					inTestMode = false;
 				});
 				if (new Date().getTime() - testStart >= duration) {
 					end();
@@ -376,11 +380,14 @@
 				}
 
 				function end() {
-					$('#btnTestStatusAdd').off();
-					$('#btnTestStatusCancel').off();
-					$('#btnTestStatusAdd').hide();
-					$('#btnTestStatusCancel').hide();
+					hideButtons();
 					uploadAndStart(xmlModel);
+				}
+
+				function hideButtons() {
+					$('#btnTestStatusAdd').off().hide();
+					$('#btnTestStatusCancel').off().hide();
+					$('#btnTestStatusApprove').off().hide();
 					document.getElementById("testStatusText").textContent = '';
 				}
 			}
@@ -837,6 +844,11 @@
 		ACS.utils.saveLocalStorageItem(ACS.vConst.WEBACS_OPTIONS_TESTMODE_TIMEOUT, timeout);
 	}
 
+	 function handleTestModeFontsize(e) {
+		 var fontsize = parseInt(e.target.value);
+		 ACS.utils.saveLocalStorageItem(ACS.vConst.WEBACS_OPTIONS_TESTMODE_FONTSIZE_PX, fontsize);
+	 }
+
 // ***********************************************************************************************************************
 // ************************************************** public stuff *******************************************************
 // ***********************************************************************************************************************
@@ -912,9 +924,13 @@
 	document.getElementById('mainMenuPanel').appendChild(fileSelector);
 	var testModeEnabled = ACS.utils.getLocalStorageItem(ACS.vConst.WEBACS_OPTIONS_TESTMODE);
 	var savedTimeout = ACS.utils.getLocalStorageItem(ACS.vConst.WEBACS_OPTIONS_TESTMODE_TIMEOUT);
+	var savedFontsize = ACS.utils.getLocalStorageItem(ACS.vConst.WEBACS_OPTIONS_TESTMODE_FONTSIZE_PX);
 	if(savedTimeout) {
 		$('#inputTestModeTime').val(savedTimeout);
 	}
+	 if(savedFontsize) {
+		 $('#inputTestModeFontsize').val(savedFontsize);
+	 }
 	$('#checkboxEnableTestMode').prop('checked', testModeEnabled);
 	$('#testModelBtnContainer').css('display', testModeEnabled ? 'block' : 'none');
 	 $('#uploadModelBtnContainer').css('display', testModeEnabled ? 'none' : 'block');
@@ -955,6 +971,7 @@
 	document.getElementById('aboutBtn').addEventListener('click', handleAbout);
 	document.getElementById('checkboxEnableTestMode').addEventListener('change', handleEnableTestMode);
 	document.getElementById('inputTestModeTime').addEventListener('change', handleTestModeTime);
+	document.getElementById('inputTestModeFontsize').addEventListener('change', handleTestModeFontsize);
 
 	// handlers for the quickselect field and the corresponding insert-button
 	document.getElementById('quickselect').addEventListener('change', function() {

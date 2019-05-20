@@ -207,6 +207,10 @@
 								<label for="inputTestModeTime" style="display: inline; color: black">Test mode timeout (s)</label>
 								<input type="number" id="inputTestModeTime" style="top: 0" min="1" value="30"/>
 							</div>
+							<div>
+								<label for="inputTestModeFontsize" style="display: inline; color: black">Test mode button fontsize (px)</label>
+								<input type="number" id="inputTestModeFontsize" style="top: 0" min="1" value="13"/>
+							</div>
 						</li>
 					</ul>
 				</section>
@@ -235,7 +239,8 @@
 			<span id="testStatus">
 				<span id="testStatusText"></span>
 				<button id="btnTestStatusAdd" style="display: none">+30s</button>
-				<button id="btnTestStatusCancel" style="display: none">stop test</button>
+				<button id="btnTestStatusCancel" style="display: none">revert model</button>
+				<button id="btnTestStatusApprove" style="display: none">approve model</button>
 			</span>
 		</div>
 		<div id="zoomBar">
