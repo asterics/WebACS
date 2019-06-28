@@ -253,6 +253,21 @@
 
 <!-- ****************************************************** main script **************************************************************** -->	
 	<script>
+		//in case of https, redirect to http as a workaround for this firefox bug (https://bugzilla.mozilla.org/show_bug.cgi?id=1376310).
+		console.log("protocol: "+window.location.protocol);
+		if(window.location.protocol == "https:") {
+			var newURL="http://"+window.location.host+window.location.pathname;
+			if(window.location.hostname=="localhost" || window.location.hostname=="127.0.0.1"||window.location.hostname=="::1") {
+				var newURL="http://"+window.location.hostname+":8081"+window.location.pathname;
+			}
+
+			console.log("Redirecting from "+window.location.href+"to "+newURL);
+			window.location.replace(newURL);
+		} else {
+			console.log("no redirection necessary")
+		}
+
+
 		var theWebACS = ACS.webACS();
 	</script>
     <noscript>
