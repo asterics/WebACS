@@ -109,100 +109,55 @@
 	}
 	
 	var AREStatusChangedEventHandler = function() {
+
+		var allButtonIds = ['#connectAREBtn', '#disconnectAREBtn', '#uploadModelBtn', '#downloadModelBtn', '#testModelBtn', '#downloadCompCollBtn', '#storeModelAREBtn',
+			'#loadModelAREBtn', '#activateStoredModelBtn', '#deleteStoredModelBtn', '#setAsAutorunBtn', '#startModelBtn', '#pauseModelBtn', '#stopModelBtn'];
+
+		function enableButtons(idList) {
+			if(!idList || idList instanceof Array === false) {
+				return;
+			}
+			idList.forEach(function (id) {
+				$(id).removeAttr('disabled');
+			});
+		}
+
+		function disableButtons(idList) {
+			if(!idList || idList instanceof Array === false) {
+				return;
+			}
+			idList.forEach(function (id) {
+				$(id).attr('disabled', '');
+			});
+		}
+
 		switch (ACS.areStatus.getStatus()) {
 			case ACS.statusType.DISCONNECTED: 
 			case ACS.statusType.CONNECTIONLOST:
-				$('#connectAREBtn').removeAttr('disabled');
-				$('#disconnectAREBtn').attr('disabled', '');
-				$('#uploadModelBtn').attr('disabled', '');
-				$('#downloadModelBtn').attr('disabled', '');
-				$('#downloadCompCollBtn').attr('disabled', '');
-				$('#storeModelAREBtn').attr('disabled', '');
-				$('#loadModelAREBtn').attr('disabled', '');
-				$('#activateStoredModelBtn').attr('disabled', '');
-				$('#deleteStoredModelBtn').attr('disabled', '');
-				$('#setAsAutorunBtn').attr('disabled', '');
-				$('#startModelBtn').attr('disabled', '');
-				$('#pauseModelBtn').attr('disabled', '');
-				$('#stopModelBtn').attr('disabled', '');
+				disableButtons(allButtonIds);
+				enableButtons(['#connectAREBtn']);
 				break;
-			case ACS.statusType.CONNECTING: 
-				$('#connectAREBtn').attr('disabled', '');
-				$('#disconnectAREBtn').attr('disabled', '');
-				$('#uploadModelBtn').attr('disabled', '');
-				$('#downloadModelBtn').attr('disabled', '');
-				$('#downloadCompCollBtn').attr('disabled', '');
-				$('#storeModelAREBtn').attr('disabled', '');
-				$('#loadModelAREBtn').attr('disabled', '');
-				$('#activateStoredModelBtn').attr('disabled', '');
-				$('#deleteStoredModelBtn').attr('disabled', '');
-				$('#setAsAutorunBtn').attr('disabled', '');
-				$('#startModelBtn').attr('disabled', '');
-				$('#pauseModelBtn').attr('disabled', '');
-				$('#stopModelBtn').attr('disabled', '');				
+			case ACS.statusType.CONNECTING:
+				disableButtons(allButtonIds);
 				break;
 			case ACS.statusType.CONNECTED:
-				$('#connectAREBtn').attr('disabled', '');
-				$('#disconnectAREBtn').removeAttr('disabled');
-				$('#uploadModelBtn').removeAttr('disabled');
-				$('#downloadModelBtn').removeAttr('disabled');
-				$('#downloadCompCollBtn').removeAttr('disabled');
-				$('#storeModelAREBtn').removeAttr('disabled');
-				$('#loadModelAREBtn').removeAttr('disabled');
-				$('#activateStoredModelBtn').removeAttr('disabled');
-				$('#deleteStoredModelBtn').removeAttr('disabled');
-				$('#setAsAutorunBtn').removeAttr('disabled');
-				$('#startModelBtn').removeAttr('disabled');
-				$('#pauseModelBtn').attr('disabled', '');
-				$('#stopModelBtn').attr('disabled', '');
+				enableButtons(allButtonIds);
+				disableButtons(['#connectAREBtn', '#pauseModelBtn', '#stopModelBtn']);
 				break;
 			case ACS.statusType.STARTED:
-				$('#connectAREBtn').attr('disabled', '');
-				$('#disconnectAREBtn').removeAttr('disabled');
-				$('#uploadModelBtn').removeAttr('disabled');
-				$('#downloadModelBtn').removeAttr('disabled');
-				$('#downloadCompCollBtn').removeAttr('disabled');
-				$('#storeModelAREBtn').removeAttr('disabled');
-				$('#loadModelAREBtn').removeAttr('disabled');
-				$('#activateStoredModelBtn').removeAttr('disabled');
-				$('#deleteStoredModelBtn').removeAttr('disabled');
-				$('#setAsAutorunBtn').removeAttr('disabled');			
-				$('#startModelBtn').attr('disabled', '');
-				$('#pauseModelBtn').removeAttr('disabled');
-				$('#stopModelBtn').removeAttr('disabled');
+				enableButtons(allButtonIds);
+				disableButtons(['#connectAREBtn', '#startModelBtn']);
 				break;
 			case ACS.statusType.PAUSED:
-				$('#connectAREBtn').attr('disabled', '');
-				$('#disconnectAREBtn').removeAttr('disabled');
-				$('#uploadModelBtn').removeAttr('disabled');
-				$('#downloadModelBtn').removeAttr('disabled');
-				$('#downloadCompCollBtn').removeAttr('disabled');
-				$('#storeModelAREBtn').removeAttr('disabled');
-				$('#loadModelAREBtn').removeAttr('disabled');
-				$('#activateStoredModelBtn').removeAttr('disabled');
-				$('#deleteStoredModelBtn').removeAttr('disabled');
-				$('#setAsAutorunBtn').removeAttr('disabled');			
-				$('#startModelBtn').removeAttr('disabled');
-				$('#pauseModelBtn').attr('disabled', '');
-				$('#stopModelBtn').removeAttr('disabled');
+				enableButtons(allButtonIds);
+				disableButtons(['#connectAREBtn', '#pauseModelBtn']);
 				break;
 			case ACS.statusType.STOPPED:
-				$('#connectAREBtn').attr('disabled', '');
-				$('#disconnectAREBtn').removeAttr('disabled');
-				$('#uploadModelBtn').removeAttr('disabled');
-				$('#downloadModelBtn').removeAttr('disabled');
-				$('#downloadCompCollBtn').removeAttr('disabled');
-				$('#storeModelAREBtn').removeAttr('disabled');
-				$('#loadModelAREBtn').removeAttr('disabled');
-				$('#activateStoredModelBtn').removeAttr('disabled');
-				$('#deleteStoredModelBtn').removeAttr('disabled');
-				$('#setAsAutorunBtn').removeAttr('disabled');			
-				$('#startModelBtn').removeAttr('disabled');
-				$('#pauseModelBtn').attr('disabled', '');
-				$('#stopModelBtn').attr('disabled', '');					
+				enableButtons(allButtonIds);
+				disableButtons(['#connectAREBtn', '#pauseModelBtn', '#stopModelBtn']);
 				break;
 		}
-	}	
+	}
 	
 	// Menu-Button-Handlers - System-Menu
 	var handleConnectARE = function(e) {
@@ -290,25 +245,25 @@
 		ACS.areStatus.setSynchronised(undefined);
 	}
 	
-	var handleUploadModel = function(e) {
+	function handleUploadModel(e) {
 		log.debug('uploading model');
 		// check whether all mustbeconnected-ports actually have a connection
 		// if not, alert the user and abort upload
-		var actModel = modelList.getActModel();
+		var model = modelList.getActModel();
 		var problemPorts = [];
-		for (var i = 0; i < actModel.componentList.length; i++) {
-			for (var j = 0; j < actModel.componentList[i].inputPortList.length; j++) {
-				if (actModel.componentList[i].inputPortList[j].getMustBeConnected()) {
+		for (var i = 0; i < model.componentList.length; i++) {
+			for (var j = 0; j < model.componentList[i].inputPortList.length; j++) {
+				if (model.componentList[i].inputPortList[j].getMustBeConnected()) {
 					var k = 0;
 					var found = false;
-					while (!found && (k < actModel.dataChannelList.length)) {
-						if (actModel.componentList[i].inputPortList[j] === actModel.dataChannelList[k].getInputPort()) {
+					while (!found && (k < model.dataChannelList.length)) {
+						if (model.componentList[i].inputPortList[j] === model.dataChannelList[k].getInputPort()) {
 							found = true;
 						} else {
 							k++;
 						}
 					}
-					if (!found) problemPorts.push(actModel.componentList[i].inputPortList[j]);
+					if (!found) problemPorts.push(model.componentList[i].inputPortList[j]);
 				}
 			}
 		}
@@ -320,44 +275,131 @@
 			alert(alertString);
 		} else {
 			// actually perform the upload
-			var modelInXML = actModel.getModelXMLString();
-			uploadModel(UM_successCallback, UM_errorCallback, modelInXML);
-			
-			function UM_successCallback(data, HTTPstatus) {
+			uploadModel(function success (data) {
 				log.debug('success: ' + data);
-			}
-			
-			function UM_errorCallback(HTTPstatus, AREerrorMessage) {
+			}, function error(HTTPstatus, AREerrorMessage) {
 				alert('error: ' + AREerrorMessage + HTTPstatus);
-			}
+			}, model.getModelXMLString());
 		}
 	}
-	
-	var handleDownloadModel = function(e) {
-		log.debug('downloading model');
-		downloadDeployedModel(DDM_successCallback, DDM_errorCallback);
-			
-		function DDM_successCallback(data, HTTPstatus) {
-			var modelXML = $.parseXML(data);
-			// if active model is not empty, open new model first
-			if (modelList.getActModel().componentList.length > 0) modelList.addNewModel();
-			// first download the componentCollection from the ARE to make sure we're using the right one
-			getComponentDescriptorsAsXml(componentDescriptors_successCallback, componentDescriptors_errorCallback);
 
-			function componentDescriptors_successCallback(data, HTTPstatus) {
-				modelList.getActModel().setComponentCollection(data);
-				// actually load the downloaded model
-				modelList.getActModel().loadModel(modelXML);
-				ACS.areStatus.setSynchronised(true);
-			}
-		
-			function componentDescriptors_errorCallback(HTTPstatus, AREerrorMessage) {
-				alert('error: ' + AREerrorMessage);
-			}
+	 function handleDownloadModel(e) {
+		 log.debug('downloading model');
+		 downloadModelInternal(function (downloadedModel) {
+			 var modelXML = $.parseXML(downloadedModel);
+		 	// if active model is not empty, open new model first
+			 if (modelList.getActModel().componentList.length > 0) {
+				 modelList.addNewModel();
+			 }
+			 // actually load the downloaded model
+			 modelList.getActModel().loadModel(modelXML);
+			 ACS.areStatus.setSynchronised(true);
+		 })
+	 }
+
+	 function downloadModelInternal(successCallback) {
+		 log.debug('downloading model');
+		 downloadDeployedModel(DDM_successCallback, DDM_errorCallback);
+
+		 function DDM_successCallback(modelData, HTTPstatus) {
+			 // first download the componentCollection from the ARE to make sure we're using the right one
+			 getComponentDescriptorsAsXml(componentDescriptors_successCallback, componentDescriptors_errorCallback);
+
+			 function componentDescriptors_successCallback(descriptorData, HTTPstatus) {
+				 modelList.getActModel().setComponentCollection(descriptorData);
+				 if (successCallback) {
+					 successCallback(modelData);
+				 }
+			 }
+
+			 function componentDescriptors_errorCallback(HTTPstatus, AREerrorMessage) {
+				 alert('error: ' + AREerrorMessage);
+			 }
+		 }
+
+		 function DDM_errorCallback(HTTPstatus, AREerrorMessage) {
+			 alert('error: ' + AREerrorMessage);
+		 }
+	 }
+
+	 var inTestMode = false;
+	function handleTestModel(e) {
+		if (inTestMode) {
+			return;
 		}
-		
-		function DDM_errorCallback(HTTPstatus, AREerrorMessage) {
-			alert('error: ' + AREerrorMessage);
+		log.debug('test model');
+		inTestMode = true;
+		var testStart = new Date().getTime();
+		var testDurationSeconds = ACS.utils.getLocalStorageItem(ACS.vConst.WEBACS_OPTIONS_TESTMODE_TIMEOUT) || 30;
+		var fontSize = ACS.utils.getLocalStorageItem(ACS.vConst.WEBACS_OPTIONS_TESTMODE_FONTSIZE_PX) || 13;
+		var testDurationMillis = testDurationSeconds * 1000;
+		var currentModelXml = null;
+		downloadModelInternal(function (model) {
+			currentModelXml = model;
+			uploadModel(function successUpload () {
+				startModel(function successStart () {
+					checkTimeout(currentModelXml, testDurationMillis);
+				}, function errorStart () {
+					uploadAndStart(currentModelXml);
+				});
+			}, function errorUpload () {
+				uploadAndStart(currentModelXml);
+			}, modelList.getActModel().getModelXMLString());
+
+			function checkTimeout(xmlModel, duration) {
+				var timeoutHandler = null;
+				$('#btnTestStatusAdd').show().off().css('font-size', fontSize + 'px').on('click', function () {
+					duration += 30000;
+					updateStatus();
+				});
+				$('#btnTestStatusCancel').show().off().css('font-size', fontSize + 'px').on('click', function () {
+					if (timeoutHandler) {
+						clearTimeout(timeoutHandler);
+					}
+					end();
+				});
+				$('#btnTestStatusApprove').show().off().css('font-size', fontSize + 'px').on('click', function () {
+					if (timeoutHandler) {
+						clearTimeout(timeoutHandler);
+					}
+					hideButtons();
+					inTestMode = false;
+				});
+				if (new Date().getTime() - testStart >= duration) {
+					end();
+				} else {
+					updateStatus();
+					timeoutHandler = setTimeout(function () {
+						checkTimeout(xmlModel, duration);
+					}, 1000);
+				}
+
+				function updateStatus() {
+					var remainingSeconds = Math.round(((testStart + duration) - new Date().getTime()) / 1000);
+					document.getElementById("testStatusText").textContent = ' / testing model (remaining: ' + remainingSeconds + 's)';
+				}
+
+				function end() {
+					hideButtons();
+					uploadAndStart(xmlModel);
+				}
+
+				function hideButtons() {
+					$('#btnTestStatusAdd').off().hide();
+					$('#btnTestStatusCancel').off().hide();
+					$('#btnTestStatusApprove').off().hide();
+					document.getElementById("testStatusText").textContent = '';
+				}
+			}
+		});
+
+		function uploadAndStart(model) {
+			log.info('reverting to previous model...');
+			inTestMode = false;
+			uploadModel(function () {
+				startModel();
+			}, function error () {
+			}, model);
 		}
 	}
 	
@@ -783,6 +825,30 @@
 		alert('About WebACS\n\nThe AsTeRICS Configuration Suite for Web Browsers (WebACS)\n is part of the AsTeRICS project.\nPlease visit www.asterics.eu for more information.');
 	}
 
+	function handleEnableTestMode(e) {
+		var enableTestMode = e.target.checked;
+		ACS.utils.saveLocalStorageItem(ACS.vConst.WEBACS_OPTIONS_TESTMODE, enableTestMode);
+		$('#testModelBtnContainer').css('display', enableTestMode ? 'block' : 'none');
+		$('#uploadModelBtnContainer').css('display', enableTestMode ? 'none' : 'block');
+		$('#stopModelBtnContainer').css('display', enableTestMode ? 'none' : 'block');
+		$('#pauseModelBtnContainer').css('display', enableTestMode ? 'none' : 'block');
+		if(enableTestMode) {
+			ACS.areStatus.disableSynchronization();
+		} else {
+			ACS.areStatus.enableSynchronization();
+		}
+	}
+
+	function handleTestModeTime(e) {
+		var timeout = parseInt(e.target.value);
+		ACS.utils.saveLocalStorageItem(ACS.vConst.WEBACS_OPTIONS_TESTMODE_TIMEOUT, timeout);
+	}
+
+	 function handleTestModeFontsize(e) {
+		 var fontsize = parseInt(e.target.value);
+		 ACS.utils.saveLocalStorageItem(ACS.vConst.WEBACS_OPTIONS_TESTMODE_FONTSIZE_PX, fontsize);
+	 }
+
 // ***********************************************************************************************************************
 // ************************************************** public stuff *******************************************************
 // ***********************************************************************************************************************
@@ -856,7 +922,22 @@
 	fileSelector.setAttribute('type', 'file');
 	fileSelector.setAttribute('class', 'displayNone'); // must be added to DOM in order for the click event to work in IE
 	document.getElementById('mainMenuPanel').appendChild(fileSelector);
-	
+	var testModeEnabled = ACS.utils.getLocalStorageItem(ACS.vConst.WEBACS_OPTIONS_TESTMODE);
+	var savedTimeout = ACS.utils.getLocalStorageItem(ACS.vConst.WEBACS_OPTIONS_TESTMODE_TIMEOUT);
+	var savedFontsize = ACS.utils.getLocalStorageItem(ACS.vConst.WEBACS_OPTIONS_TESTMODE_FONTSIZE_PX);
+	if(savedTimeout) {
+		$('#inputTestModeTime').val(savedTimeout);
+	}
+	 if(savedFontsize) {
+		 $('#inputTestModeFontsize').val(savedFontsize);
+	 }
+	$('#checkboxEnableTestMode').prop('checked', testModeEnabled);
+	$('#testModelBtnContainer').css('display', testModeEnabled ? 'block' : 'none');
+	 $('#uploadModelBtnContainer').css('display', testModeEnabled ? 'none' : 'block');
+	 $('#stopModelBtnContainer').css('display', testModeEnabled ? 'none' : 'block');
+	 $('#pauseModelBtnContainer').css('display', testModeEnabled ? 'none' : 'block');
+
+
 	// register handlers
 	modelList.getActModel().events.registerHandler('componentCollectionChangedEvent', componentCollectionChangedEventHandler);
 	modelList.events.registerHandler('actModelChangedEvent', actModelChangedEventHandler);
@@ -865,7 +946,8 @@
 	document.getElementById('connectAREBtn').addEventListener('click', handleConnectARE);
 	document.getElementById('disconnectAREBtn').addEventListener('click', handleDisconnectARE);
 	document.getElementById('uploadModelBtn').addEventListener('click', handleUploadModel);
-	document.getElementById('downloadModelBtn').addEventListener('click', handleDownloadModel);
+	 document.getElementById('testModelBtn').addEventListener('click', handleTestModel);
+	 document.getElementById('downloadModelBtn').addEventListener('click', handleDownloadModel);
 	document.getElementById('downloadCompCollBtn').addEventListener('click', handleDownloadComponentCollection);
 	document.getElementById('storeModelAREBtn').addEventListener('click', handleStoreModelOnARE);
 	document.getElementById('loadModelAREBtn').addEventListener('click', handleLoadModelFromARE);
@@ -887,7 +969,10 @@
 	document.getElementById('redoBtn').addEventListener('click', handleRedo);
 	document.getElementById('helpBtn').addEventListener('click', handleHelp);
 	document.getElementById('aboutBtn').addEventListener('click', handleAbout);
-	
+	document.getElementById('checkboxEnableTestMode').addEventListener('change', handleEnableTestMode);
+	document.getElementById('inputTestModeTime').addEventListener('change', handleTestModeTime);
+	document.getElementById('inputTestModeFontsize').addEventListener('change', handleTestModeFontsize);
+
 	// handlers for the quickselect field and the corresponding insert-button
 	document.getElementById('quickselect').addEventListener('change', function() {
 		var actCompName = this.value;
