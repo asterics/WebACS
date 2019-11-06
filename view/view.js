@@ -264,6 +264,7 @@ ACS.view = function(
     }
     // catch Del to delete selected items
     var keyCode = e.keyCode || e.which;
+    var ctrlOrMeta = e.ctrlKey || e.metaKey; //metaKey is macOS Mac key
     if (keyCode === 46) {
       // Del can't be caught by keyPress for not all browsers act consistently (see: http://unixpapa.com/js/key.html)
       if (
@@ -285,49 +286,49 @@ ACS.view = function(
 
     switch (keyCode) {
       case 48: // Ctrl-0 for menu
-        if (e.ctrlKey) {
+        if (ctrlOrMeta) {
           handleMenuShortcutClick();
           stopEvent(e);
           return false;
         }
         break;
       case 49: // Ctrl-1 for model panel (file)
-        if (e.ctrlKey) {
+        if (ctrlOrMeta) {
           handleModelPanelShortcutClick();
           stopEvent(e);
           return false;
         }
         break;
       case 50: // Ctrl-2 for model designer
-        if (e.ctrlKey) {
+        if (ctrlOrMeta) {
           handleModelDesignerShortcutClick();
           stopEvent(e);
           return false;
         }
         break;
       case 51: // Ctrl-3 for gui designer
-        if (e.ctrlKey) {
+        if (ctrlOrMeta) {
           handleGuiDesignerShortcutClick();
           stopEvent(e);
           return false;
         }
         break;
       case 52: // CTRL-4 for list view
-        if (e.ctrlKey) {
+        if (ctrlOrMeta) {
           handleListViewShortcutClick();
           stopEvent(e);
           return false;
         }
         break;
       case 53: // Ctrl-5 for property editor
-        if (e.ctrlKey) {
+        if (ctrlOrMeta) {
           handlePropertyEditorShortcutClick();
           stopEvent(e);
           return false;
         }
         break;
       case 88: // Ctrl-x for cut
-        if (e.ctrlKey) {
+        if (ctrlOrMeta) {
           if (
               !$("#" + ACS.vConst.PROPERTYEDITOR_MOTHERPANEL)
                   .find("*")
@@ -341,7 +342,7 @@ ACS.view = function(
         }
         break;
       case 67: // Ctrl-c for copy
-        if (e.ctrlKey) {
+        if (ctrlOrMeta) {
           if (
               !$("#" + ACS.vConst.PROPERTYEDITOR_MOTHERPANEL)
                   .find("*")
@@ -355,7 +356,7 @@ ACS.view = function(
         }
         break;
       case 86: // Ctrl-v for paste
-        if (e.ctrlKey) {
+        if (ctrlOrMeta) {
           if (
               !$("#" + ACS.vConst.PROPERTYEDITOR_MOTHERPANEL)
                   .find("*")
@@ -369,7 +370,7 @@ ACS.view = function(
         }
         break;
       case 90: // Ctrl-z for undo
-        if (e.ctrlKey) {
+        if (ctrlOrMeta) {
           if (
               !$("#" + ACS.vConst.PROPERTYEDITOR_MOTHERPANEL)
                   .find("*")
@@ -383,7 +384,7 @@ ACS.view = function(
         }
         break;
       case 89: // Ctrl-y for redo
-        if (e.ctrlKey) {
+        if (ctrlOrMeta) {
           if (
               !$("#" + ACS.vConst.PROPERTYEDITOR_MOTHERPANEL)
                   .find("*")
@@ -397,7 +398,7 @@ ACS.view = function(
         }
         break;
       case 68: // Ctrl-d for drop channel
-        if (e.ctrlKey) {
+        if (ctrlOrMeta) {
           dropStartedChannel();
           stopEvent(e);
           return false;
