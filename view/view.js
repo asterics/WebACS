@@ -259,8 +259,13 @@ ACS.view = function(
   };
 
   var handleKeydown = function(e) {
+    if (e.repeat) {
+      return;
+    }
     // catch Del to delete selected items
-    if (e.keyCode === 46) {
+    var keyCode = e.keyCode || e.which;
+    var ctrlOrMeta = e.ctrlKey || e.metaKey; //metaKey is macOS Mac key
+    if (keyCode === 46) {
       // Del can't be caught by keyPress for not all browsers act consistently (see: http://unixpapa.com/js/key.html)
       if (
         !$("#" + ACS.vConst.PROPERTYEDITOR_MOTHERPANEL)
@@ -278,58 +283,56 @@ ACS.view = function(
       stopEvent(e);
       return false;
     }
-  };
 
-  var handleKeypress = function(e) {
-    switch (e.charCode) {
+    switch (keyCode) {
       case 48: // Ctrl-0 for menu
-        if (e.ctrlKey) {
+        if (ctrlOrMeta) {
           handleMenuShortcutClick();
           stopEvent(e);
           return false;
         }
         break;
       case 49: // Ctrl-1 for model panel (file)
-        if (e.ctrlKey) {
+        if (ctrlOrMeta) {
           handleModelPanelShortcutClick();
           stopEvent(e);
           return false;
         }
         break;
       case 50: // Ctrl-2 for model designer
-        if (e.ctrlKey) {
+        if (ctrlOrMeta) {
           handleModelDesignerShortcutClick();
           stopEvent(e);
           return false;
         }
         break;
       case 51: // Ctrl-3 for gui designer
-        if (e.ctrlKey) {
+        if (ctrlOrMeta) {
           handleGuiDesignerShortcutClick();
           stopEvent(e);
           return false;
         }
         break;
       case 52: // CTRL-4 for list view
-        if (e.ctrlKey) {
+        if (ctrlOrMeta) {
           handleListViewShortcutClick();
           stopEvent(e);
           return false;
         }
         break;
       case 53: // Ctrl-5 for property editor
-        if (e.ctrlKey) {
+        if (ctrlOrMeta) {
           handlePropertyEditorShortcutClick();
           stopEvent(e);
           return false;
         }
         break;
-      case 120: // Ctrl-x for cut
-        if (e.ctrlKey) {
+      case 88: // Ctrl-x for cut
+        if (ctrlOrMeta) {
           if (
-            !$("#" + ACS.vConst.PROPERTYEDITOR_MOTHERPANEL)
-              .find("*")
-              .is(":focus")
+              !$("#" + ACS.vConst.PROPERTYEDITOR_MOTHERPANEL)
+                  .find("*")
+                  .is(":focus")
           ) {
             // if focus is not somewhere inside propertyEditor (otherwise key could not be used in propertyEditor)
             cutHandler();
@@ -338,12 +341,12 @@ ACS.view = function(
           }
         }
         break;
-      case 99: // Ctrl-c for copy
-        if (e.ctrlKey) {
+      case 67: // Ctrl-c for copy
+        if (ctrlOrMeta) {
           if (
-            !$("#" + ACS.vConst.PROPERTYEDITOR_MOTHERPANEL)
-              .find("*")
-              .is(":focus")
+              !$("#" + ACS.vConst.PROPERTYEDITOR_MOTHERPANEL)
+                  .find("*")
+                  .is(":focus")
           ) {
             // if focus is not somewhere inside propertyEditor (otherwise key could not be used in propertyEditor)
             copyHandler();
@@ -352,12 +355,12 @@ ACS.view = function(
           }
         }
         break;
-      case 118: // Ctrl-v for paste
-        if (e.ctrlKey) {
+      case 86: // Ctrl-v for paste
+        if (ctrlOrMeta) {
           if (
-            !$("#" + ACS.vConst.PROPERTYEDITOR_MOTHERPANEL)
-              .find("*")
-              .is(":focus")
+              !$("#" + ACS.vConst.PROPERTYEDITOR_MOTHERPANEL)
+                  .find("*")
+                  .is(":focus")
           ) {
             // if focus is not somewhere inside propertyEditor (otherwise key could not be used in propertyEditor)
             pasteHandler();
@@ -366,12 +369,12 @@ ACS.view = function(
           }
         }
         break;
-      case 122: // Ctrl-z for undo
-        if (e.ctrlKey) {
+      case 90: // Ctrl-z for undo
+        if (ctrlOrMeta) {
           if (
-            !$("#" + ACS.vConst.PROPERTYEDITOR_MOTHERPANEL)
-              .find("*")
-              .is(":focus")
+              !$("#" + ACS.vConst.PROPERTYEDITOR_MOTHERPANEL)
+                  .find("*")
+                  .is(":focus")
           ) {
             // if focus is not somewhere inside propertyEditor (otherwise key could not be used in propertyEditor)
             undoHandler();
@@ -380,12 +383,12 @@ ACS.view = function(
           }
         }
         break;
-      case 121: // Ctrl-y for redo
-        if (e.ctrlKey) {
+      case 89: // Ctrl-y for redo
+        if (ctrlOrMeta) {
           if (
-            !$("#" + ACS.vConst.PROPERTYEDITOR_MOTHERPANEL)
-              .find("*")
-              .is(":focus")
+              !$("#" + ACS.vConst.PROPERTYEDITOR_MOTHERPANEL)
+                  .find("*")
+                  .is(":focus")
           ) {
             // if focus is not somewhere inside propertyEditor (otherwise key could not be used in propertyEditor)
             redoHandler();
@@ -394,8 +397,8 @@ ACS.view = function(
           }
         }
         break;
-      case 100: // Ctrl-d for drop channel
-        if (e.ctrlKey) {
+      case 68: // Ctrl-d for drop channel
+        if (ctrlOrMeta) {
           dropStartedChannel();
           stopEvent(e);
           return false;
@@ -403,8 +406,8 @@ ACS.view = function(
         break;
       case 32: // SPACE
         if (
-          actModelView.getKeyboardMode() &&
-          $("#modelPanel" + actModelView.getModelContainerId()).is(":focus")
+            actModelView.getKeyboardMode() &&
+            $("#modelPanel" + actModelView.getModelContainerId()).is(":focus")
         ) {
           if (actModelView.getPortMode()) {
             if (e.shiftKey) {
@@ -422,10 +425,10 @@ ACS.view = function(
             return false;
           }
         } else if (
-          actModelView.getListKeyboardMode() &&
-          $("#listPanel" + actModelView.getModelContainerId())
-            .find("*")
-            .is(":focus")
+            actModelView.getListKeyboardMode() &&
+            $("#listPanel" + actModelView.getModelContainerId())
+                .find("*")
+                .is(":focus")
         ) {
           if (actModelView.getListPortMode()) {
             if (e.shiftKey) {
@@ -444,7 +447,7 @@ ACS.view = function(
         }
     }
 
-    switch (e.keyCode) {
+    switch (keyCode) {
       case 37: // arrow left
         if (catchArrowKey(e, "left")) {
           stopEvent(e);
@@ -474,7 +477,8 @@ ACS.view = function(
 
   var handleKeyup = function(e) {
     // ESC and ENTER need to be caught on keyup, since firefox does not send the keydown event
-    if (e.keyCode === 27) {
+    let keyCode = e.keyCode || e.which;
+    if (keyCode === 27) {
       // one step back up in the hierarchy of keyboard modes
       if (
         actModelView.getKeyboardMode() &&
@@ -501,7 +505,7 @@ ACS.view = function(
         stopEvent(e);
         return false;
       }
-    } else if (e.keyCode === 13) {
+    } else if (keyCode === 13) {
       // ENTER to enter keyboard mode
       if (
         $("#" + actModelView.getModelContainerId()).has(":focus").length > 0 ||
@@ -743,7 +747,6 @@ ACS.view = function(
   menu.setComponentMenu();
   // catch keyboard shortcuts
   document.addEventListener("keydown", handleKeydown);
-  document.addEventListener("keypress", handleKeypress);
   document.addEventListener("keyup", handleKeyup);
   // register handlers for button-presses in menu
   menu.events.registerHandler("cutBtnPressedEvent", cutHandler);
