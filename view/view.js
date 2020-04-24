@@ -26,7 +26,7 @@
  * limitations under the License.
  */
 
-ACS.view = function(
+ACS.view = function (
   modelList, // ACS.modelList
   clipBoard
 ) {
@@ -47,7 +47,7 @@ ACS.view = function(
   // ***********************************************************************************************************************
   // ************************************************** private methods ****************************************************
   // ***********************************************************************************************************************
-  var stopEvent = function(e) {
+  var stopEvent = function (e) {
     if (e.stopPropagation) {
       e.stopPropagation();
     } else {
@@ -56,7 +56,7 @@ ACS.view = function(
     if (e.preventDefault) e.preventDefault();
   };
 
-  var catchArrowKey = function(e, direction) {
+  var catchArrowKey = function (e, direction) {
     if (e.shiftKey) {
       if (
         actModelView.getKeyboardMode() &&
@@ -145,7 +145,7 @@ ACS.view = function(
     return false;
   };
 
-  var dropStartedChannel = function() {
+  var dropStartedChannel = function () {
     var actModel = modelList.getActModel();
     if (
       (actModel.dataChannelList.length > 0 &&
@@ -165,7 +165,7 @@ ACS.view = function(
   };
 
   // ********************************************** handlers ***********************************************************
-  var handleMenuShortcutClick = function() {
+  var handleMenuShortcutClick = function () {
     var tablist = document
       .getElementById("mainMenuTablist")
       .getElementsByClassName("tab");
@@ -179,7 +179,7 @@ ACS.view = function(
     }
   };
 
-  var handleModelPanelShortcutClick = function() {
+  var handleModelPanelShortcutClick = function () {
     var tablist = document
       .getElementById(ACS.vConst.CANVASVIEW_TABLIST)
       .getElementsByClassName("tab");
@@ -193,7 +193,7 @@ ACS.view = function(
     }
   };
 
-  var handleModelDesignerShortcutClick = function() {
+  var handleModelDesignerShortcutClick = function () {
     var tablist = document
       .getElementById(ACS.vConst.CANVASVIEW_TABLIST)
       .getElementsByClassName("tab");
@@ -210,7 +210,7 @@ ACS.view = function(
     }
   };
 
-  var handleGuiDesignerShortcutClick = function() {
+  var handleGuiDesignerShortcutClick = function () {
     var tablist = document
       .getElementById(ACS.vConst.CANVASVIEW_TABLIST)
       .getElementsByClassName("tab");
@@ -227,7 +227,7 @@ ACS.view = function(
     }
   };
 
-  var handleListViewShortcutClick = function() {
+  var handleListViewShortcutClick = function () {
     var tablist = document
       .getElementById(ACS.vConst.CANVASVIEW_TABLIST)
       .getElementsByClassName("tab");
@@ -244,7 +244,7 @@ ACS.view = function(
     }
   };
 
-  var handlePropertyEditorShortcutClick = function() {
+  var handlePropertyEditorShortcutClick = function () {
     var tablist = document
       .getElementById("propertyEditorTabList")
       .getElementsByClassName("tab");
@@ -258,7 +258,7 @@ ACS.view = function(
     }
   };
 
-  var handleKeydown = function(e) {
+  var handleKeydown = function (e) {
     if (e.repeat) {
       return;
     }
@@ -330,9 +330,9 @@ ACS.view = function(
       case 88: // Ctrl-x for cut
         if (ctrlOrMeta) {
           if (
-              !$("#" + ACS.vConst.PROPERTYEDITOR_MOTHERPANEL)
-                  .find("*")
-                  .is(":focus")
+            !$("#" + ACS.vConst.PROPERTYEDITOR_MOTHERPANEL)
+              .find("*")
+              .is(":focus")
           ) {
             // if focus is not somewhere inside propertyEditor (otherwise key could not be used in propertyEditor)
             cutHandler();
@@ -344,9 +344,9 @@ ACS.view = function(
       case 67: // Ctrl-c for copy
         if (ctrlOrMeta) {
           if (
-              !$("#" + ACS.vConst.PROPERTYEDITOR_MOTHERPANEL)
-                  .find("*")
-                  .is(":focus")
+            !$("#" + ACS.vConst.PROPERTYEDITOR_MOTHERPANEL)
+              .find("*")
+              .is(":focus")
           ) {
             // if focus is not somewhere inside propertyEditor (otherwise key could not be used in propertyEditor)
             copyHandler();
@@ -358,9 +358,9 @@ ACS.view = function(
       case 86: // Ctrl-v for paste
         if (ctrlOrMeta) {
           if (
-              !$("#" + ACS.vConst.PROPERTYEDITOR_MOTHERPANEL)
-                  .find("*")
-                  .is(":focus")
+            !$("#" + ACS.vConst.PROPERTYEDITOR_MOTHERPANEL)
+              .find("*")
+              .is(":focus")
           ) {
             // if focus is not somewhere inside propertyEditor (otherwise key could not be used in propertyEditor)
             pasteHandler();
@@ -372,9 +372,9 @@ ACS.view = function(
       case 90: // Ctrl-z for undo
         if (ctrlOrMeta) {
           if (
-              !$("#" + ACS.vConst.PROPERTYEDITOR_MOTHERPANEL)
-                  .find("*")
-                  .is(":focus")
+            !$("#" + ACS.vConst.PROPERTYEDITOR_MOTHERPANEL)
+              .find("*")
+              .is(":focus")
           ) {
             // if focus is not somewhere inside propertyEditor (otherwise key could not be used in propertyEditor)
             undoHandler();
@@ -386,9 +386,9 @@ ACS.view = function(
       case 89: // Ctrl-y for redo
         if (ctrlOrMeta) {
           if (
-              !$("#" + ACS.vConst.PROPERTYEDITOR_MOTHERPANEL)
-                  .find("*")
-                  .is(":focus")
+            !$("#" + ACS.vConst.PROPERTYEDITOR_MOTHERPANEL)
+              .find("*")
+              .is(":focus")
           ) {
             // if focus is not somewhere inside propertyEditor (otherwise key could not be used in propertyEditor)
             redoHandler();
@@ -406,8 +406,8 @@ ACS.view = function(
         break;
       case 32: // SPACE
         if (
-            actModelView.getKeyboardMode() &&
-            $("#modelPanel" + actModelView.getModelContainerId()).is(":focus")
+          actModelView.getKeyboardMode() &&
+          $("#modelPanel" + actModelView.getModelContainerId()).is(":focus")
         ) {
           if (actModelView.getPortMode()) {
             if (e.shiftKey) {
@@ -425,10 +425,10 @@ ACS.view = function(
             return false;
           }
         } else if (
-            actModelView.getListKeyboardMode() &&
-            $("#listPanel" + actModelView.getModelContainerId())
-                .find("*")
-                .is(":focus")
+          actModelView.getListKeyboardMode() &&
+          $("#listPanel" + actModelView.getModelContainerId())
+            .find("*")
+            .is(":focus")
         ) {
           if (actModelView.getListPortMode()) {
             if (e.shiftKey) {
@@ -475,7 +475,7 @@ ACS.view = function(
     }
   };
 
-  var handleKeyup = function(e) {
+  var handleKeyup = function (e) {
     // ESC and ENTER need to be caught on keyup, since firefox does not send the keydown event
     let keyCode = e.keyCode || e.which;
     if (keyCode === 27) {
@@ -548,22 +548,22 @@ ACS.view = function(
     }
   };
 
-  var cutHandler = function() {
+  var cutHandler = function () {
     if (!actModelView.getPortMode() && !actModelView.getChannelMode())
       clipBoard.cut(modelList.getActModel());
   };
 
-  var copyHandler = function() {
+  var copyHandler = function () {
     if (!actModelView.getPortMode() && !actModelView.getChannelMode())
       clipBoard.copy(modelList.getActModel());
   };
 
-  var pasteHandler = function() {
+  var pasteHandler = function () {
     if (!actModelView.getPortMode() && !actModelView.getChannelMode())
       clipBoard.paste(modelList.getActModel());
   };
 
-  var deleteSelectionHandler = function() {
+  var deleteSelectionHandler = function () {
     log.debug("deleteBtnPressed");
     if (!$("#guiPanel" + actModelView.getModelContainerId()).is(":focus")) {
       var remAct;
@@ -585,7 +585,7 @@ ACS.view = function(
     }
   };
 
-  var undoHandler = function() {
+  var undoHandler = function () {
     // find out, if the Model Designer or the GUI Designer is active, then pop from the corresponding stack
     var modelTabs = null;
     var canvasPanels = document.getElementsByClassName("canvasPanel");
@@ -596,20 +596,14 @@ ACS.view = function(
     }
     if (modelTabs[1].getAttribute("aria-selected") === "true") {
       if (modelList.getActModel().guiUndoStack.length > 0)
-        modelList
-          .getActModel()
-          .guiUndoStack.pop()
-          .undo();
+        modelList.getActModel().guiUndoStack.pop().undo();
     } else {
       if (modelList.getActModel().undoStack.length > 0)
-        modelList
-          .getActModel()
-          .undoStack.pop()
-          .undo();
+        modelList.getActModel().undoStack.pop().undo();
     }
   };
 
-  var redoHandler = function() {
+  var redoHandler = function () {
     // find out, if the Model Designer or the GUI Designer is active, then pop from the corresponding stack
     var modelTabs = null;
     var canvasPanels = document.getElementsByClassName("canvasPanel");
@@ -620,20 +614,14 @@ ACS.view = function(
     }
     if (modelTabs[1].getAttribute("aria-selected") === "true") {
       if (modelList.getActModel().guiRedoStack.length > 0)
-        modelList
-          .getActModel()
-          .guiRedoStack.pop()
-          .execute();
+        modelList.getActModel().guiRedoStack.pop().execute();
     } else {
       if (modelList.getActModel().redoStack.length > 0)
-        modelList
-          .getActModel()
-          .redoStack.pop()
-          .execute();
+        modelList.getActModel().redoStack.pop().execute();
     }
   };
 
-  var helpHandler = function() {
+  var helpHandler = function () {
     openHelp(ACS.vConst.VIEW_ONLINE_HELP_PATH);
   };
 
@@ -659,13 +647,16 @@ ACS.view = function(
       }
       var file = actModel.selectedItemsList[0].getComponentTypeId() + ".html";
       if (file.indexOf("Oska") === -1) file = file.slice(9); // the slice eliminates the "asterics."
+      //Get first letter and convert it to upper case.
+      file = file.slice(0, 1).toUpperCase() + file.slice(1);
+
       window.open(pathToHelp + "/plugins/" + directory + "/" + file);
     } else {
       window.open(pathToHelp + ACS.vConst.VIEW_PATHTOACSHELPSTARTPAGE);
     }
   }
 
-  var AREStatusChangedEventHandler = function() {
+  var AREStatusChangedEventHandler = function () {
     switch (ACS.areStatus.getStatus()) {
       case ACS.statusType.DISCONNECTED:
         document.getElementById("AREstatus").textContent = "Disconnected";
@@ -707,7 +698,7 @@ ACS.view = function(
     }
   };
 
-  var ARESynchronisationChangedEventHandler = function() {
+  var ARESynchronisationChangedEventHandler = function () {
     if (
       ACS.areStatus.getStatus() === ACS.statusType.DISCONNECTED ||
       ACS.areStatus.getStatus() === ACS.statusType.CONNECTIONLOST ||
@@ -732,7 +723,7 @@ ACS.view = function(
     }
   };
 
-  var actModelChangedEventHandler = function() {
+  var actModelChangedEventHandler = function () {
     actModelView = canvas.getActModelView();
   };
 
@@ -768,32 +759,32 @@ ACS.view = function(
   // register handlers for shortcuts
   $("#AKmenu")
     .click(handleMenuShortcutClick)
-    .keypress(function(e) {
+    .keypress(function (e) {
       if (e.keyCode === 13) handleMenuShortcutClick();
     });
   $("#AKactModelPanel")
     .click(handleModelPanelShortcutClick)
-    .keypress(function(e) {
+    .keypress(function (e) {
       if (e.keyCode === 13) handleModelPanelShortcutClick();
     });
   $("#AKmodelDesigner")
     .click(handleModelDesignerShortcutClick)
-    .keypress(function(e) {
+    .keypress(function (e) {
       if (e.keyCode === 13) handleModelDesignerShortcutClick();
     });
   $("#AKguiDesigner")
     .click(handleGuiDesignerShortcutClick)
-    .keypress(function(e) {
+    .keypress(function (e) {
       if (e.keyCode === 13) handleGuiDesignerShortcutClick();
     });
   $("#AKlistView")
     .click(handleListViewShortcutClick)
-    .keypress(function(e) {
+    .keypress(function (e) {
       if (e.keyCode === 13) handleListViewShortcutClick();
     });
   $("#AKPropertyEditor")
     .click(handlePropertyEditorShortcutClick)
-    .keypress(function(e) {
+    .keypress(function (e) {
       if (e.keyCode === 13) handlePropertyEditorShortcutClick();
     });
   // register handler for change of the actModel
@@ -805,7 +796,7 @@ ACS.view = function(
   actModelView = canvas.getActModelView();
 
   // deactivate keyboardModes when using the mouse
-  $("body").mousedown(function() {
+  $("body").mousedown(function () {
     if (actModelView.getKeyboardMode()) actModelView.setKeyboardMode(false);
     if (actModelView.getGuiKeyboardMode())
       actModelView.setGuiKeyboardMode(false);
