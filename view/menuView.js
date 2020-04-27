@@ -745,7 +745,7 @@
 	}	
 
 	var handleNewModel = function(e) {
-		modelList.addNewModel();
+		modelList.addNewModel(true);
 		modelList.getActModel().events.registerHandler('componentCollectionChangedEvent', componentCollectionChangedEventHandler);
 	}
 
@@ -757,7 +757,7 @@
 				modelList.setActModel(indexOfModelInList)
 			} else { // else load it
 				// if active model is not empty, open new model first
-				if (modelList.getActModel().componentList.length > 0) modelList.addNewModel();
+				if (modelList.getActModel().componentList.length > 0) modelList.addNewModel(true);
 				// load the model
 				modelList.getActModel().loadModelFromFile(loadFile);
 			}
