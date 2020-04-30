@@ -1,5 +1,5 @@
 
-# [1.2.1]((https://github.com/asterics/WebACS/compare/v1.2.0...v1.2.1))
+# [1.2.1]((https://github.com/asterics/WebACS/compare/v1.2.0...v1.2.1)) (2020-04-30)
 
 * [Fixes #320](https://github.com/asterics/AsTeRICS/issues/320) The first letter of a Plugin Name is converted to upper case.
 * added component collection for AsTeRICS 4.1 release
