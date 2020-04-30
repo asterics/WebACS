@@ -27,11 +27,13 @@
 	<script type="text/javascript" language="javascript" src="lib/Blob/Blob.js"></script>
 	<script type="text/javascript" language="javascript" src="lib/rest_library/JSmap.js"></script>
 	<script type="text/javascript" language="javascript" src="lib/rest_library/areCommunicator.js"></script>
-	<!-- namespace: -->
+	<!-- namespace, constants: -->
 	<script type="text/javascript" language="javascript" src="acsNamespace.js"></script>
+    <script type="text/javascript" language="javascript" src="view/vConst.js"></script>
 	<!-- misc: -->
 	<script type="text/javascript" language="javascript" src="eventManager.js"></script>
 	<!-- model:   -->
+    <script type="text/javascript" language="javascript" src="model/utils.js"></script>
 	<script type="text/javascript" language="javascript" src="model/mConst.js"></script>
 	<script type="text/javascript" language="javascript" src="model/clipBoard.js"></script>
 	<script type="text/javascript" language="javascript" src="model/action.js"></script>
@@ -58,10 +60,8 @@
 	<script type="text/javascript" language="javascript" src="model/model.js"></script>
 	<script type="text/javascript" language="javascript" src="model/modelList.js"></script>
 	<script type="text/javascript" language="javascript" src="model/areStatus.js"></script>
-	<script type="text/javascript" language="javascript" src="model/utils.js"></script>
     <!-- view:   -->
 	<script type="text/javascript" language="javascript" src="view/view.js"></script>
-	<script type="text/javascript" language="javascript" src="view/vConst.js"></script>
 	<script type="text/javascript" language="javascript" src="view/tabPanel.js"></script>
 	<script type="text/javascript" language="javascript" src="view/visualAreaMarkerView.js"></script>
 	<script type="text/javascript" language="javascript" src="view/componentView.js"></script>
@@ -115,7 +115,8 @@
 					<ul class="buttonList">
 						<li><button type="button" class="menuButton" id="connectAREBtn"><div class="buttonContents"><img src="view/images/connect.png" alt="Connect to ARE" />Connect<br />to ARE</div></button></li>
 						<li><button type="button" class="menuButton" id="disconnectAREBtn" disabled><div class="buttonContents"><img src="view/images/disconnect.png" alt="Disconnect from ARE" />Disconnect<br />from ARE</div></button></li>
-						<li><button type="button" class="menuButton" id="uploadModelBtn" disabled><div class="buttonContents"><img src="view/images/Upload.png" alt="Upload model" />Upload<br />Model</div></button></li>
+						<li id="uploadModelBtnContainer"><button type="button" class="menuButton" id="uploadModelBtn" disabled><div class="buttonContents"><img src="view/images/Upload.png" alt="Upload model" />Upload<br />Model</div></button></li>
+						<li id="testModelBtnContainer" style="display: none"><button type="button" class="menuButton" id="testModelBtn" disabled><div class="buttonContents"><img src="view/images/Upload.png" alt="Test model" />Test<br />Model</div></button></li>
 						<li><button type="button" class="menuButton" id="downloadModelBtn" disabled><div class="buttonContents"><img src="view/images/Download.png" alt="Download model" />Download<br />Model</div></button></li>
 						<li><button type="button" class="menuButton" id="downloadCompCollBtn" disabled><div class="buttonContents"><img src="view/images/DownloadBundle.png" alt="Download component collection" />Download<br />Component Collection</div></button></li>
 					</ul>
@@ -134,8 +135,8 @@
 					<h2>Model</h2>			
 					<ul class="buttonList">
 						<li><button type="button" class="menuButton" id="startModelBtn" disabled><div class="buttonContents"><img src="view/images/StartModel.png" alt="Start model" />Start<br />Model</div></button></li>
-						<li><button type="button" class="menuButton" id="pauseModelBtn" disabled><div class="buttonContents"><img src="view/images/PauseModel.png" alt="Pause model" />Pause<br />Model</div></button></li>
-						<li><button type="button" class="menuButton" id="stopModelBtn" disabled><div class="buttonContents"><img src="view/images/StopModel.png" alt="Stop model" />Stop<br />Model</div></button></li>
+						<li id="pauseModelBtnContainer"><button type="button" class="menuButton" id="pauseModelBtn" disabled><div class="buttonContents"><img src="view/images/PauseModel.png" alt="Pause model" />Pause<br />Model</div></button></li>
+						<li id="stopModelBtnContainer"><button type="button" class="menuButton" id="stopModelBtn" disabled><div class="buttonContents"><img src="view/images/StopModel.png" alt="Stop model" />Stop<br />Model</div></button></li>
 					</ul>
 				</section>
 				<section class="buttonGroup bg_right">
@@ -197,6 +198,20 @@
 						<li><button type="button" class="menuButton" id="printBtn" disabled><div class="buttonContents"><img src="view/images/Printer.png" alt="Print" />Print</div></button></li>
 						<li><button type="button" class="menuButton" id="helpBtn" title="Help (F1)"><div class="buttonContents"><img src="view/images/Question.png" alt="Help (F1)" />Help</div></button></li>
 						<li><button type="button" class="menuButton" id="aboutBtn"><div class="buttonContents"><img src="view/images/about.png" alt="About" />About</div></button></li>
+						<li style="margin-left: 1em">
+							<div>
+								<input type="checkbox" id="checkboxEnableTestMode" style="top: 0"/>
+								<label for="checkboxEnableTestMode" style="display: inline; color: black">Enable test-auto-revert mode</label>
+							</div>
+							<div>
+								<label for="inputTestModeTime" style="display: inline; color: black">Test mode timeout (s)</label>
+								<input type="number" id="inputTestModeTime" style="top: 0" min="1" value="30"/>
+							</div>
+							<div>
+								<label for="inputTestModeFontsize" style="display: inline; color: black">Test mode button fontsize (px)</label>
+								<input type="number" id="inputTestModeFontsize" style="top: 0" min="1" value="13"/>
+							</div>
+						</li>
 					</ul>
 				</section>
 			  </div>
@@ -221,7 +236,13 @@
 			<span class="bold">ARE status: </span>
 			<span id="AREstatus">Disconnected</span>
 			<span id="synchronisationStatus"></span>
-		</div>	
+			<span id="testStatus">
+				<span id="testStatusText"></span>
+				<button id="btnTestStatusAdd" style="display: none">+30s</button>
+				<button id="btnTestStatusCancel" style="display: none">revert model</button>
+				<button id="btnTestStatusApprove" style="display: none">approve model</button>
+			</span>
+		</div>
 		<div id="zoomBar">
 			<span id="zoomPercent">100%</span>
 			<input type="range" name="zoomSlider" id="zoomSlider" min="20" max="200" />

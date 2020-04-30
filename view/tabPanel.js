@@ -81,6 +81,9 @@ ACS.tabPanel = function (id, // String; the id of the div-container holding the 
 
 	var bindEventHandlers = function () {
 		// Bind handlers for the tabs:
+		$tabs.off();
+		$panels.off();
+
 		$tabs.keydown(function (e) {
 			return handleTabKeyDown($(this), e);
 		});

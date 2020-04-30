@@ -33,6 +33,7 @@
 // ***********************************************************************************************************************
 	var status = ACS.statusType.DISCONNECTED;
 	var synchronised = undefined;
+	var syncDisabled = ACS.utils.getLocalStorageItem(ACS.vConst.WEBACS_OPTIONS_TESTMODE);
 	var modelList;
 
 // ***********************************************************************************************************************
@@ -171,13 +172,27 @@
 	}
 	
 	returnObj.setSynchronised = function(newSync) {
-		synchronised = newSync;
+		synchronised = newSync && !syncDisabled;
 		log.debug('setting sync: ' + synchronised);
 		returnObj.events.fireEvent('ARESynchronisationChangedEvent');
 	}
+
+	 returnObj.disableSynchronization = function() {
+		 synchronised = false;
+		 syncDisabled = true;
+		 log.debug('disabled synchronization!');
+		 returnObj.events.fireEvent('ARESynchronisationChangedEvent');
+	 }
+
+     returnObj.enableSynchronization = function() {
+         syncDisabled = false;
+         returnObj.checkAndSetSynchronisation();
+         log.debug('enabled synchronization!');
+         returnObj.events.fireEvent('ARESynchronisationChangedEvent');
+     }
 	
 	returnObj.getSynchronised = function() {
-		return synchronised;
+		return synchronised && !syncDisabled;
 	}
 	
 	returnObj.setStatus = function(newStatus) { // ACS.statusType

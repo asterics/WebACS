@@ -1,4 +1,14 @@
 
+# [1.2.1]((https://github.com/asterics/WebACS/compare/v1.2.0...v1.2.1)) (2020-04-30)
+
+* [Fixes #320](https://github.com/asterics/AsTeRICS/issues/320) The first letter of a Plugin Name is converted to upper case.
+* added component collection for AsTeRICS 4.1 release
+* [PR #47](https://github.com/asterics/WebACS/pull/47): Improve tab switch perofrmance
+
+# [1.2.0](https://github.com/asterics/WebACS/compare/v1.1.2...v1.2.0) (2019-11-06)
+* fixed non-working keyboard shortcuts, see https://github.com/asterics/WebACS/issues/44
+* added new model test and auto-revert mode, see https://github.com/asterics/WebACS/pull/40
+
 # [1.1.2](https://github.com/asterics/WebACS/compare/v1.1.1...v1.1.2) (2019-09-05)
 
 * **https redirection bug fix** If the original URL had query parameters (e.g. ?autoDownloadModel=true), they were lost through redirection. (see: https://github.com/asterics/WebACS/commit/7b55b1bfb739b1b47ca901743f0e8ccd0336a7e4) 

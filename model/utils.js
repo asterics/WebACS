@@ -45,3 +45,19 @@ ACS.utils.encodeForXml = function (string) {
         .replace(/"/g, '&quot;')
         .replace(/'/g, '&apos;');
 };
+
+ACS.utils.saveLocalStorageItem = function (key, value) {
+	if (!window.localStorage) {
+		log.warn('local storage not supported');
+		return;
+	}
+	window.localStorage.setItem(key, JSON.stringify(value));
+};
+
+ACS.utils.getLocalStorageItem = function (key) {
+	if (!window.localStorage) {
+		log.warn('local storage not supported');
+		return;
+	}
+	return JSON.parse(window.localStorage.getItem(key));
+};
