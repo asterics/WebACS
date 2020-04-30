@@ -82,7 +82,10 @@
 			if (modelViewList[i] && (modelViewList[i].getModel() === modelList.getActModel())) {
 				// activate the tab
 				var tabId = modelViewList[i].getModelContainerId().replace('Panel', 'Tab');
-				document.getElementById(tabId).click();
+				var alreadyOpen = document.getElementById(tabId).getAttribute('aria-selected') === 'true';
+				if (!alreadyOpen) {
+					document.getElementById(tabId).click();
+				}
 			}
 		}	
 	}
